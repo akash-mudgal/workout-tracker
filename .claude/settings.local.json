@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(npm create *)",
+      "PowerShell(winget install *)",
+      "PowerShell(nvm install *)",
+      "PowerShell(npm *)",
+      "PowerShell($env:PATH = \"C:\\\\Program Files\\\\nodejs;\" + $env:PATH; cd D:\\\\workout-tracker; ls)",
+      "PowerShell(npm_config_yes=true npx *)",
+      "PowerShell(cd D:\\\\workout-tracker; Start-Process powershell -ArgumentList '-NoExit', '-Command', \"cd D:\\\\workout-tracker; & 'C:\\\\Program Files\\\\nodejs\\\\npm.cmd' run dev\" -WindowStyle Normal)",
+      "PowerShell(Start-Sleep -Seconds 4; Invoke-WebRequest -Uri \"http://localhost:5173\" -UseBasicParsing -TimeoutSec 5 2>&1 | Select-Object -ExpandProperty StatusCode)",
+      "PowerShell(Start-Process \"http://localhost:5173\")"
+    ]
+  }
+}
