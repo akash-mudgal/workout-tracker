@@ -5,11 +5,10 @@ import { getRecommendedWorkout, PHASE_INFO } from '../data/workoutPlans'
 
 const WATER_GOAL = 10
 const STEPS_GOAL = 9000
-const PROTEIN_GOAL = 130
 const SLEEP_GOAL = 7.5
 
 export default function Dashboard() {
-  const { today, dayNumber, totalDays, todayLog, workoutHistory, updateTodayLog, toggleSupplement, activeSession } = useStore()
+  const { today, dayNumber, totalDays, todayLog, workoutHistory, updateTodayLog, toggleSupplement, activeSession, proteinGoal } = useStore()
   const navigate = useNavigate()
   const recommended = getRecommendedWorkout(activeSession?.planId ?? 'ppl', workoutHistory)
   const todayDone = workoutHistory[today]
@@ -98,7 +97,7 @@ export default function Dashboard() {
         <StatCard
           label="Protein"
           value={todayLog.protein}
-          goal={PROTEIN_GOAL}
+          goal={proteinGoal}
           unit="g"
           color="amber"
           icon="🥩"
@@ -157,7 +156,7 @@ export default function Dashboard() {
         <h3 className="text-sm font-semibold text-violet-400 mb-2">Daily Checklist</h3>
         <div className="space-y-1 text-xs text-zinc-400">
           {[
-            `120g+ protein ${todayLog.protein >= 120 ? '✓' : `(${todayLog.protein}/${120}g)`}`,
+            `${proteinGoal}g+ protein ${todayLog.protein >= proteinGoal ? '✓' : `(${todayLog.protein}/${proteinGoal}g)`}`,
             `8–10k steps ${todayLog.steps >= 8000 ? '✓' : `(${todayLog.steps.toLocaleString()})`}`,
             `10 glasses water ${todayLog.water >= 10 ? '✓' : `(${todayLog.water}/10)`}`,
             `7+ hrs sleep ${todayLog.sleep >= 7 ? '✓' : `(${todayLog.sleep} hrs)`}`,

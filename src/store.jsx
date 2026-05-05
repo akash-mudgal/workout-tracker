@@ -29,6 +29,7 @@ export function StoreProvider({ children }) {
   const [bodyMetrics, setBodyMetrics] = useState(() => load('wt_body_metrics', []))
   const [activeWorkout, setActiveWorkout] = useState(null)
   const [needsOnboarding, setNeedsOnboarding] = useState(false)
+  const [userProfile, setUserProfile] = useState(() => load('wt_user_profile', { weightKg: 0, heightCm: 0 }))
 
   const today = format(new Date(), 'yyyy-MM-dd')
   const userRef = useRef(null)
@@ -297,6 +298,15 @@ export function StoreProvider({ children }) {
     }
   }, [])
 
+  const updateUserProfile = useCallback((profile) => {
+    setUserProfile(profile)
+    save('wt_user_profile', profile)
+  }, [])
+
+  const proteinGoal = userProfile.weightKg > 0
+    ? Math.round((userProfile.weightKg * 2.0) / 5) * 5
+    : 130
+
   const totalDays = activeSession?.totalDays ?? 90
   const dayNumber = (() => {
     const start = new Date(startDate)
@@ -308,6 +318,7 @@ export function StoreProvider({ children }) {
   return (
     <StoreContext.Provider value={{
       user, authLoading, syncing, needsOnboarding,
+      userProfile, updateUserProfile, proteinGoal,
       today, startDate, dayNumber, totalDays,
       sessions, activeSession, activeSessionId,
       todayLog, dailyLogs, workoutHistory, bodyMetrics,
