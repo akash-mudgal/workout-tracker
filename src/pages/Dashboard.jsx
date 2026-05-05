@@ -9,12 +9,12 @@ const PROTEIN_GOAL = 130
 const SLEEP_GOAL = 7.5
 
 export default function Dashboard() {
-  const { today, dayNumber, todayLog, workoutHistory, updateTodayLog, toggleSupplement, activeSession } = useStore()
+  const { today, dayNumber, totalDays, todayLog, workoutHistory, updateTodayLog, toggleSupplement, activeSession } = useStore()
   const navigate = useNavigate()
   const recommended = getRecommendedWorkout(activeSession?.planId ?? 'ppl', workoutHistory)
   const todayDone = workoutHistory[today]
 
-  const phase = dayNumber <= 28 ? PHASE_INFO[0] : dayNumber <= 56 ? PHASE_INFO[1] : PHASE_INFO[2]
+  const phase = dayNumber <= Math.round(totalDays / 3) ? PHASE_INFO[0] : dayNumber <= Math.round(totalDays * 2 / 3) ? PHASE_INFO[1] : PHASE_INFO[2]
   const weekNum = Math.ceil(dayNumber / 7)
 
   return (
@@ -33,7 +33,7 @@ export default function Dashboard() {
         <div className="text-right">
           <div className="text-xs text-zinc-500">Day</div>
           <div className="text-3xl font-black text-violet-400">{dayNumber}</div>
-          <div className="text-xs text-zinc-500">of 90</div>
+          <div className="text-xs text-zinc-500">of {totalDays}</div>
         </div>
       </div>
 
@@ -41,12 +41,12 @@ export default function Dashboard() {
       <div className="card">
         <div className="flex justify-between text-xs text-zinc-500 mb-2">
           <span>Week {weekNum} · {phase.label} Phase</span>
-          <span>{Math.round((dayNumber / 90) * 100)}%</span>
+          <span>{Math.round((dayNumber / totalDays) * 100)}%</span>
         </div>
         <div className="progress-bar">
           <div
             className="progress-fill bg-gradient-to-r from-violet-600 to-violet-400"
-            style={{ width: `${(dayNumber / 90) * 100}%` }}
+            style={{ width: `${(dayNumber / totalDays) * 100}%` }}
           />
         </div>
         <p className="text-xs text-zinc-500 mt-2">{phase.desc}</p>

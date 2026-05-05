@@ -8,7 +8,7 @@ import { useStore } from '../store.jsx'
 import { getPlan, getWorkoutDays } from '../data/workoutPlans'
 
 export default function Progress() {
-  const { startDate, today, workoutHistory, dailyLogs, dayNumber, activeSession } = useStore()
+  const { startDate, today, workoutHistory, dailyLogs, dayNumber, totalDays, activeSession } = useStore()
   const planId = activeSession?.planId ?? 'ppl'
   const uniqueExercises = [...new Set(getWorkoutDays(planId).flatMap((w) => w.exercises.map((e) => e.name)))]
   const [selectedExercise, setSelectedExercise] = useState(uniqueExercises[0])
@@ -44,7 +44,7 @@ export default function Progress() {
   }))
 
   // 90-day heatmap
-  const heatmapDays = getHeatmapDays(startDate, today, workoutHistory)
+  const heatmapDays = getHeatmapDays(startDate, today, workoutHistory, totalDays)
 
   return (
     <div className="space-y-4">
@@ -61,7 +61,7 @@ export default function Progress() {
       {/* 90 Day Heatmap */}
       <div className="card">
         <h3 className="text-sm font-semibold mb-3">
-          90-Day Journey · Day {dayNumber}
+          {totalDays}-Day Journey · Day {dayNumber}
         </h3>
         <div className="flex flex-wrap gap-1">
           {heatmapDays.map(({ date, hasWorkout, isFuture, isToday }) => (
@@ -143,7 +143,7 @@ export default function Progress() {
       <div className="card">
         <h3 className="text-sm font-semibold mb-3">This Week</h3>
         <div className="grid grid-cols-2 gap-2 text-xs">
-          <StatRow label="Workouts" value={`${workoutsThisWeek} / 6`} />
+          <StatRow label="Workouts" value={`${workoutsThisWeek} / 7`} />
           <StatRow label="Avg Steps" value={`${Math.round(avgSteps).toLocaleString()}`} />
           <StatRow label="Avg Protein" value={`${Math.round(avgProtein)}g`} />
           <StatRow label="Avg Sleep" value={`${avgSleep.toFixed(1)} hrs`} />
@@ -228,10 +228,10 @@ function getLast14Days(today) {
   })
 }
 
-function getHeatmapDays(startDate, today, workoutHistory) {
+function getHeatmapDays(startDate, today, workoutHistory, totalDays = 90) {
   const start = new Date(startDate + 'T00:00:00')
   const todayDate = new Date(today + 'T00:00:00')
-  return Array.from({ length: 90 }, (_, i) => {
+  return Array.from({ length: totalDays }, (_, i) => {
     const d = new Date(start)
     d.setDate(start.getDate() + i)
     const dateStr = format(d, 'yyyy-MM-dd')

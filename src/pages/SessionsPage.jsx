@@ -8,39 +8,46 @@ const PLAN_LIST = Object.values(PLANS)
 export default function SessionsPage() {
   const {
     today, sessions, activeSessionId, workoutHistory,
-    createSession, switchSession, renameSession, resetSessionProgress, deleteSession,
+    createSession, switchSession, updateSession, resetSessionProgress, deleteSession,
   } = useStore()
 
   const [creating, setCreating] = useState(false)
   const [newName, setNewName] = useState('90-Day Recomp')
   const [newStart, setNewStart] = useState(today)
   const [newPlanId, setNewPlanId] = useState('ppl')
+  const [newTotalDays, setNewTotalDays] = useState(90)
+
   const [editingId, setEditingId] = useState(null)
   const [editName, setEditName] = useState('')
+  const [editStart, setEditStart] = useState('')
+  const [editTotalDays, setEditTotalDays] = useState(90)
+  const [editPlanId, setEditPlanId] = useState('ppl')
+
   const [resetConfirmId, setResetConfirmId] = useState(null)
   const [deleteConfirmId, setDeleteConfirmId] = useState(null)
   const [loading, setLoading] = useState(false)
 
-  function getDayNumber(startDate) {
+  function getDayNumber(startDate, totalDays) {
     const diff = Math.floor((new Date(today) - new Date(startDate + 'T00:00:00')) / 86400000)
-    return Math.min(diff + 1, 90)
+    return Math.min(diff + 1, totalDays)
   }
 
   function getWorkoutCount(sessionId) {
-    // workout_history in store is only for active session — show from local for active
     if (sessionId === activeSessionId) return Object.keys(workoutHistory).length
     return '—'
   }
 
   async function handleCreate() {
     if (!newName.trim()) return
+    const days = Math.max(7, Math.min(365, Number(newTotalDays) || 90))
     setLoading(true)
     try {
-      await createSession(newName.trim(), newStart, newPlanId)
+      await createSession(newName.trim(), newStart, newPlanId, days)
       setCreating(false)
       setNewName('90-Day Recomp')
       setNewStart(today)
       setNewPlanId('ppl')
+      setNewTotalDays(90)
     } finally {
       setLoading(false)
     }
@@ -53,9 +60,17 @@ export default function SessionsPage() {
     finally { setLoading(false) }
   }
 
-  async function handleRename(id) {
-    if (!editName.trim()) return
-    await renameSession(id, editName.trim())
+  function openEdit(session) {
+    setEditingId(session.id)
+    setEditName(session.name)
+    setEditStart(session.startDate)
+    setEditTotalDays(session.totalDays ?? 90)
+    setEditPlanId(session.planId ?? 'ppl')
+  }
+
+  async function handleSaveEdit(id) {
+    const days = Math.max(7, Math.min(365, Number(editTotalDays) || 90))
+    await updateSession(id, { name: editName.trim() || undefined, startDate: editStart, totalDays: days, planId: editPlanId })
     setEditingId(null)
   }
 
@@ -76,16 +91,13 @@ export default function SessionsPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Sessions</h1>
-        <button
-          onClick={() => setCreating(true)}
-          className="btn-primary text-sm px-4 py-2"
-        >
+        <button onClick={() => setCreating(true)} className="btn-primary text-sm px-4 py-2">
           + New
         </button>
       </div>
 
       <p className="text-xs text-zinc-500">
-        Each session is an independent 90-day cycle with its own workouts, logs, and metrics.
+        Each session is an independent cycle with its own workouts, logs, and metrics.
       </p>
 
       {/* New session form */}
@@ -102,17 +114,29 @@ export default function SessionsPage() {
               autoFocus
             />
           </div>
-          <div>
-            <label className="text-xs text-zinc-500 block mb-1">Start Date (Day 1)</label>
-            <input
-              type="date"
-              value={newStart}
-              max={today}
-              onChange={(e) => setNewStart(e.target.value)}
-              className="input-field"
-            />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs text-zinc-500 block mb-1">Start Date (Day 1)</label>
+              <input
+                type="date"
+                value={newStart}
+                max={today}
+                onChange={(e) => setNewStart(e.target.value)}
+                className="input-field"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-zinc-500 block mb-1">Duration (days)</label>
+              <input
+                type="number"
+                value={newTotalDays}
+                min={7}
+                max={365}
+                onChange={(e) => setNewTotalDays(e.target.value)}
+                className="input-field"
+              />
+            </div>
           </div>
-
           <div>
             <label className="text-xs text-zinc-500 block mb-2">Workout Plan</label>
             <div className="space-y-2">
@@ -138,14 +162,11 @@ export default function SessionsPage() {
               ))}
             </div>
           </div>
-
           <div className="flex gap-2">
             <button onClick={handleCreate} disabled={loading} className="btn-primary flex-1 py-2 disabled:opacity-50">
               {loading ? 'Creating…' : 'Create & Switch'}
             </button>
-            <button onClick={() => setCreating(false)} className="btn-ghost px-4 py-2">
-              Cancel
-            </button>
+            <button onClick={() => setCreating(false)} className="btn-ghost px-4 py-2">Cancel</button>
           </div>
         </div>
       )}
@@ -153,8 +174,9 @@ export default function SessionsPage() {
       {/* Session cards */}
       <div className="space-y-3">
         {sessions.map((session) => {
-          const dayNum = getDayNumber(session.startDate)
-          const pct = Math.round((dayNum / 90) * 100)
+          const totalDays = session.totalDays ?? 90
+          const dayNum = getDayNumber(session.startDate, totalDays)
+          const pct = Math.round((dayNum / totalDays) * 100)
           const isActive = session.id === activeSessionId
           const isEditingThis = editingId === session.id
           const isResettingThis = resetConfirmId === session.id
@@ -164,47 +186,30 @@ export default function SessionsPage() {
             <div
               key={session.id}
               className={`card border transition-colors ${
-                isActive
-                  ? 'border-violet-500/40 bg-violet-500/5'
-                  : 'border-zinc-800 hover:border-zinc-700'
+                isActive ? 'border-violet-500/40 bg-violet-500/5' : 'border-zinc-800 hover:border-zinc-700'
               }`}
             >
               {/* Header row */}
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 min-w-0">
-                  {isEditingThis ? (
-                    <div className="flex gap-2">
-                      <input
-                        value={editName}
-                        onChange={(e) => setEditName(e.target.value)}
-                        className="input-field text-sm py-1 flex-1"
-                        autoFocus
-                        onKeyDown={(e) => e.key === 'Enter' && handleRename(session.id)}
-                      />
-                      <button onClick={() => handleRename(session.id)} className="btn-primary text-xs px-3">Save</button>
-                      <button onClick={() => setEditingId(null)} className="btn-ghost text-xs px-2">✕</button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold truncate">{session.name}</span>
-                      {isActive && (
-                        <span className="text-xs bg-violet-500/20 text-violet-300 px-2 py-0.5 rounded-full flex-shrink-0">
-                          Active
-                        </span>
-                      )}
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold truncate">{session.name}</span>
+                    {isActive && (
+                      <span className="text-xs bg-violet-500/20 text-violet-300 px-2 py-0.5 rounded-full flex-shrink-0">
+                        Active
+                      </span>
+                    )}
+                  </div>
                   <div className="text-xs text-zinc-500 mt-0.5">
-                    {PLANS[session.planId ?? 'ppl']?.name ?? 'PPL'} · Started {format(new Date(session.startDate + 'T00:00:00'), 'MMM d, yyyy')}
+                    {PLANS[session.planId ?? 'ppl']?.name ?? 'PPL'} · {totalDays} days · Started {format(new Date(session.startDate + 'T00:00:00'), 'MMM d, yyyy')}
                     {' · '}{getWorkoutCount(session.id)} workouts
                   </div>
                 </div>
-
                 <div className="text-right flex-shrink-0">
                   <div className={`text-2xl font-black ${isActive ? 'text-violet-400' : 'text-zinc-400'}`}>
                     {dayNum}
                   </div>
-                  <div className="text-xs text-zinc-600">/ 90</div>
+                  <div className="text-xs text-zinc-600">/ {totalDays}</div>
                 </div>
               </div>
 
@@ -216,12 +221,80 @@ export default function SessionsPage() {
                 />
               </div>
 
+              {/* Inline edit form */}
+              {isEditingThis && (
+                <div className="mt-3 pt-3 border-t border-zinc-800 space-y-3">
+                  <h4 className="text-xs font-semibold text-zinc-400">Edit Session</h4>
+                  <div>
+                    <label className="text-xs text-zinc-500 block mb-1">Name</label>
+                    <input
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      className="input-field text-sm py-1"
+                      autoFocus
+                      onKeyDown={(e) => e.key === 'Enter' && handleSaveEdit(session.id)}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs text-zinc-500 block mb-1">Start Date</label>
+                      <input
+                        type="date"
+                        value={editStart}
+                        max={today}
+                        onChange={(e) => setEditStart(e.target.value)}
+                        className="input-field text-sm py-1"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs text-zinc-500 block mb-1">Duration (days)</label>
+                      <input
+                        type="number"
+                        value={editTotalDays}
+                        min={7}
+                        max={365}
+                        onChange={(e) => setEditTotalDays(e.target.value)}
+                        className="input-field text-sm py-1"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-xs text-zinc-500 block mb-2">Workout Plan</label>
+                    <div className="space-y-1.5">
+                      {PLAN_LIST.map((plan) => (
+                        <button
+                          key={plan.id}
+                          onClick={() => setEditPlanId(plan.id)}
+                          className={`w-full text-left p-2.5 rounded-xl border transition-colors ${
+                            editPlanId === plan.id
+                              ? 'border-violet-500/50 bg-violet-500/10'
+                              : 'border-zinc-800 hover:border-zinc-700 bg-zinc-800/30'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="font-medium text-xs">{plan.name}</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs text-zinc-500">{plan.daysPerWeek}d/wk</span>
+                              {editPlanId === plan.id && <span className="text-violet-400 text-xs">●</span>}
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={() => handleSaveEdit(session.id)} className="btn-primary text-xs px-4 py-1.5">Save</button>
+                    <button onClick={() => setEditingId(null)} className="btn-ghost text-xs px-3 py-1.5">Cancel</button>
+                  </div>
+                </div>
+              )}
+
               {/* Reset progress confirm */}
               {isResettingThis && (
                 <div className="mt-3 pt-3 border-t border-orange-500/20 space-y-2">
                   <div className="text-xs text-orange-400 font-medium">Reset all progress for "{session.name}"?</div>
                   <div className="text-xs text-zinc-500">
-                    This clears all workouts, daily logs, and body metrics for this cycle and restarts from today. Cannot be undone.
+                    This clears all workouts, daily logs, and body metrics and restarts from today. Cannot be undone.
                   </div>
                   <div className="flex gap-2">
                     <button
@@ -240,7 +313,7 @@ export default function SessionsPage() {
               {isDeletingThis && (
                 <div className="mt-3 pt-3 border-t border-red-500/20 space-y-2">
                   <div className="text-xs text-red-400">
-                    Delete "{session.name}"? This removes all workouts, logs and metrics for this session permanently.
+                    Delete "{session.name}"? This removes all workouts, logs and metrics permanently.
                   </div>
                   <div className="flex gap-2">
                     <button
@@ -268,10 +341,10 @@ export default function SessionsPage() {
                     </button>
                   )}
                   <button
-                    onClick={() => { setEditingId(session.id); setEditName(session.name) }}
+                    onClick={() => openEdit(session)}
                     className="btn-ghost text-xs px-3 py-1.5"
                   >
-                    Rename
+                    Edit
                   </button>
                   <button
                     onClick={() => setResetConfirmId(session.id)}

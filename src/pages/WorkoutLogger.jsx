@@ -201,6 +201,12 @@ function LoggingView({ workout, sessionSets, workoutHistory, selectedId, onUpdat
 
               {isExpanded && (
                 <div className="mt-3 space-y-2">
+                  {ex.tip && (
+                    <div className="flex gap-2 bg-violet-500/10 border border-violet-500/20 rounded-lg px-3 py-2">
+                      <span className="text-violet-400 flex-shrink-0">💡</span>
+                      <span className="text-xs text-violet-300">{ex.tip}</span>
+                    </div>
+                  )}
                   {prev && (
                     <div className="text-xs text-zinc-500 bg-zinc-800/50 rounded-lg px-3 py-1.5">
                       Last: {prev.sets.map((s) => `${s.weight}kg×${s.reps}`).join(', ')}

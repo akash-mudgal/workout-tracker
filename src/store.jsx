@@ -28,6 +28,7 @@ export function StoreProvider({ children }) {
   const [workoutHistory, setWorkoutHistory] = useState(() => load('wt_workout_history', {}))
   const [bodyMetrics, setBodyMetrics] = useState(() => load('wt_body_metrics', []))
   const [activeWorkout, setActiveWorkout] = useState(null)
+  const [needsOnboarding, setNeedsOnboarding] = useState(false)
 
   const today = format(new Date(), 'yyyy-MM-dd')
   const userRef = useRef(null)
@@ -88,14 +89,14 @@ export function StoreProvider({ children }) {
     setBodyMetrics(metrics); save('wt_body_metrics', metrics)
   }
 
-  async function insertSession(userId, name, startDate, planId = 'ppl') {
+  async function insertSession(userId, name, startDate, planId = 'ppl', totalDays = 90) {
     const { data, error } = await supabase
       .from('sessions')
-      .insert({ user_id: userId, name, start_date: startDate, plan_id: planId })
+      .insert({ user_id: userId, name, start_date: startDate, plan_id: planId, total_days: totalDays })
       .select()
       .single()
     if (error) throw error
-    return { id: data.id, name: data.name, startDate: data.start_date, planId: data.plan_id, createdAt: data.created_at }
+    return { id: data.id, name: data.name, startDate: data.start_date, planId: data.plan_id, totalDays: data.total_days ?? 90, createdAt: data.created_at }
   }
 
   async function loadAllData(userId) {
@@ -109,20 +110,30 @@ export function StoreProvider({ children }) {
 
       if (rawSessions?.length) {
         resolvedSessions = rawSessions.map((s) => ({
-          id: s.id, name: s.name, startDate: s.start_date, planId: s.plan_id ?? 'ppl', createdAt: s.created_at,
+          id: s.id, name: s.name, startDate: s.start_date, planId: s.plan_id ?? 'ppl', totalDays: s.total_days ?? 90, createdAt: s.created_at,
         }))
       } else {
-        // First login — migrate old flat data into a default session
-        const localStart = load('wt_start_date', today)
-        const defaultSession = await insertSession(userId, '90-Day Recomp', localStart)
-        resolvedSessions = [defaultSession]
+        // Check if there's old pre-sessions data to migrate
+        const { data: oldLogs } = await supabase
+          .from('daily_logs').select('id').eq('user_id', userId).is('session_id', null).limit(1)
+        const hasOldData = oldLogs?.length > 0
 
-        // Tag any pre-sessions rows with this new session_id
-        await Promise.all([
-          supabase.from('daily_logs').update({ session_id: defaultSession.id }).eq('user_id', userId).is('session_id', null),
-          supabase.from('workout_history').update({ session_id: defaultSession.id }).eq('user_id', userId).is('session_id', null),
-          supabase.from('body_metrics').update({ session_id: defaultSession.id }).eq('user_id', userId).is('session_id', null),
-        ])
+        if (hasOldData) {
+          // Returning user from before sessions feature — migrate silently
+          const localStart = load('wt_start_date', today)
+          const defaultSession = await insertSession(userId, '90-Day Recomp', localStart)
+          resolvedSessions = [defaultSession]
+          await Promise.all([
+            supabase.from('daily_logs').update({ session_id: defaultSession.id }).eq('user_id', userId).is('session_id', null),
+            supabase.from('workout_history').update({ session_id: defaultSession.id }).eq('user_id', userId).is('session_id', null),
+            supabase.from('body_metrics').update({ session_id: defaultSession.id }).eq('user_id', userId).is('session_id', null),
+          ])
+        } else {
+          // Brand new user — show onboarding
+          setNeedsOnboarding(true)
+          setSessions([]); save('wt_sessions', [])
+          return
+        }
       }
 
       setSessions(resolvedSessions); save('wt_sessions', resolvedSessions)
@@ -142,13 +153,14 @@ export function StoreProvider({ children }) {
   }
 
   // ── Session management ────────────────────────────────────────────────────
-  const createSession = useCallback(async (name, startDate, planId = 'ppl') => {
+  const createSession = useCallback(async (name, startDate, planId = 'ppl', totalDays = 90) => {
     let newSession
     if (userRef.current) {
-      newSession = await insertSession(userRef.current.id, name, startDate, planId)
+      newSession = await insertSession(userRef.current.id, name, startDate, planId, totalDays)
     } else {
-      newSession = { id: crypto.randomUUID(), name, startDate, planId, createdAt: new Date().toISOString() }
+      newSession = { id: crypto.randomUUID(), name, startDate, planId, totalDays, createdAt: new Date().toISOString() }
     }
+    setNeedsOnboarding(false)
     setSessions((prev) => { const next = [...prev, newSession]; save('wt_sessions', next); return next })
     // Switch to the new empty session
     setActiveSessionId(newSession.id); save('wt_active_session_id', newSession.id)
@@ -169,13 +181,18 @@ export function StoreProvider({ children }) {
     }
   }, [])
 
-  const renameSession = useCallback(async (sessionId, newName) => {
+  const updateSession = useCallback(async (sessionId, updates) => {
     setSessions((prev) => {
-      const next = prev.map((s) => s.id === sessionId ? { ...s, name: newName } : s)
+      const next = prev.map((s) => s.id === sessionId ? { ...s, ...updates } : s)
       save('wt_sessions', next); return next
     })
     if (userRef.current) {
-      await supabase.from('sessions').update({ name: newName }).eq('id', sessionId).eq('user_id', userRef.current.id)
+      const dbUpdates = {}
+      if (updates.name !== undefined) dbUpdates.name = updates.name
+      if (updates.startDate !== undefined) dbUpdates.start_date = updates.startDate
+      if (updates.totalDays !== undefined) dbUpdates.total_days = updates.totalDays
+      if (updates.planId !== undefined) dbUpdates.plan_id = updates.planId
+      await supabase.from('sessions').update(dbUpdates).eq('id', sessionId).eq('user_id', userRef.current.id)
     }
   }, [])
 
@@ -280,22 +297,23 @@ export function StoreProvider({ children }) {
     }
   }, [])
 
+  const totalDays = activeSession?.totalDays ?? 90
   const dayNumber = (() => {
     const start = new Date(startDate)
     const now = new Date(today)
     const diff = Math.floor((now - start) / 86400000)
-    return Math.min(diff + 1, 90)
+    return Math.min(diff + 1, totalDays)
   })()
 
   return (
     <StoreContext.Provider value={{
-      user, authLoading, syncing,
-      today, startDate, dayNumber,
+      user, authLoading, syncing, needsOnboarding,
+      today, startDate, dayNumber, totalDays,
       sessions, activeSession, activeSessionId,
       todayLog, dailyLogs, workoutHistory, bodyMetrics,
       activeWorkout, setActiveWorkout,
       updateTodayLog, toggleSupplement, saveWorkout, addBodyMetric,
-      createSession, switchSession, renameSession, resetSessionProgress, deleteSession,
+      createSession, switchSession, updateSession, resetSessionProgress, deleteSession,
     }}>
       {children}
     </StoreContext.Provider>
