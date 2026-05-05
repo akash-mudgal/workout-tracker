@@ -5,14 +5,13 @@ import {
   CartesianGrid, BarChart, Bar,
 } from 'recharts'
 import { useStore } from '../store.jsx'
-import { WORKOUT_DAYS } from '../data/workoutPlan'
-
-const ALL_EXERCISES = WORKOUT_DAYS.flatMap((w) => w.exercises.map((e) => e.name))
-const UNIQUE_EXERCISES = [...new Set(ALL_EXERCISES)]
+import { getPlan, getWorkoutDays } from '../data/workoutPlans'
 
 export default function Progress() {
-  const { startDate, today, workoutHistory, dailyLogs, dayNumber } = useStore()
-  const [selectedExercise, setSelectedExercise] = useState(UNIQUE_EXERCISES[0])
+  const { startDate, today, workoutHistory, dailyLogs, dayNumber, activeSession } = useStore()
+  const planId = activeSession?.planId ?? 'ppl'
+  const uniqueExercises = [...new Set(getWorkoutDays(planId).flatMap((w) => w.exercises.map((e) => e.name)))]
+  const [selectedExercise, setSelectedExercise] = useState(uniqueExercises[0])
 
   const completedWorkouts = Object.values(workoutHistory)
   const thisWeek = getThisWeekDates()
@@ -97,7 +96,7 @@ export default function Progress() {
           onChange={(e) => setSelectedExercise(e.target.value)}
           className="input-field text-sm mb-3"
         >
-          {UNIQUE_EXERCISES.map((name) => (
+          {uniqueExercises.map((name) => (
             <option key={name} value={name}>{name}</option>
           ))}
         </select>
@@ -158,7 +157,7 @@ export default function Progress() {
           <div className="space-y-2">
             {['push', 'pull', 'legs'].map((type) => {
               const count = completedWorkouts.filter((w) => {
-                const wd = WORKOUT_DAYS.find((d) => d.id === w.workoutId)
+                const wd = getWorkoutDays(planId).find((d) => d.id === w.workoutId)
                 return wd?.type === type
               }).length
               const total = completedWorkouts.length

@@ -1,6 +1,9 @@
 import { useState } from 'react'
 import { format } from 'date-fns'
 import { useStore } from '../store.jsx'
+import { PLANS } from '../data/workoutPlans'
+
+const PLAN_LIST = Object.values(PLANS)
 
 export default function SessionsPage() {
   const {
@@ -11,6 +14,7 @@ export default function SessionsPage() {
   const [creating, setCreating] = useState(false)
   const [newName, setNewName] = useState('90-Day Recomp')
   const [newStart, setNewStart] = useState(today)
+  const [newPlanId, setNewPlanId] = useState('ppl')
   const [editingId, setEditingId] = useState(null)
   const [editName, setEditName] = useState('')
   const [resetConfirmId, setResetConfirmId] = useState(null)
@@ -32,10 +36,11 @@ export default function SessionsPage() {
     if (!newName.trim()) return
     setLoading(true)
     try {
-      await createSession(newName.trim(), newStart)
+      await createSession(newName.trim(), newStart, newPlanId)
       setCreating(false)
       setNewName('90-Day Recomp')
       setNewStart(today)
+      setNewPlanId('ppl')
     } finally {
       setLoading(false)
     }
@@ -107,6 +112,33 @@ export default function SessionsPage() {
               className="input-field"
             />
           </div>
+
+          <div>
+            <label className="text-xs text-zinc-500 block mb-2">Workout Plan</label>
+            <div className="space-y-2">
+              {PLAN_LIST.map((plan) => (
+                <button
+                  key={plan.id}
+                  onClick={() => setNewPlanId(plan.id)}
+                  className={`w-full text-left p-3 rounded-xl border transition-colors ${
+                    newPlanId === plan.id
+                      ? 'border-violet-500/50 bg-violet-500/10'
+                      : 'border-zinc-800 hover:border-zinc-700 bg-zinc-800/30'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium text-sm">{plan.name}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-zinc-500">{plan.daysPerWeek}d/wk</span>
+                      {newPlanId === plan.id && <span className="text-violet-400 text-xs">●</span>}
+                    </div>
+                  </div>
+                  <p className="text-xs text-zinc-500 mt-0.5">{plan.description}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="flex gap-2">
             <button onClick={handleCreate} disabled={loading} className="btn-primary flex-1 py-2 disabled:opacity-50">
               {loading ? 'Creating…' : 'Create & Switch'}
@@ -163,7 +195,7 @@ export default function SessionsPage() {
                     </div>
                   )}
                   <div className="text-xs text-zinc-500 mt-0.5">
-                    Started {format(new Date(session.startDate + 'T00:00:00'), 'MMM d, yyyy')}
+                    {PLANS[session.planId ?? 'ppl']?.name ?? 'PPL'} · Started {format(new Date(session.startDate + 'T00:00:00'), 'MMM d, yyyy')}
                     {' · '}{getWorkoutCount(session.id)} workouts
                   </div>
                 </div>

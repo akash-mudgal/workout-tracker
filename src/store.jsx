@@ -88,14 +88,14 @@ export function StoreProvider({ children }) {
     setBodyMetrics(metrics); save('wt_body_metrics', metrics)
   }
 
-  async function insertSession(userId, name, startDate) {
+  async function insertSession(userId, name, startDate, planId = 'ppl') {
     const { data, error } = await supabase
       .from('sessions')
-      .insert({ user_id: userId, name, start_date: startDate })
+      .insert({ user_id: userId, name, start_date: startDate, plan_id: planId })
       .select()
       .single()
     if (error) throw error
-    return { id: data.id, name: data.name, startDate: data.start_date, createdAt: data.created_at }
+    return { id: data.id, name: data.name, startDate: data.start_date, planId: data.plan_id, createdAt: data.created_at }
   }
 
   async function loadAllData(userId) {
@@ -109,7 +109,7 @@ export function StoreProvider({ children }) {
 
       if (rawSessions?.length) {
         resolvedSessions = rawSessions.map((s) => ({
-          id: s.id, name: s.name, startDate: s.start_date, createdAt: s.created_at,
+          id: s.id, name: s.name, startDate: s.start_date, planId: s.plan_id ?? 'ppl', createdAt: s.created_at,
         }))
       } else {
         // First login — migrate old flat data into a default session
@@ -142,12 +142,12 @@ export function StoreProvider({ children }) {
   }
 
   // ── Session management ────────────────────────────────────────────────────
-  const createSession = useCallback(async (name, startDate) => {
+  const createSession = useCallback(async (name, startDate, planId = 'ppl') => {
     let newSession
     if (userRef.current) {
-      newSession = await insertSession(userRef.current.id, name, startDate)
+      newSession = await insertSession(userRef.current.id, name, startDate, planId)
     } else {
-      newSession = { id: crypto.randomUUID(), name, startDate, createdAt: new Date().toISOString() }
+      newSession = { id: crypto.randomUUID(), name, startDate, planId, createdAt: new Date().toISOString() }
     }
     setSessions((prev) => { const next = [...prev, newSession]; save('wt_sessions', next); return next })
     // Switch to the new empty session

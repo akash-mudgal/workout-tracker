@@ -1,7 +1,7 @@
 import { useNavigate, Link } from 'react-router-dom'
 import { format } from 'date-fns'
 import { useStore } from '../store.jsx'
-import { getRecommendedWorkout, PHASE_INFO } from '../data/workoutPlan'
+import { getRecommendedWorkout, PHASE_INFO } from '../data/workoutPlans'
 
 const WATER_GOAL = 10
 const STEPS_GOAL = 9000
@@ -11,7 +11,7 @@ const SLEEP_GOAL = 7.5
 export default function Dashboard() {
   const { today, dayNumber, todayLog, workoutHistory, updateTodayLog, toggleSupplement, activeSession } = useStore()
   const navigate = useNavigate()
-  const recommended = getRecommendedWorkout(workoutHistory)
+  const recommended = getRecommendedWorkout(activeSession?.planId ?? 'ppl', workoutHistory)
   const todayDone = workoutHistory[today]
 
   const phase = dayNumber <= 28 ? PHASE_INFO[0] : dayNumber <= 56 ? PHASE_INFO[1] : PHASE_INFO[2]

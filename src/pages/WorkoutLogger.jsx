@@ -1,19 +1,21 @@
 import { useState, useCallback } from 'react'
 import { format } from 'date-fns'
 import { useStore } from '../store.jsx'
-import { WORKOUT_DAYS, getRecommendedWorkout, getWorkoutById } from '../data/workoutPlan'
+import { getPlan, getRecommendedWorkout, getWorkoutById, getWorkoutDays } from '../data/workoutPlans'
 
 export default function WorkoutLogger() {
-  const { today, workoutHistory, saveWorkout } = useStore()
+  const { today, workoutHistory, saveWorkout, activeSession } = useStore()
+  const planId = activeSession?.planId ?? 'ppl'
+  const plan = getPlan(planId)
   const todayWorkout = workoutHistory[today]
-  const recommended = getRecommendedWorkout(workoutHistory)
+  const recommended = getRecommendedWorkout(planId, workoutHistory)
 
   const [selectedId, setSelectedId] = useState(recommended.id)
   const [phase, setPhase] = useState('select') // select | logging | done
   const [sessionSets, setSessionSets] = useState({})
   const [startTime] = useState(Date.now())
 
-  const workout = getWorkoutById(selectedId)
+  const workout = getWorkoutById(planId, selectedId)
 
   const initSession = useCallback(() => {
     const sets = {}
@@ -105,8 +107,10 @@ export default function WorkoutLogger() {
         <div className="text-sm text-zinc-400">{recommended.subtitle}</div>
       </div>
 
+      <div className="text-xs text-zinc-500 px-1">{plan.name} · {plan.daysPerWeek} days/week</div>
+
       <div className="space-y-2">
-        {WORKOUT_DAYS.map((w) => (
+        {getWorkoutDays(planId).map((w) => (
           <button
             key={w.id}
             onClick={() => setSelectedId(w.id)}
