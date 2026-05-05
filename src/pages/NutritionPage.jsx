@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useStore } from '../store.jsx'
 
-const PROTEIN_GOAL = 130
 const CALORIE_GOAL = 2100
 
 const QUICK_FOODS = [
@@ -22,7 +21,7 @@ const QUICK_FOODS = [
 const MEAL_SLOTS = ['Breakfast', 'Lunch', 'Snack', 'Dinner', 'Before Bed']
 
 export default function NutritionPage() {
-  const { todayLog, updateTodayLog } = useStore()
+  const { todayLog, updateTodayLog, proteinGoal } = useStore()
   const [meals, setMeals] = useState(() => {
     const stored = localStorage.getItem('wt_meals_today')
     if (stored) {
@@ -71,7 +70,7 @@ export default function NutritionPage() {
     setCustomCal('')
   }
 
-  const proteinPct = Math.min((protein / PROTEIN_GOAL) * 100, 100)
+  const proteinPct = Math.min((protein / proteinGoal) * 100, 100)
   const calPct = Math.min((calories / CALORIE_GOAL) * 100, 100)
 
   return (
@@ -80,24 +79,8 @@ export default function NutritionPage() {
 
       {/* Macro Overview */}
       <div className="grid grid-cols-2 gap-3">
-        <MacroCard
-          label="Protein"
-          value={protein}
-          goal={PROTEIN_GOAL}
-          unit="g"
-          pct={proteinPct}
-          color="amber"
-          icon="🥩"
-        />
-        <MacroCard
-          label="Calories"
-          value={calories}
-          goal={CALORIE_GOAL}
-          unit="kcal"
-          pct={calPct}
-          color="orange"
-          icon="🔥"
-        />
+        <MacroCard label="Protein" value={protein} goal={proteinGoal} unit="g" pct={proteinPct} color="amber" icon="🥩" />
+        <MacroCard label="Calories" value={calories} goal={CALORIE_GOAL} unit="kcal" pct={calPct} color="orange" icon="🔥" />
       </div>
 
       {/* Meal Log */}
@@ -107,8 +90,8 @@ export default function NutritionPage() {
             className="w-full flex items-center justify-between"
             onClick={() => setActiveMeal(activeMeal === slot ? null : slot)}
           >
-            <span className="font-semibold text-sm">{slot}</span>
-            <div className="flex items-center gap-2 text-xs text-zinc-500">
+            <span className="font-semibold text-sm text-white">{slot}</span>
+            <div className="flex items-center gap-2 text-xs text-zinc-400">
               {meals[slot]?.length > 0 && (
                 <span>{meals[slot].reduce((s, f) => s + f.protein, 0)}g protein</span>
               )}
@@ -119,13 +102,13 @@ export default function NutritionPage() {
           {meals[slot]?.length > 0 && (
             <div className="space-y-1">
               {meals[slot].map((food, i) => (
-                <div key={i} className="flex items-center justify-between bg-zinc-800/50 rounded-lg px-3 py-1.5">
+                <div key={i} className="flex items-center justify-between rounded-xl px-3 py-1.5" style={{ background: 'rgba(255,255,255,0.04)' }}>
                   <span className="text-xs text-zinc-300">{food.name}</span>
-                  <div className="flex items-center gap-2 text-xs text-zinc-500">
+                  <div className="flex items-center gap-2 text-xs text-zinc-400">
                     <span>{food.protein}g · {food.cal} kcal</span>
                     <button
                       onClick={() => removeFood(slot, i)}
-                      className="text-zinc-600 hover:text-red-400 transition-colors"
+                      className="text-zinc-500 hover:text-red-400 transition-colors"
                     >
                       ×
                     </button>
@@ -136,22 +119,23 @@ export default function NutritionPage() {
           )}
 
           {activeMeal === slot && (
-            <div className="space-y-2 pt-1 border-t border-zinc-800">
+            <div className="space-y-2 pt-1" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
               <div className="grid grid-cols-2 gap-1.5">
                 {QUICK_FOODS.map((food) => (
                   <button
                     key={food.name}
                     onClick={() => addFood(slot, food)}
-                    className="text-left bg-zinc-800 hover:bg-zinc-700 rounded-lg px-2.5 py-2 transition-colors"
+                    className="text-left rounded-xl px-2.5 py-2 transition-all hover:border-white/20"
+                    style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}
                   >
                     <div className="text-xs font-medium text-zinc-200 leading-tight">{food.name}</div>
-                    <div className="text-xs text-zinc-500 mt-0.5">{food.protein}g · {food.cal} kcal</div>
+                    <div className="text-xs text-zinc-400 mt-0.5">{food.protein}g · {food.cal} kcal</div>
                   </button>
                 ))}
               </div>
 
-              <div className="pt-1 border-t border-zinc-800">
-                <div className="text-xs text-zinc-500 mb-1.5">Custom item</div>
+              <div className="pt-1" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+                <div className="text-xs text-zinc-400 mb-1.5">Custom item</div>
                 <div className="flex gap-1.5">
                   <input
                     placeholder="Name"
@@ -182,8 +166,8 @@ export default function NutritionPage() {
       ))}
 
       {/* Protein guide */}
-      <div className="card border-amber-500/20 bg-amber-500/5">
-        <h3 className="text-sm font-semibold text-amber-400 mb-2">Protein Sources (Veg)</h3>
+      <div className="card space-y-2" style={{ borderColor: 'rgba(245,158,11,0.2)', background: 'rgba(245,158,11,0.05)' }}>
+        <h3 className="text-sm font-semibold text-amber-400">Protein Sources (Veg)</h3>
         <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-zinc-400">
           <span>Soya chunks · 52g/100g</span>
           <span>Paneer · 18g/100g</span>
@@ -199,20 +183,20 @@ export default function NutritionPage() {
 
 function MacroCard({ label, value, goal, unit, pct, color, icon }) {
   const colorMap = {
-    amber: { bar: 'bg-amber-500', text: 'text-amber-400' },
-    orange: { bar: 'bg-orange-500', text: 'text-orange-400' },
+    amber: { bar: '#f59e0b', text: 'text-amber-400' },
+    orange: { bar: '#f97316', text: 'text-orange-400' },
   }
   const c = colorMap[color]
   return (
-    <div className="card space-y-2">
-      <div className="text-xs text-zinc-500">{icon} {label}</div>
-      <div className={`text-2xl font-bold ${c.text}`}>
-        {value} <span className="text-sm font-normal text-zinc-500">{unit}</span>
+    <div className="card overflow-hidden">
+      <div className="h-1 w-full -mx-4 -mt-4 mb-3" style={{ width: 'calc(100% + 2rem)' }}>
+        <div className="h-full transition-all duration-500" style={{ width: `${pct}%`, background: c.bar }} />
       </div>
-      <div className="progress-bar">
-        <div className={`progress-fill ${c.bar}`} style={{ width: `${pct}%` }} />
+      <div className="text-xs text-zinc-400">{icon} {label}</div>
+      <div className={`text-2xl font-bold mt-1 ${c.text}`}>
+        {value} <span className="text-sm font-normal text-zinc-400">{unit}</span>
       </div>
-      <div className="text-xs text-zinc-600">Goal: {goal} {unit}</div>
+      <div className="text-xs text-zinc-400 mt-1">Goal: {goal} {unit}</div>
     </div>
   )
 }

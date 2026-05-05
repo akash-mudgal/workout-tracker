@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { format, eachDayOfInterval, startOfDay } from 'date-fns'
+import { format } from 'date-fns'
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
   CartesianGrid, BarChart, Bar,
@@ -21,7 +21,6 @@ export default function Progress() {
   const avgProtein = avgOf(dailyLogs, 'protein')
   const avgSleep = avgOf(dailyLogs, 'sleep')
 
-  // Strength chart data for selected exercise
   const strengthData = completedWorkouts
     .filter((w) => w.exercises?.some((e) => e.name === selectedExercise))
     .sort((a, b) => a.date.localeCompare(b.date))
@@ -37,14 +36,17 @@ export default function Progress() {
     })
     .filter((d) => d.weight > 0)
 
-  // Steps chart (last 14 days)
   const stepsData = getLast14Days(today).map((date) => ({
     date: format(new Date(date + 'T00:00:00'), 'EEE'),
     steps: dailyLogs[date]?.steps ?? 0,
   }))
 
-  // 90-day heatmap
   const heatmapDays = getHeatmapDays(startDate, today, workoutHistory, totalDays)
+
+  const tooltipStyle = {
+    contentStyle: { background: 'rgba(10,10,18,0.95)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, backdropFilter: 'blur(16px)' },
+    labelStyle: { color: '#a1a1aa' },
+  }
 
   return (
     <div className="space-y-4">
@@ -60,7 +62,7 @@ export default function Progress() {
 
       {/* 90 Day Heatmap */}
       <div className="card">
-        <h3 className="text-sm font-semibold mb-3">
+        <h3 className="text-sm font-semibold mb-3 text-white">
           {totalDays}-Day Journey · Day {dayNumber}
         </h3>
         <div className="flex flex-wrap gap-1">
@@ -70,26 +72,27 @@ export default function Progress() {
               title={date}
               className={`w-4 h-4 rounded-sm ${
                 isFuture
-                  ? 'bg-zinc-800/40'
+                  ? 'bg-white/[0.04]'
                   : hasWorkout
                   ? 'bg-violet-500'
                   : isToday
-                  ? 'bg-zinc-700 ring-1 ring-violet-500'
-                  : 'bg-zinc-800'
+                  ? 'ring-1 ring-violet-500'
+                  : 'bg-white/[0.07]'
               }`}
+              style={isToday && !hasWorkout ? { background: 'rgba(255,255,255,0.08)' } : {}}
             />
           ))}
         </div>
-        <div className="flex gap-3 mt-2 text-xs text-zinc-600">
+        <div className="flex gap-3 mt-2 text-xs text-zinc-400">
           <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-violet-500 inline-block" /> Workout done</span>
-          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-zinc-800 inline-block" /> Rest / missed</span>
+          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-white/[0.07] inline-block" /> Rest / missed</span>
         </div>
       </div>
 
       {/* Strength Chart */}
       <div className="card">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold">Strength Progress</h3>
+          <h3 className="text-sm font-semibold text-white">Strength Progress</h3>
         </div>
         <select
           value={selectedExercise}
@@ -103,19 +106,15 @@ export default function Progress() {
         {strengthData.length >= 2 ? (
           <ResponsiveContainer width="100%" height={160}>
             <LineChart data={strengthData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
               <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#71717a' }} />
               <YAxis tick={{ fontSize: 10, fill: '#71717a' }} width={35} />
-              <Tooltip
-                contentStyle={{ background: '#111118', border: '1px solid #27272a', borderRadius: 8 }}
-                formatter={(v, n) => [`${v}${n === 'weight' ? 'kg' : ''}`, n]}
-                labelStyle={{ color: '#a1a1aa' }}
-              />
+              <Tooltip {...tooltipStyle} formatter={(v, n) => [`${v}${n === 'weight' ? 'kg' : ''}`, n]} itemStyle={{ color: '#8b5cf6' }} />
               <Line type="monotone" dataKey="weight" name="weight" stroke="#8b5cf6" strokeWidth={2} dot={{ r: 3, fill: '#8b5cf6' }} />
             </LineChart>
           </ResponsiveContainer>
         ) : (
-          <div className="h-32 flex items-center justify-center text-zinc-600 text-sm">
+          <div className="h-32 flex items-center justify-center text-zinc-400 text-sm">
             Log at least 2 {selectedExercise} sessions to see trend
           </div>
         )}
@@ -123,17 +122,13 @@ export default function Progress() {
 
       {/* Steps Chart */}
       <div className="card">
-        <h3 className="text-sm font-semibold mb-3">Daily Steps (14 days)</h3>
+        <h3 className="text-sm font-semibold mb-3 text-white">Daily Steps (14 days)</h3>
         <ResponsiveContainer width="100%" height={140}>
           <BarChart data={stepsData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
             <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#71717a' }} />
             <YAxis tick={{ fontSize: 10, fill: '#71717a' }} width={35} />
-            <Tooltip
-              contentStyle={{ background: '#111118', border: '1px solid #27272a', borderRadius: 8 }}
-              labelStyle={{ color: '#a1a1aa' }}
-              itemStyle={{ color: '#10b981' }}
-            />
+            <Tooltip {...tooltipStyle} itemStyle={{ color: '#10b981' }} />
             <Bar dataKey="steps" fill="#10b981" radius={[3, 3, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
@@ -141,7 +136,7 @@ export default function Progress() {
 
       {/* Weekly breakdown */}
       <div className="card">
-        <h3 className="text-sm font-semibold mb-3">This Week</h3>
+        <h3 className="text-sm font-semibold mb-3 text-white">This Week</h3>
         <div className="grid grid-cols-2 gap-2 text-xs">
           <StatRow label="Workouts" value={`${workoutsThisWeek} / 7`} />
           <StatRow label="Avg Steps" value={`${Math.round(avgSteps).toLocaleString()}`} />
@@ -153,7 +148,7 @@ export default function Progress() {
       {/* Workout type breakdown */}
       {completedWorkouts.length > 0 && (
         <div className="card">
-          <h3 className="text-sm font-semibold mb-3">Workout Breakdown</h3>
+          <h3 className="text-sm font-semibold mb-3 text-white">Workout Breakdown</h3>
           <div className="space-y-2">
             {['push', 'pull', 'legs'].map((type) => {
               const count = completedWorkouts.filter((w) => {
@@ -165,7 +160,7 @@ export default function Progress() {
                 <div key={type}>
                   <div className="flex justify-between text-xs mb-1">
                     <span className="capitalize text-zinc-400">{type}</span>
-                    <span className="text-zinc-500">{count} sessions</span>
+                    <span className="text-zinc-400">{count} sessions</span>
                   </div>
                   <div className="progress-bar">
                     <div
@@ -188,15 +183,15 @@ function SummaryCard({ value, label, sub, color }) {
     <div className="card text-center p-3">
       <div className={`text-xl font-bold ${color}`}>{value}</div>
       <div className="text-xs text-zinc-300 font-medium">{label}</div>
-      <div className="text-xs text-zinc-600">{sub}</div>
+      <div className="text-xs text-zinc-400">{sub}</div>
     </div>
   )
 }
 
 function StatRow({ label, value }) {
   return (
-    <div className="flex justify-between py-1.5 border-b border-zinc-800">
-      <span className="text-zinc-500">{label}</span>
+    <div className="flex justify-between py-1.5" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+      <span className="text-zinc-400">{label}</span>
       <span className="text-zinc-200 font-medium">{value}</span>
     </div>
   )

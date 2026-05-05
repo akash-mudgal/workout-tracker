@@ -98,7 +98,7 @@ export default function WorkoutLogger() {
     <div className="space-y-4">
       <div>
         <h1 className="text-2xl font-bold">Log Workout</h1>
-        <p className="text-zinc-500 text-sm mt-1">{format(new Date(today + 'T00:00:00'), 'EEEE, MMMM d')}</p>
+        <p className="text-zinc-400 text-sm mt-1">{format(new Date(today + 'T00:00:00'), 'EEEE, MMMM d')}</p>
       </div>
 
       <div className={`card ${recommended.colorClasses.bg} ${recommended.colorClasses.border}`}>
@@ -107,7 +107,7 @@ export default function WorkoutLogger() {
         <div className="text-sm text-zinc-400">{recommended.subtitle}</div>
       </div>
 
-      <div className="text-xs text-zinc-500 px-1">{plan.name} · {plan.daysPerWeek} days/week</div>
+      <div className="text-xs text-zinc-400 px-1">{plan.name} · {plan.daysPerWeek} days/week</div>
 
       <div className="space-y-2">
         {getWorkoutDays(planId).map((w) => (
@@ -117,14 +117,14 @@ export default function WorkoutLogger() {
             className={`w-full card flex items-center justify-between transition-all ${
               selectedId === w.id
                 ? `${w.colorClasses.bg} ${w.colorClasses.border}`
-                : 'border-zinc-800 hover:border-zinc-700'
+                : 'hover:border-white/20'
             }`}
           >
             <div className="flex items-center gap-3">
               <div className={`w-3 h-3 rounded-full ${w.colorClasses.dot}`} />
               <div className="text-left">
                 <div className="font-semibold">{w.name}</div>
-                <div className="text-xs text-zinc-500">{w.subtitle}</div>
+                <div className="text-xs text-zinc-400">{w.subtitle}</div>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -158,10 +158,10 @@ function LoggingView({ workout, sessionSets, workoutHistory, selectedId, onUpdat
       <div className="flex items-center justify-between">
         <div>
           <h1 className={`text-xl font-bold ${workout.colorClasses.text}`}>{workout.name}</h1>
-          <p className="text-xs text-zinc-500">{workout.subtitle}</p>
+          <p className="text-xs text-zinc-400">{workout.subtitle}</p>
         </div>
         <div className="text-right">
-          <div className="text-xs text-zinc-500">Sets</div>
+          <div className="text-xs text-zinc-400">Sets</div>
           <div className="text-lg font-bold text-white">{doneSets}/{totalSets}</div>
         </div>
       </div>
@@ -184,16 +184,16 @@ function LoggingView({ workout, sessionSets, workoutHistory, selectedId, onUpdat
           const isExpanded = expandedEx === ex.name
 
           return (
-            <div key={ex.name} className={`card border ${exDone ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-zinc-800'}`}>
+            <div key={ex.name} className={`card border ${exDone ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-white/[0.08]'}`}>
               <button
                 className="w-full flex items-center justify-between"
                 onClick={() => setExpandedEx(isExpanded ? null : ex.name)}
               >
                 <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${exDone ? 'bg-emerald-500' : 'bg-zinc-600'}`} />
+                  <div className={`w-2 h-2 rounded-full ${exDone ? 'bg-emerald-500' : 'bg-zinc-500'}`} />
                   <span className="font-medium text-sm">{ex.name}</span>
                 </div>
-                <div className="flex items-center gap-3 text-xs text-zinc-500">
+                <div className="flex items-center gap-3 text-xs text-zinc-400">
                   <span>{ex.sets}×{ex.repRange} · RPE {ex.rpe}</span>
                   <span>{isExpanded ? '▲' : '▼'}</span>
                 </div>
@@ -202,17 +202,17 @@ function LoggingView({ workout, sessionSets, workoutHistory, selectedId, onUpdat
               {isExpanded && (
                 <div className="mt-3 space-y-2">
                   {ex.tip && (
-                    <div className="flex gap-2 bg-violet-500/10 border border-violet-500/20 rounded-lg px-3 py-2">
+                    <div className="flex gap-2 rounded-xl px-3 py-2" style={{ background: 'rgba(124,58,237,0.1)', border: '1px solid rgba(124,58,237,0.2)' }}>
                       <span className="text-violet-400 flex-shrink-0">💡</span>
                       <span className="text-xs text-violet-300">{ex.tip}</span>
                     </div>
                   )}
                   {prev && (
-                    <div className="text-xs text-zinc-500 bg-zinc-800/50 rounded-lg px-3 py-1.5">
+                    <div className="text-xs text-zinc-400 rounded-xl px-3 py-1.5" style={{ background: 'rgba(255,255,255,0.04)' }}>
                       Last: {prev.sets.map((s) => `${s.weight}kg×${s.reps}`).join(', ')}
                     </div>
                   )}
-                  <div className="grid grid-cols-12 gap-1 text-xs text-zinc-500 px-1">
+                  <div className="grid grid-cols-12 gap-1 text-xs text-zinc-400 px-1">
                     <div className="col-span-1">Set</div>
                     <div className="col-span-4 text-center">Weight (kg)</div>
                     <div className="col-span-4 text-center">Reps</div>
@@ -223,7 +223,7 @@ function LoggingView({ workout, sessionSets, workoutHistory, selectedId, onUpdat
                     const improved = prevSet && (set.reps > prevSet.reps || set.weight > prevSet.weight)
                     return (
                       <div key={i} className={`grid grid-cols-12 gap-1 items-center ${set.done ? 'opacity-60' : ''}`}>
-                        <div className="col-span-1 text-xs text-zinc-500">{i + 1}</div>
+                        <div className="col-span-1 text-xs text-zinc-400">{i + 1}</div>
                         <div className="col-span-4">
                           <input
                             type="number"
@@ -247,7 +247,7 @@ function LoggingView({ workout, sessionSets, workoutHistory, selectedId, onUpdat
                           <button
                             onClick={() => onToggleDone(ex.name, i)}
                             className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-colors ${
-                              set.done ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-zinc-600'
+                              set.done ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-zinc-500'
                             }`}
                           >
                             {set.done && '✓'}
@@ -289,19 +289,19 @@ function WorkoutComplete({ workout }) {
         <div className="grid grid-cols-3 gap-4">
           <div>
             <div className="text-2xl font-bold text-white">{doneSets}/{totalSets}</div>
-            <div className="text-xs text-zinc-500">Sets Done</div>
+            <div className="text-xs text-zinc-400">Sets Done</div>
           </div>
           <div>
             <div className="text-2xl font-bold text-white">{workout.durationMin}m</div>
-            <div className="text-xs text-zinc-500">Duration</div>
+            <div className="text-xs text-zinc-400">Duration</div>
           </div>
           <div>
             <div className="text-2xl font-bold text-white">{workout.exercises.length}</div>
-            <div className="text-xs text-zinc-500">Exercises</div>
+            <div className="text-xs text-zinc-400">Exercises</div>
           </div>
         </div>
       </div>
-      <p className="text-zinc-500 text-sm">Rest well. Come back stronger tomorrow.</p>
+      <p className="text-zinc-400 text-sm">Rest well. Come back stronger tomorrow.</p>
     </div>
   )
 }
@@ -322,7 +322,8 @@ function WorkoutSummary({ workout, onRedo }) {
           <div className="font-medium text-sm mb-2">{ex.name}</div>
           <div className="flex flex-wrap gap-1">
             {ex.sets.map((s, i) => (
-              <span key={i} className={`text-xs px-2 py-0.5 rounded-full ${s.done ? 'bg-emerald-500/20 text-emerald-300' : 'bg-zinc-800 text-zinc-400'}`}>
+              <span key={i} className={`text-xs px-2 py-0.5 rounded-full ${s.done ? 'bg-emerald-500/20 text-emerald-300' : 'text-zinc-400'}`}
+                style={!s.done ? { background: 'rgba(255,255,255,0.05)' } : {}}>
                 {s.weight}kg × {s.reps}
               </span>
             ))}
