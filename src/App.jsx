@@ -27,40 +27,41 @@ function AppInner() {
       {needsOnboarding ? (
         <OnboardingFlow />
       ) : (
-        <div className="flex flex-col min-h-screen max-w-lg mx-auto relative">
-          {syncing && (
-            <div className="fixed top-2 right-3 z-50 text-xs text-violet-400 animate-pulse">
-              syncing…
-            </div>
-          )}
-          <main className="flex-1 pb-28 px-4 pt-6">
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/workout" element={<WorkoutLogger />} />
-              <Route path="/progress" element={<Progress />} />
-              <Route path="/nutrition" element={<NutritionPage />} />
-              <Route path="/metrics" element={<BodyMetrics />} />
-              <Route path="/sessions" element={<SessionsPage />} />
-              <Route path="*" element={<Navigate to="/" />} />
-            </Routes>
-          </main>
+        <div className="flex min-h-screen">
           <NavBar />
-          <SignOutButton />
+
+          {/* Main content — offset by sidebar on md+ */}
+          <div className="flex-1 flex flex-col min-w-0 md:pl-56">
+            {syncing && (
+              <div className="fixed top-2 right-3 z-50 text-xs text-violet-400 animate-pulse">
+                syncing…
+              </div>
+            )}
+
+            {/* Mobile sign-out (desktop version lives in sidebar) */}
+            <button
+              onClick={() => supabase.auth.signOut()}
+              className="md:hidden fixed top-3 right-3 text-xs text-zinc-500 hover:text-zinc-300 transition-colors z-50"
+            >
+              Sign out
+            </button>
+
+            <main className="flex-1 pb-28 md:pb-10 px-4 md:px-8 pt-6">
+              <div className="max-w-2xl mx-auto">
+                <Routes>
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/workout" element={<WorkoutLogger />} />
+                  <Route path="/progress" element={<Progress />} />
+                  <Route path="/nutrition" element={<NutritionPage />} />
+                  <Route path="/metrics" element={<BodyMetrics />} />
+                  <Route path="/sessions" element={<SessionsPage />} />
+                  <Route path="*" element={<Navigate to="/" />} />
+                </Routes>
+              </div>
+            </main>
+          </div>
         </div>
       )}
     </AuthGate>
-  )
-}
-
-function SignOutButton() {
-  const { user } = useStore()
-  if (!user) return null
-  return (
-    <button
-      onClick={() => supabase.auth.signOut()}
-      className="fixed top-3 right-3 text-xs text-zinc-600 hover:text-zinc-400 transition-colors z-50"
-    >
-      Sign out
-    </button>
   )
 }

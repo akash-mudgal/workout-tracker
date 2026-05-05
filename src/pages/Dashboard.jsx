@@ -88,7 +88,7 @@ export default function Dashboard() {
             {doneCount} / {goals.length}
           </span>
         </div>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
           {goals.map((g) => (
             <div key={g.label} className={`flex items-center gap-2.5 p-2.5 rounded-xl border ${g.done ? 'bg-emerald-500/8 border-emerald-500/20' : 'bg-white/[0.02] border-white/[0.06]'}`}>
               <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 text-[10px] font-black ${g.done ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-zinc-600 text-zinc-500'}`}>
@@ -107,7 +107,7 @@ export default function Dashboard() {
       </div>
 
       {/* Stat sliders */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <StatCard label="Water" value={todayLog.water} goal={WATER_GOAL} unit="glasses" color="cyan"
           min={0} max={15} step={1}
           onChange={(v) => updateTodayLog({ water: v })} />
@@ -125,7 +125,7 @@ export default function Dashboard() {
       {/* Supplements */}
       <div className="card">
         <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-3">Supplements</h3>
-        <div className="space-y-2">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           <SupplementRow label="Creatine Monohydrate" sub="3–5g · Strength & muscle" checked={todayLog.supplements?.creatine} onChange={() => toggleSupplement('creatine')} />
           <SupplementRow label="Vitamin B12" sub="Essential for vegetarians" checked={todayLog.supplements?.b12} onChange={() => toggleSupplement('b12')} />
           <SupplementRow label="D3 + Magnesium" sub="Recovery & sleep quality" checked={todayLog.supplements?.d3mag} onChange={() => toggleSupplement('d3mag')} />

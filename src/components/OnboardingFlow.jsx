@@ -92,7 +92,7 @@ export default function OnboardingFlow() {
                 <input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Summer Recomp 2026"
+                  placeholder="e.g. Summer Cut 2026"
                   className="input-field"
                   autoFocus
                   onKeyDown={(e) => e.key === 'Enter' && name.trim() && setStep(1)}

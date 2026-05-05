@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { LogoMark } from './Logo'
 
 export default function AuthGate({ children, user, loading }) {
   const [email, setEmail] = useState('')
@@ -13,7 +14,7 @@ export default function AuthGate({ children, user, loading }) {
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 rounded-full border-2 border-violet-500 border-t-transparent animate-spin" />
-          <span className="text-zinc-600 text-sm">Loading…</span>
+          <span className="text-zinc-400 text-sm">Loading…</span>
         </div>
       </div>
     )
@@ -53,12 +54,12 @@ export default function AuthGate({ children, user, loading }) {
         <div className="text-center space-y-2">
           <div
             className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-2"
-            style={{ background: 'linear-gradient(135deg, rgba(124,58,237,0.3), rgba(91,33,182,0.15))', border: '1px solid rgba(124,58,237,0.3)' }}
+            style={{ background: 'linear-gradient(135deg, rgba(124,58,237,0.25), rgba(91,33,182,0.1))', border: '1px solid rgba(124,58,237,0.3)' }}
           >
-            <span className="text-2xl">⚡</span>
+            <LogoMark size={36} id="auth" />
           </div>
-          <h1 className="text-3xl font-black gradient-text">Recomp</h1>
-          <p className="text-zinc-500 text-sm">Your 90-day transformation tracker</p>
+          <h1 className="text-3xl font-black gradient-text">Kinetiq</h1>
+          <p className="text-zinc-400 text-sm">Track every rep, step, and meal.</p>
         </div>
 
         {/* Form card */}

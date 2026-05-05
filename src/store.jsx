@@ -122,7 +122,7 @@ export function StoreProvider({ children }) {
         if (hasOldData) {
           // Returning user from before sessions feature — migrate silently
           const localStart = load('wt_start_date', today)
-          const defaultSession = await insertSession(userId, '90-Day Recomp', localStart)
+          const defaultSession = await insertSession(userId, '90-Day Cycle', localStart)
           resolvedSessions = [defaultSession]
           await Promise.all([
             supabase.from('daily_logs').update({ session_id: defaultSession.id }).eq('user_id', userId).is('session_id', null),

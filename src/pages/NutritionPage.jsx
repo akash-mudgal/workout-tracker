@@ -120,7 +120,7 @@ export default function NutritionPage() {
 
           {activeMeal === slot && (
             <div className="space-y-2 pt-1" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
-              <div className="grid grid-cols-2 gap-1.5">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
                 {QUICK_FOODS.map((food) => (
                   <button
                     key={food.name}

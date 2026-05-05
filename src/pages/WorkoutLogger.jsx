@@ -109,7 +109,7 @@ export default function WorkoutLogger() {
 
       <div className="text-xs text-zinc-400 px-1">{plan.name} · {plan.daysPerWeek} days/week</div>
 
-      <div className="space-y-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {getWorkoutDays(planId).map((w) => (
           <button
             key={w.id}
@@ -173,7 +173,7 @@ function LoggingView({ workout, sessionSets, workoutHistory, selectedId, onUpdat
         />
       </div>
 
-      <div className="space-y-2">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
         {workout.exercises.map((ex) => {
           const sets = sessionSets[ex.name] || []
           const prevWorkouts = Object.values(workoutHistory)

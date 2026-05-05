@@ -16,7 +16,7 @@ export default function SessionsPage() {
   } = useStore()
 
   const [creating, setCreating] = useState(false)
-  const [newName, setNewName] = useState('90-Day Recomp')
+  const [newName, setNewName] = useState('90-Day Cycle')
   const [newStart, setNewStart] = useState(today)
   const [newPlanId, setNewPlanId] = useState('ppl')
   const [newTotalDays, setNewTotalDays] = useState(90)
@@ -48,7 +48,7 @@ export default function SessionsPage() {
     try {
       await createSession(newName.trim(), newStart, newPlanId, days)
       setCreating(false)
-      setNewName('90-Day Recomp')
+      setNewName('90-Day Cycle')
       setNewStart(today)
       setNewPlanId('ppl')
       setNewTotalDays(90)

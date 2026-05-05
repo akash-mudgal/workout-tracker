@@ -53,7 +53,7 @@ export default function Progress() {
       <h1 className="text-2xl font-bold">Progress</h1>
 
       {/* Week Summary */}
-      <div className="grid grid-cols-4 gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         <SummaryCard value={workoutsThisWeek} label="Workouts" sub="this week" color="text-violet-400" />
         <SummaryCard value={completedWorkouts.length} label="Total" sub="sessions" color="text-violet-400" />
         <SummaryCard value={`${Math.round(avgSteps / 1000)}k`} label="Avg Steps" sub="per day" color="text-emerald-400" />
@@ -137,7 +137,7 @@ export default function Progress() {
       {/* Weekly breakdown */}
       <div className="card">
         <h3 className="text-sm font-semibold mb-3 text-white">This Week</h3>
-        <div className="grid grid-cols-2 gap-2 text-xs">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
           <StatRow label="Workouts" value={`${workoutsThisWeek} / 7`} />
           <StatRow label="Avg Steps" value={`${Math.round(avgSteps).toLocaleString()}`} />
           <StatRow label="Avg Protein" value={`${Math.round(avgProtein)}g`} />
