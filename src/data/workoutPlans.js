@@ -221,118 +221,106 @@ const BROSPLIT_DAYS = {
 }
 
 // ─── Plan: Built With Science Home ───────────────────────────────────────────
-// Based on Jeremy Ethier's 150-day home transformation (26 lb fat, 7 lb muscle)
-// 4 days/week · Push / Pull / Legs / Upper+(Pre-Exhaust)
+// Based on Jeremy Ethier's home transformation program
+// 4 days/week · Upper/Lower split · Mon/Tue/Thu/Fri
 const BWS_DAYS = {
-  bws_push: {
-    id: 'bws_push', name: 'Push', subtitle: 'Chest · Shoulders · Triceps', type: 'push', colorClasses: COLORS.red,
+  bws_upper1: {
+    id: 'bws_upper1', name: 'Upper 1', subtitle: 'Chest · Shoulders · Back · Triceps', type: 'push', colorClasses: COLORS.red,
     exercises: [
       {
-        name: 'Incline DB Press', sets: 4, repRange: '8–12', rpe: 8, restSec: 150,
-        tip: 'Align arm path with your upper chest fibers — not super wide. Tuck elbows at the bottom and flare slightly on the way up. Higher incline needed if your sternum angle is steep.',
+        name: 'Flat Dumbbell Press', sets: 4, repRange: '8–12', rpe: 8, restSec: 150,
+        tip: 'Targets mid and lower chest. Keep a slight arch, drive through the chest not the shoulders. Full stretch at the bottom — let the dumbbells go deep.',
       },
       {
-        name: 'Flat DB Press', sets: 3, repRange: '10–12', rpe: 8, restSec: 120,
-        tip: 'Targets mid and lower chest fibers. Keep a slight arch and drive through your chest, not your shoulders.',
+        name: 'Seated Dumbbell Shoulder Press', sets: 4, repRange: '8–12', rpe: 8, restSec: 120,
+        tip: 'Tuck elbows at the bottom, then flare slightly on the way up. Avoid pressing straight out wide — that loads the front delt less efficiently and stresses the shoulder joint.',
       },
       {
-        name: 'DB Shoulder Press', sets: 3, repRange: '8–12', rpe: 8, restSec: 120,
-        tip: 'Tuck elbows at the bottom, then flare on the way up. Avoid pressing straight out wide — that loads the front delt less efficiently and can cause shoulder clicks.',
+        name: 'Chest-Supported Dumbbell Row', sets: 4, repRange: '10–12', rpe: 8, restSec: 120,
+        tip: 'Lie chest-down on an incline bench. Wide elbow angle targets mid and upper back thickness. Cue: fist directly under elbow. Shrug first, then row — limits bicep takeover.',
       },
       {
-        name: 'Reverse Drop Set Lateral Raises', sets: 3, repRange: 'To failure + half reps', rpe: 9, restSec: 90,
-        tip: 'Do full reps to failure. Then immediately grab a weight 20% heavier and do half reps in the bottom range (hardest zone). This takes the side delt to true failure and overloads the stretched position.',
+        name: 'Lean-In Lateral Raise', sets: 4, repRange: '10–15', rpe: 9, restSec: 75,
+        tip: 'Hold a fixed support and lean to one side. This makes the bottom range harder, mimicking a cable — the side delt is loaded throughout the full ROM. Keep a slight bend in the elbow.',
       },
       {
-        name: 'Leaning Lateral Raises', sets: 3, repRange: '12–15', rpe: 8, restSec: 75,
-        tip: 'Hold a wall or upright with one hand and lean sideways. This makes the bottom of the movement harder — mimicking the cable effect. Pair with reverse drop set raises on the same day for full delt stimulus.',
-      },
-      {
-        name: 'Overhead DB Triceps Extension', sets: 3, repRange: '12–15', rpe: 9, restSec: 90,
-        tip: 'Standing or seated. This is the best single triceps exercise — it stretches and loads the long head (the part that gives arm size). Keep upper arms close to your head.',
+        name: 'Dumbbell Overhead Tricep Extension', sets: 4, repRange: '10–15', rpe: 9, restSec: 90,
+        tip: 'Best single tricep exercise — stretches and loads the long head (the bulk of arm size). Keep upper arms close to your head. Full stretch at the bottom is the key stimulus.',
       },
     ],
   },
-  bws_pull: {
-    id: 'bws_pull', name: 'Pull', subtitle: 'Back · Biceps', type: 'pull', colorClasses: COLORS.blue,
+  bws_lower1: {
+    id: 'bws_lower1', name: 'Lower 1', subtitle: 'Quad Focused', type: 'legs', colorClasses: COLORS.emerald,
     exercises: [
       {
-        name: 'Chest-Supported DB Row', sets: 4, repRange: '10–12', rpe: 8, restSec: 150,
-        tip: 'Wide elbow angle for mid and upper back thickness. Key cue: fist directly under elbow. Shrug first, then squeeze shoulder blades together — this limits bicep takeover.',
+        name: 'Bulgarian Split Squat (Quad Focus)', sets: 4, repRange: '8–12 each', rpe: 8, restSec: 180,
+        tip: 'Narrow stance, knee drives forward over the toes. Upright torso. This shifts the load to the quads rather than the glutes. Keep front foot closer to the bench to increase quad stretch.',
       },
       {
-        name: 'Single-Arm DB Row (Lat Focus)', sets: 4, repRange: '10–12', rpe: 8, restSec: 150,
-        tip: 'Elbow tight to your side, sweep the arm back toward your hip. Think "wing" not "row". This targets the lats for back width rather than the mid-back.',
+        name: 'Dumbbell Romanian Deadlift', sets: 4, repRange: '10–12', rpe: 8, restSec: 150,
+        tip: '3-second lowering. Feel the full hamstring stretch at the bottom — that is the stimulus. Hinge at the hips, back flat, dumbbells close to your legs the whole way down.',
       },
       {
-        name: 'Incline DB Curl', sets: 3, repRange: '10–12', rpe: 9, restSec: 90,
-        tip: 'Lie on incline bench so arms hang behind your body. This stretch-focused position targets the upper biceps peak. Keep upper arms locked — only forearms move.',
+        name: 'Heel-Elevated Goblet Squat', sets: 4, repRange: '10–15', rpe: 8, restSec: 120,
+        tip: 'Place heels on a weight plate or wedge. This increases quad recruitment by shifting your centre of gravity forward. Keep torso upright and squat as deep as possible.',
       },
       {
-        name: 'Preacher Curl (DB)', sets: 3, repRange: '10–12', rpe: 9, restSec: 90,
-        tip: 'Use the incline bench as a preacher pad — rest upper arm against the pad. Targets the lower biceps and brachialis. Pairs with incline curl for complete bicep development.',
+        name: 'Single-Leg Weighted Calf Raise', sets: 4, repRange: '12–15 each', rpe: 9, restSec: 60,
+        tip: 'Do these on a step for full range — the stretch at the bottom is critical. Lower slowly. Single-leg version loads each calf twice as hard as two-leg raises.',
       },
       {
-        name: 'Hammer Curl', sets: 2, repRange: '10–12', rpe: 8, restSec: 75,
-        tip: 'Neutral (hammer) grip. Builds the brachialis which pushes the bicep up and adds arm thickness.',
+        name: 'Dead Bug', sets: 3, repRange: '8–10 each side', rpe: 7, restSec: 60,
+        tip: 'Lie on your back, arms up, knees at 90°. Lower opposite arm and leg toward the floor while pressing your lower back flat into the ground. Slow and controlled — core stability, not speed.',
       },
     ],
   },
-  bws_legs: {
-    id: 'bws_legs', name: 'Legs', subtitle: 'Quads · Glutes · Hamstrings · RF', type: 'legs', colorClasses: COLORS.emerald,
+  bws_upper2: {
+    id: 'bws_upper2', name: 'Upper 2', subtitle: 'Chest · Back · Shoulders · Triceps', type: 'push', colorClasses: COLORS.violet,
     exercises: [
       {
-        name: 'Wide-Stance Bulgarian Split Squat', sets: 3, repRange: '10–12 each', rpe: 8, restSec: 180,
-        tip: 'Wider stance shifts emphasis to the glutes. Keep torso upright and drive through the heel. Lower the bench height with foam if the hip angle feels uncomfortable.',
+        name: 'Low Incline Dumbbell Press', sets: 4, repRange: '8–12', rpe: 8, restSec: 150,
+        tip: 'Set bench to 15–30 degrees — lower than a standard incline. Hits the upper chest without losing the mid-chest involvement. Arm path aligns with upper chest fibers, not straight up.',
       },
       {
-        name: 'Narrow-Stance Bulgarian Split Squat', sets: 3, repRange: '10–12 each', rpe: 8, restSec: 180,
-        tip: 'Narrow stance with knee driving forward over the toes. This shifts load to the quads. Same movement, different stance = different muscle emphasis.',
+        name: '6-Point Dumbbell Row', sets: 4, repRange: '10–12 each', rpe: 8, restSec: 120,
+        tip: 'Place one hand and same-side knee on the bench, other foot wide on the floor. Elbow tight to your side, sweep the arm toward your hip — this targets lat width. Think "wing" not "row".',
       },
       {
-        name: 'DB Romanian Deadlift', sets: 4, repRange: '10–12', rpe: 8, restSec: 150,
-        tip: 'Slow and controlled — 3 second lowering. Feel the full hamstring stretch at the bottom. Hinge at the hips, keep back flat and dumbbells close to your legs.',
+        name: 'Dumbbell Lateral Raises', sets: 4, repRange: '12–15', rpe: 9, restSec: 75,
+        tip: 'Slight forward lean from the hips. Lead with the elbow, not the hand. Do not shrug — keep traps relaxed. Use a weight where you can feel the side delt burning, not your traps taking over.',
       },
       {
-        name: 'Reverse Nordic', sets: 3, repRange: '5–10', rpe: 9, restSec: 90,
-        tip: 'Anchor feet under a bench. Lean back slowly with core braced, butt to heels for full stretch. Targets the rectus femoris — the quad muscle squats/lunges don\'t grow well. Start with partials and progress.',
+        name: 'Incline Dumbbell Overhead Extension', sets: 4, repRange: '10–15', rpe: 9, restSec: 90,
+        tip: 'Lie on an incline bench and extend the dumbbell overhead. The incline increases the stretch on the long head of the tricep at the bottom. Keep upper arms perpendicular to the floor.',
       },
       {
-        name: 'Sissy Squat', sets: 3, repRange: '8–12', rpe: 9, restSec: 90,
-        tip: 'Hold a support with one hand. Drive knees forward, back straight, full quad stretch at the bottom. Best alternative to leg extensions for rectus femoris. Even one controlled rep is progress early on.',
-      },
-      {
-        name: 'Calf Raises (Elevated)', sets: 4, repRange: '15–20', rpe: 9, restSec: 60,
-        tip: 'Stand on an elevated platform (build one from wood) for full range. Slow lowering to get the stretch. Without elevation this exercise loses most of its benefit.',
+        name: 'Prone Arm Circles', sets: 3, repRange: '10–12', rpe: 7, restSec: 60,
+        tip: 'Lie face-down, arms out to the sides. Make slow controlled circles. Strengthens the rotator cuff and rear delts — important for shoulder health and posture when pressing heavy.',
       },
     ],
   },
-  bws_upper: {
-    id: 'bws_upper', name: 'Upper+ (Pre-Exhaust)', subtitle: 'Full Upper · Advanced Technique', type: 'push', colorClasses: COLORS.violet,
+  bws_lower2: {
+    id: 'bws_lower2', name: 'Lower 2', subtitle: 'Glute Focused', type: 'legs', colorClasses: COLORS.amber,
     exercises: [
       {
-        name: 'DB Fly → Flat DB Press (Superset)', sets: 3, repRange: 'Fly to failure, then press', rpe: 9, restSec: 150,
-        tip: 'PRE-EXHAUST: Do DB fly to complete failure. Without resting, switch immediately to flat DB press with heavier weight. Your chest is pre-fatigued so it reaches failure at lighter weight. Add 1–2 extra sets vs normal training to match volume.',
+        name: 'Bulgarian Split Squat (Glute Focus)', sets: 4, repRange: '8–12 each', rpe: 8, restSec: 180,
+        tip: 'Wider stance, torso leaned slightly forward. Drive through the heel. This shifts load to the glutes rather than the quads. Place front foot further from the bench than the quad version.',
       },
       {
-        name: 'Incline DB Press', sets: 3, repRange: '10–12', rpe: 8, restSec: 120,
-        tip: 'Upper chest focus. Keep arm path aligned with fiber direction — not too wide. Full stretch at bottom.',
+        name: 'Single-Leg Weighted Calf Raise', sets: 4, repRange: '12–15 each', rpe: 9, restSec: 60,
+        tip: 'Full range on a step — the stretched position at the bottom is what drives calf growth. Slow eccentric (3 seconds down). Hold a dumbbell to add load progressively.',
       },
       {
-        name: 'Chest-Supported DB Row', sets: 3, repRange: '10–12', rpe: 8, restSec: 120,
-        tip: 'Wide elbow for mid-back thickness. Fist under elbow. Shrug first, then row.',
+        name: 'Single-Leg Hip Thrust', sets: 4, repRange: '10–12 each', rpe: 8, restSec: 120,
+        tip: 'Upper back on a bench, one foot on the floor, other leg raised. Drive through the heel, squeeze the glute hard at the top. Single-leg keeps the glute from being overshadowed by the quads.',
       },
       {
-        name: 'Single-Arm DB Row (Lat Focus)', sets: 3, repRange: '10–12', rpe: 8, restSec: 120,
-        tip: 'Elbow tight, sweep toward hip for lat width.',
+        name: 'Sliding Hamstring Curl', sets: 3, repRange: '8–12', rpe: 9, restSec: 90,
+        tip: 'Lie on your back, feet on a smooth surface (socks on floor or sliders). Bridge up and curl your heels toward your glutes. Isolates the hamstrings at the knee — the part RDLs do not fully train.',
       },
       {
-        name: 'Reverse Drop Set Lateral Raises', sets: 3, repRange: 'To failure + half reps', rpe: 9, restSec: 90,
-        tip: 'Full reps to failure, then immediately go 20% heavier for bottom-range half reps. True delt failure.',
-      },
-      {
-        name: 'Overhead DB Triceps Extension', sets: 3, repRange: '12–15', rpe: 9, restSec: 90,
-        tip: 'Long head focus. Arms close to head. Full stretch at the bottom.',
+        name: 'Reverse Crunch', sets: 4, repRange: '10–15', rpe: 8, restSec: 60,
+        tip: 'Lie flat, legs at 90°. Drive your knees toward your chest by tilting the pelvis — do not just swing the legs. Lower slowly. This targets the lower abs more than standard crunches.',
       },
     ],
   },
@@ -380,10 +368,10 @@ export const PLANS = {
   bws_home: {
     id: 'bws_home',
     name: 'Built With Science Home',
-    description: '4 days/week · Science-based · Proven: 26lb fat lost, 7lb muscle gained in 150 days',
+    description: '4 days/week · Upper/Lower split · Mon/Tue/Thu/Fri · Science-based dumbbell program',
     daysPerWeek: 4,
     accentColor: 'violet',
-    cycle: ['bws_push', 'bws_pull', 'bws_legs', 'rest', 'bws_upper', 'rest', 'rest'],
+    cycle: ['bws_upper1', 'bws_lower1', 'rest', 'bws_upper2', 'bws_lower2', 'rest', 'rest'],
     days: BWS_DAYS,
   },
 }
