@@ -33,7 +33,7 @@ function AppInner() {
               syncing…
             </div>
           )}
-          <main className="flex-1 pb-24 px-4 pt-6">
+          <main className="flex-1 pb-28 px-4 pt-6">
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/workout" element={<WorkoutLogger />} />
