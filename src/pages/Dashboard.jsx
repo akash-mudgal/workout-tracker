@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { format } from 'date-fns'
 import { useStore } from '../store.jsx'
 import { getRecommendedWorkout, PHASE_INFO } from '../data/workoutPlan'
@@ -9,7 +9,7 @@ const PROTEIN_GOAL = 130
 const SLEEP_GOAL = 7.5
 
 export default function Dashboard() {
-  const { today, dayNumber, todayLog, workoutHistory, updateTodayLog, toggleSupplement } = useStore()
+  const { today, dayNumber, todayLog, workoutHistory, updateTodayLog, toggleSupplement, activeSession } = useStore()
   const navigate = useNavigate()
   const recommended = getRecommendedWorkout(workoutHistory)
   const todayDone = workoutHistory[today]
@@ -23,6 +23,11 @@ export default function Dashboard() {
       <div className="flex items-start justify-between">
         <div>
           <p className="text-zinc-500 text-sm">{format(new Date(today + 'T00:00:00'), 'EEEE, MMM d')}</p>
+          {activeSession && (
+            <Link to="/sessions" className="text-xs text-violet-400/70 hover:text-violet-400 transition-colors">
+              {activeSession.name} ›
+            </Link>
+          )}
           <h1 className="text-2xl font-bold mt-0.5">Hey Akash 👋</h1>
         </div>
         <div className="text-right">

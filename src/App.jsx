@@ -8,6 +8,7 @@ import WorkoutLogger from './pages/WorkoutLogger'
 import Progress from './pages/Progress'
 import NutritionPage from './pages/NutritionPage'
 import BodyMetrics from './pages/BodyMetrics'
+import SessionsPage from './pages/SessionsPage'
 
 export default function App() {
   return (
@@ -35,6 +36,7 @@ function AppInner() {
             <Route path="/progress" element={<Progress />} />
             <Route path="/nutrition" element={<NutritionPage />} />
             <Route path="/metrics" element={<BodyMetrics />} />
+            <Route path="/sessions" element={<SessionsPage />} />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </main>

@@ -15,29 +15,32 @@ function load(key, def) {
     return v ? JSON.parse(v) : def
   } catch { return def }
 }
-
-function save(key, value) {
-  localStorage.setItem(key, JSON.stringify(value))
-}
+function save(key, value) { localStorage.setItem(key, JSON.stringify(value)) }
 
 export function StoreProvider({ children }) {
   const [user, setUser] = useState(null)
   const [authLoading, setAuthLoading] = useState(true)
   const [syncing, setSyncing] = useState(false)
 
-  const [startDate, setStartDate] = useState(() => load('wt_start_date', format(new Date(), 'yyyy-MM-dd')))
+  const [sessions, setSessions] = useState(() => load('wt_sessions', []))
+  const [activeSessionId, setActiveSessionId] = useState(() => load('wt_active_session_id', null))
   const [dailyLogs, setDailyLogs] = useState(() => load('wt_daily_logs', {}))
   const [workoutHistory, setWorkoutHistory] = useState(() => load('wt_workout_history', {}))
   const [bodyMetrics, setBodyMetrics] = useState(() => load('wt_body_metrics', []))
   const [activeWorkout, setActiveWorkout] = useState(null)
 
   const today = format(new Date(), 'yyyy-MM-dd')
-  const userRef = useRef(user)
+  const userRef = useRef(null)
+  const sessionIdRef = useRef(activeSessionId)
   const logSyncTimer = useRef(null)
 
   useEffect(() => { userRef.current = user }, [user])
+  useEffect(() => { sessionIdRef.current = activeSessionId }, [activeSessionId])
 
-  // Auth listener
+  const activeSession = sessions.find((s) => s.id === activeSessionId) ?? sessions[0] ?? null
+  const startDate = activeSession?.startDate ?? today
+
+  // ── Auth ──────────────────────────────────────────────────────────────────
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null)
@@ -49,62 +52,88 @@ export function StoreProvider({ children }) {
     return () => subscription.unsubscribe()
   }, [])
 
-  // Load from Supabase when user logs in
   useEffect(() => {
     if (!user) return
     loadAllData(user.id)
   }, [user?.id])
 
-  async function loadAllData(userId) {
-    setSyncing(true)
-    try {
-      const [s, l, w, m] = await Promise.all([
-        supabase.from('user_settings').select('start_date').eq('user_id', userId).maybeSingle(),
-        supabase.from('daily_logs').select('*').eq('user_id', userId),
-        supabase.from('workout_history').select('*').eq('user_id', userId),
-        supabase.from('body_metrics').select('*').eq('user_id', userId).order('date'),
-      ])
+  // ── Data loading ──────────────────────────────────────────────────────────
+  async function fetchSessionData(userId, sessionId) {
+    const [l, w, m] = await Promise.all([
+      supabase.from('daily_logs').select('*').eq('user_id', userId).eq('session_id', sessionId),
+      supabase.from('workout_history').select('*').eq('user_id', userId).eq('session_id', sessionId),
+      supabase.from('body_metrics').select('*').eq('user_id', userId).eq('session_id', sessionId).order('date'),
+    ])
 
-      // First-time user: push local data up to Supabase
-      const isNewUser = !l.data?.length && !w.data?.length && !m.data?.length
-
-      if (s.data?.start_date) {
-        setStartDate(s.data.start_date)
-        save('wt_start_date', s.data.start_date)
-      } else {
-        // Save start date to Supabase
-        const localStart = load('wt_start_date', today)
-        await supabase.from('user_settings').upsert({ user_id: userId, start_date: localStart })
-      }
-
-      if (isNewUser) {
-        await migrateLocalToSupabase(userId)
-        return
-      }
-
-      if (l.data?.length) {
-        const logs = Object.fromEntries(l.data.map((r) => [r.date, {
+    const logs = l.data?.length
+      ? Object.fromEntries(l.data.map((r) => [r.date, {
           water: r.water, steps: r.steps, protein: r.protein,
           calories: r.calories, sleep: r.sleep, supplements: r.supplements,
         }]))
-        setDailyLogs(logs)
-        save('wt_daily_logs', logs)
-      }
+      : {}
 
-      if (w.data?.length) {
-        const hist = Object.fromEntries(w.data.map((r) => [r.date, {
+    const hist = w.data?.length
+      ? Object.fromEntries(w.data.map((r) => [r.date, {
           date: r.date, workoutId: r.workout_id, workoutName: r.workout_name,
           durationMin: r.duration_min, exercises: r.exercises,
         }]))
-        setWorkoutHistory(hist)
-        save('wt_workout_history', hist)
+      : {}
+
+    const metrics = m.data?.length
+      ? m.data.map((r) => ({ date: r.date, weight: r.weight, waist: r.waist, notes: r.notes }))
+      : []
+
+    setDailyLogs(logs); save('wt_daily_logs', logs)
+    setWorkoutHistory(hist); save('wt_workout_history', hist)
+    setBodyMetrics(metrics); save('wt_body_metrics', metrics)
+  }
+
+  async function insertSession(userId, name, startDate) {
+    const { data, error } = await supabase
+      .from('sessions')
+      .insert({ user_id: userId, name, start_date: startDate })
+      .select()
+      .single()
+    if (error) throw error
+    return { id: data.id, name: data.name, startDate: data.start_date, createdAt: data.created_at }
+  }
+
+  async function loadAllData(userId) {
+    setSyncing(true)
+    try {
+      const { data: rawSessions } = await supabase
+        .from('sessions').select('*').eq('user_id', userId).order('created_at')
+
+      let resolvedSessions
+      let resolvedActiveId = load('wt_active_session_id', null)
+
+      if (rawSessions?.length) {
+        resolvedSessions = rawSessions.map((s) => ({
+          id: s.id, name: s.name, startDate: s.start_date, createdAt: s.created_at,
+        }))
+      } else {
+        // First login — migrate old flat data into a default session
+        const localStart = load('wt_start_date', today)
+        const defaultSession = await insertSession(userId, '90-Day Recomp', localStart)
+        resolvedSessions = [defaultSession]
+
+        // Tag any pre-sessions rows with this new session_id
+        await Promise.all([
+          supabase.from('daily_logs').update({ session_id: defaultSession.id }).eq('user_id', userId).is('session_id', null),
+          supabase.from('workout_history').update({ session_id: defaultSession.id }).eq('user_id', userId).is('session_id', null),
+          supabase.from('body_metrics').update({ session_id: defaultSession.id }).eq('user_id', userId).is('session_id', null),
+        ])
       }
 
-      if (m.data?.length) {
-        const metrics = m.data.map((r) => ({ date: r.date, weight: r.weight, waist: r.waist, notes: r.notes }))
-        setBodyMetrics(metrics)
-        save('wt_body_metrics', metrics)
+      setSessions(resolvedSessions); save('wt_sessions', resolvedSessions)
+
+      if (!resolvedActiveId || !resolvedSessions.find((s) => s.id === resolvedActiveId)) {
+        resolvedActiveId = resolvedSessions[0].id
       }
+      setActiveSessionId(resolvedActiveId); save('wt_active_session_id', resolvedActiveId)
+      sessionIdRef.current = resolvedActiveId
+
+      await fetchSessionData(userId, resolvedActiveId)
     } catch (e) {
       console.error('Supabase load failed, using local data', e)
     } finally {
@@ -112,38 +141,91 @@ export function StoreProvider({ children }) {
     }
   }
 
-  async function migrateLocalToSupabase(userId) {
-    const localLogs = load('wt_daily_logs', {})
-    const localWorkouts = load('wt_workout_history', {})
-    const localMetrics = load('wt_body_metrics', [])
+  // ── Session management ────────────────────────────────────────────────────
+  const createSession = useCallback(async (name, startDate) => {
+    let newSession
+    if (userRef.current) {
+      newSession = await insertSession(userRef.current.id, name, startDate)
+    } else {
+      newSession = { id: crypto.randomUUID(), name, startDate, createdAt: new Date().toISOString() }
+    }
+    setSessions((prev) => { const next = [...prev, newSession]; save('wt_sessions', next); return next })
+    // Switch to the new empty session
+    setActiveSessionId(newSession.id); save('wt_active_session_id', newSession.id)
+    sessionIdRef.current = newSession.id
+    setDailyLogs({}); save('wt_daily_logs', {})
+    setWorkoutHistory({}); save('wt_workout_history', {})
+    setBodyMetrics([]); save('wt_body_metrics', [])
+    return newSession
+  }, [])
 
-    const logRows = Object.entries(localLogs).map(([date, log]) => ({
-      user_id: userId, date, ...log,
-    }))
-    const workoutRows = Object.entries(localWorkouts).map(([date, w]) => ({
-      user_id: userId, date,
-      workout_id: w.workoutId, workout_name: w.workoutName,
-      duration_min: w.durationMin, exercises: w.exercises,
-    }))
-    const metricRows = localMetrics.map((m) => ({ user_id: userId, ...m }))
+  const switchSession = useCallback(async (sessionId) => {
+    setActiveSessionId(sessionId); save('wt_active_session_id', sessionId)
+    sessionIdRef.current = sessionId
+    if (userRef.current) {
+      setSyncing(true)
+      try { await fetchSessionData(userRef.current.id, sessionId) }
+      finally { setSyncing(false) }
+    }
+  }, [])
 
-    await Promise.all([
-      logRows.length && supabase.from('daily_logs').upsert(logRows, { onConflict: 'user_id,date' }),
-      workoutRows.length && supabase.from('workout_history').upsert(workoutRows, { onConflict: 'user_id,date' }),
-      metricRows.length && supabase.from('body_metrics').upsert(metricRows, { onConflict: 'user_id,date' }),
-    ].filter(Boolean))
-  }
+  const renameSession = useCallback(async (sessionId, newName) => {
+    setSessions((prev) => {
+      const next = prev.map((s) => s.id === sessionId ? { ...s, name: newName } : s)
+      save('wt_sessions', next); return next
+    })
+    if (userRef.current) {
+      await supabase.from('sessions').update({ name: newName }).eq('id', sessionId).eq('user_id', userRef.current.id)
+    }
+  }, [])
 
-  // Debounced sync for frequent updates (water taps, etc.)
+  const resetSessionProgress = useCallback(async (sessionId) => {
+    const newStart = format(new Date(), 'yyyy-MM-dd')
+    // Update start date
+    setSessions((prev) => {
+      const next = prev.map((s) => s.id === sessionId ? { ...s, startDate: newStart } : s)
+      save('wt_sessions', next); return next
+    })
+    // Clear data in memory if this is the active session
+    if (sessionIdRef.current === sessionId) {
+      setDailyLogs({}); save('wt_daily_logs', {})
+      setWorkoutHistory({}); save('wt_workout_history', {})
+      setBodyMetrics([]); save('wt_body_metrics', [])
+    }
+    if (userRef.current) {
+      await Promise.all([
+        supabase.from('sessions').update({ start_date: newStart }).eq('id', sessionId).eq('user_id', userRef.current.id),
+        supabase.from('daily_logs').delete().eq('session_id', sessionId).eq('user_id', userRef.current.id),
+        supabase.from('workout_history').delete().eq('session_id', sessionId).eq('user_id', userRef.current.id),
+        supabase.from('body_metrics').delete().eq('session_id', sessionId).eq('user_id', userRef.current.id),
+      ])
+    }
+  }, [])
+
+  const deleteSession = useCallback(async (sessionId, remainingSessions) => {
+    const next = remainingSessions.filter((s) => s.id !== sessionId)
+    setSessions(next); save('wt_sessions', next)
+    if (userRef.current) {
+      await supabase.from('sessions').delete().eq('id', sessionId).eq('user_id', userRef.current.id)
+    }
+    // If we deleted the active one, switch to first remaining
+    if (sessionIdRef.current === sessionId && next.length > 0) {
+      setActiveSessionId(next[0].id); save('wt_active_session_id', next[0].id)
+      sessionIdRef.current = next[0].id
+      if (userRef.current) await fetchSessionData(userRef.current.id, next[0].id)
+    }
+  }, [])
+
+  // ── Daily data sync ───────────────────────────────────────────────────────
   function scheduledLogSync(date, log) {
-    if (!userRef.current) return
+    if (!userRef.current || !sessionIdRef.current) return
     if (logSyncTimer.current) clearTimeout(logSyncTimer.current)
     logSyncTimer.current = setTimeout(() => {
       supabase.from('daily_logs').upsert({
-        user_id: userRef.current.id, date,
+        user_id: userRef.current.id, session_id: sessionIdRef.current, date,
         water: log.water, steps: log.steps, protein: log.protein,
         calories: log.calories, sleep: log.sleep, supplements: log.supplements,
-      }, { onConflict: 'user_id,date' })
+      }, { onConflict: 'user_id,session_id,date' })
     }, 800)
   }
 
@@ -173,18 +255,14 @@ export function StoreProvider({ children }) {
   const saveWorkout = useCallback((dateStr, workoutData) => {
     setWorkoutHistory((prev) => {
       const next = { ...prev, [dateStr]: workoutData }
-      save('wt_workout_history', next)
-      return next
+      save('wt_workout_history', next); return next
     })
-    if (userRef.current) {
+    if (userRef.current && sessionIdRef.current) {
       supabase.from('workout_history').upsert({
-        user_id: userRef.current.id,
-        date: dateStr,
-        workout_id: workoutData.workoutId,
-        workout_name: workoutData.workoutName,
-        duration_min: workoutData.durationMin,
-        exercises: workoutData.exercises,
-      }, { onConflict: 'user_id,date' })
+        user_id: userRef.current.id, session_id: sessionIdRef.current, date: dateStr,
+        workout_id: workoutData.workoutId, workout_name: workoutData.workoutName,
+        duration_min: workoutData.durationMin, exercises: workoutData.exercises,
+      }, { onConflict: 'user_id,session_id,date' })
     }
   }, [])
 
@@ -192,17 +270,13 @@ export function StoreProvider({ children }) {
     setBodyMetrics((prev) => {
       const filtered = prev.filter((m) => m.date !== metric.date)
       const next = [...filtered, metric].sort((a, b) => a.date.localeCompare(b.date))
-      save('wt_body_metrics', next)
-      return next
+      save('wt_body_metrics', next); return next
     })
-    if (userRef.current) {
+    if (userRef.current && sessionIdRef.current) {
       supabase.from('body_metrics').upsert({
-        user_id: userRef.current.id,
-        date: metric.date,
-        weight: metric.weight,
-        waist: metric.waist,
-        notes: metric.notes,
-      }, { onConflict: 'user_id,date' })
+        user_id: userRef.current.id, session_id: sessionIdRef.current,
+        date: metric.date, weight: metric.weight, waist: metric.waist, notes: metric.notes,
+      }, { onConflict: 'user_id,session_id,date' })
     }
   }, [])
 
@@ -217,9 +291,11 @@ export function StoreProvider({ children }) {
     <StoreContext.Provider value={{
       user, authLoading, syncing,
       today, startDate, dayNumber,
+      sessions, activeSession, activeSessionId,
       todayLog, dailyLogs, workoutHistory, bodyMetrics,
       activeWorkout, setActiveWorkout,
       updateTodayLog, toggleSupplement, saveWorkout, addBodyMetric,
+      createSession, switchSession, renameSession, resetSessionProgress, deleteSession,
     }}>
       {children}
     </StoreContext.Provider>
