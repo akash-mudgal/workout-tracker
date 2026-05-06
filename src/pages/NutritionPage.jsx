@@ -48,10 +48,10 @@ export default function NutritionPage() {
     updateTodayLog({ protein: totalProtein, calories: totalCal })
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Always derive displayed totals from meals state, not from todayLog,
-  // so the UI is immediately consistent after adding/removing food.
-  const protein = Math.round(Object.values(meals).flat().reduce((s, f) => s + f.protein, 0))
-  const calories = Math.round(Object.values(meals).flat().reduce((s, f) => s + f.cal, 0))
+  // Display from store so Home page and Nutrition page always agree.
+  // syncTotals keeps the store up-to-date whenever meals change.
+  const protein = todayLog.protein
+  const calories = todayLog.calories || 0
 
   function syncTotals(nextMeals) {
     const allFoods = Object.values(nextMeals).flat()
