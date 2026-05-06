@@ -59,6 +59,17 @@ export function StoreProvider({ children }) {
     loadAllData(user.id)
   }, [user?.id])
 
+  // Re-sync when the tab becomes visible (other-device edits show up without manual refresh)
+  useEffect(() => {
+    function onVisible() {
+      if (document.visibilityState === 'visible' && userRef.current && sessionIdRef.current) {
+        fetchSessionData(userRef.current.id, sessionIdRef.current)
+      }
+    }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => document.removeEventListener('visibilitychange', onVisible)
+  }, [])
+
   // ── Data loading ──────────────────────────────────────────────────────────
   async function fetchSessionData(userId, sessionId) {
     const [l, w, m] = await Promise.all([
