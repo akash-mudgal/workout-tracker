@@ -1,7 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { format } from 'date-fns'
 import { useStore } from '../store.jsx'
 
 const CALORIE_GOAL = 2100
+const TODAY = format(new Date(), 'yyyy-MM-dd')
+const MEALS_KEY = `wt_meals_${TODAY}`
 
 const QUICK_FOODS = [
   { name: 'Soya Chunks (100g)', protein: 52, cal: 345 },
@@ -23,7 +26,7 @@ const MEAL_SLOTS = ['Breakfast', 'Lunch', 'Snack', 'Dinner', 'Before Bed']
 export default function NutritionPage() {
   const { todayLog, updateTodayLog, proteinGoal } = useStore()
   const [meals, setMeals] = useState(() => {
-    const stored = localStorage.getItem('wt_meals_today')
+    const stored = localStorage.getItem(MEALS_KEY)
     if (stored) {
       try { return JSON.parse(stored) } catch { /* noop */ }
     }
@@ -34,28 +37,42 @@ export default function NutritionPage() {
   const [customCal, setCustomCal] = useState('')
   const [customName, setCustomName] = useState('')
 
-  const protein = todayLog.protein
-  const calories = todayLog.calories || 0
+  // On mount: if localStorage has meals for today, reconcile totals into the store.
+  // This fixes the case where the DB sync failed last time — the local meal list is
+  // the source of truth, so we recompute protein/calories from it.
+  useEffect(() => {
+    const allFoods = Object.values(meals).flat()
+    if (allFoods.length === 0) return
+    const totalProtein = Math.round(allFoods.reduce((s, f) => s + f.protein, 0))
+    const totalCal = Math.round(allFoods.reduce((s, f) => s + f.cal, 0))
+    updateTodayLog({ protein: totalProtein, calories: totalCal })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Always derive displayed totals from meals state, not from todayLog,
+  // so the UI is immediately consistent after adding/removing food.
+  const protein = Math.round(Object.values(meals).flat().reduce((s, f) => s + f.protein, 0))
+  const calories = Math.round(Object.values(meals).flat().reduce((s, f) => s + f.cal, 0))
+
+  function syncTotals(nextMeals) {
+    const allFoods = Object.values(nextMeals).flat()
+    updateTodayLog({
+      protein: Math.round(allFoods.reduce((s, f) => s + f.protein, 0)),
+      calories: Math.round(allFoods.reduce((s, f) => s + f.cal, 0)),
+    })
+  }
 
   function addFood(mealSlot, food) {
     const next = { ...meals, [mealSlot]: [...(meals[mealSlot] || []), food] }
     setMeals(next)
-    localStorage.setItem('wt_meals_today', JSON.stringify(next))
-    updateTodayLog({
-      protein: Math.round(protein + food.protein),
-      calories: Math.round(calories + food.cal),
-    })
+    localStorage.setItem(MEALS_KEY, JSON.stringify(next))
+    syncTotals(next)
   }
 
   function removeFood(mealSlot, idx) {
-    const food = meals[mealSlot][idx]
     const next = { ...meals, [mealSlot]: meals[mealSlot].filter((_, i) => i !== idx) }
     setMeals(next)
-    localStorage.setItem('wt_meals_today', JSON.stringify(next))
-    updateTodayLog({
-      protein: Math.max(0, Math.round(protein - food.protein)),
-      calories: Math.max(0, Math.round(calories - food.cal)),
-    })
+    localStorage.setItem(MEALS_KEY, JSON.stringify(next))
+    syncTotals(next)
   }
 
   function addCustom(mealSlot) {

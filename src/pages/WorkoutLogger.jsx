@@ -110,9 +110,9 @@ export default function WorkoutLogger() {
       <div className="text-xs text-zinc-400 px-1">{plan.name} · {plan.daysPerWeek} days/week</div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        {getWorkoutDays(planId).map((w) => (
+        {getWorkoutDays(planId).map((w, i) => (
           <button
-            key={w.id}
+            key={`${w.id}-${i}`}
             onClick={() => setSelectedId(w.id)}
             className={`w-full card flex items-center justify-between transition-all ${
               selectedId === w.id

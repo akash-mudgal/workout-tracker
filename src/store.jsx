@@ -238,12 +238,13 @@ export function StoreProvider({ children }) {
   function scheduledLogSync(date, log) {
     if (!userRef.current || !sessionIdRef.current) return
     if (logSyncTimer.current) clearTimeout(logSyncTimer.current)
-    logSyncTimer.current = setTimeout(() => {
-      supabase.from('daily_logs').upsert({
+    logSyncTimer.current = setTimeout(async () => {
+      const { error } = await supabase.from('daily_logs').upsert({
         user_id: userRef.current.id, session_id: sessionIdRef.current, date,
         water: log.water, steps: log.steps, protein: log.protein,
         calories: log.calories, sleep: log.sleep, supplements: log.supplements,
       }, { onConflict: 'user_id,session_id,date' })
+      if (error) console.error('[kinetiq] daily_log sync failed:', error.message, error)
     }, 800)
   }
 
@@ -270,31 +271,33 @@ export function StoreProvider({ children }) {
     })
   }, [today])
 
-  const saveWorkout = useCallback((dateStr, workoutData) => {
+  const saveWorkout = useCallback(async (dateStr, workoutData) => {
     setWorkoutHistory((prev) => {
       const next = { ...prev, [dateStr]: workoutData }
       save('wt_workout_history', next); return next
     })
     if (userRef.current && sessionIdRef.current) {
-      supabase.from('workout_history').upsert({
+      const { error } = await supabase.from('workout_history').upsert({
         user_id: userRef.current.id, session_id: sessionIdRef.current, date: dateStr,
         workout_id: workoutData.workoutId, workout_name: workoutData.workoutName,
         duration_min: workoutData.durationMin, exercises: workoutData.exercises,
       }, { onConflict: 'user_id,session_id,date' })
+      if (error) console.error('[kinetiq] workout save failed:', error.message, error)
     }
   }, [])
 
-  const addBodyMetric = useCallback((metric) => {
+  const addBodyMetric = useCallback(async (metric) => {
     setBodyMetrics((prev) => {
       const filtered = prev.filter((m) => m.date !== metric.date)
       const next = [...filtered, metric].sort((a, b) => a.date.localeCompare(b.date))
       save('wt_body_metrics', next); return next
     })
     if (userRef.current && sessionIdRef.current) {
-      supabase.from('body_metrics').upsert({
+      const { error } = await supabase.from('body_metrics').upsert({
         user_id: userRef.current.id, session_id: sessionIdRef.current,
         date: metric.date, weight: metric.weight, waist: metric.waist, notes: metric.notes,
       }, { onConflict: 'user_id,session_id,date' })
+      if (error) console.error('[kinetiq] body metric save failed:', error.message, error)
     }
   }, [])
 

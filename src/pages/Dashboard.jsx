@@ -207,7 +207,7 @@ function WorkoutHeroCard({ recommended, todayDone, onClick }) {
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
             <div className={`w-1.5 h-1.5 rounded-full ${recommended.colorClasses.dot}`} />
-            <span className="text-[10px] font-semibold text-zinc-500 tracking-widest uppercase">Today's Workout</span>
+            <span className="text-[10px] font-semibold text-zinc-500 tracking-widest uppercase">{todayDone ? "Next Workout" : "Today's Workout"}</span>
           </div>
           <h2 className={`text-2xl font-bold ${recommended.colorClasses.text}`}>{recommended.name}</h2>
           <p className="text-sm text-zinc-400 mt-0.5">{recommended.subtitle}</p>
