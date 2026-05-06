@@ -383,7 +383,7 @@ export function StoreProvider({ children }) {
   }, [])
 
   const proteinGoal = userProfile.weightKg > 0
-    ? Math.round((userProfile.weightKg * 2.0) / 5) * 5
+    ? Math.round((userProfile.weightKg * 1.6) / 5) * 5
     : 130
 
   const totalDays = activeSession?.totalDays ?? 90
