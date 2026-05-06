@@ -20,7 +20,10 @@
       "Bash(taskkill *)",
       "PowerShell(Stop-Process *)",
       "Bash(npm install *)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(timeout 4)",
+      "Bash(Start-Sleep -Seconds 4)",
+      "Bash(Get-Content \"C:\\\\Users\\\\AKASHM~1\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\D--workout-tracker\\\\b1a07f84-e0b4-424b-9f7f-b6043d8b6c3f\\\\tasks\\\\br5mzh1n9.output\")"
     ]
   }
 }
