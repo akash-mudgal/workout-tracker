@@ -170,9 +170,6 @@ function StatCard({ label, value, goal, unit, color, min, max, step, onChange })
             min={min} max={max} step={step}
             value={value}
             onChange={(e) => onChange(+e.target.value)}
-            style={{
-              background: `linear-gradient(to right, ${c.track} ${pct}%, rgba(255,255,255,0.08) ${pct}%)`,
-            }}
           />
           <div className="flex justify-between text-[10px] text-zinc-500 mt-1.5">
             <span>{min}</span>
