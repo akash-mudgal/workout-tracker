@@ -59,15 +59,28 @@ export function StoreProvider({ children }) {
     loadAllData(user.id)
   }, [user?.id])
 
-  // Re-sync when the tab becomes visible (other-device edits show up without manual refresh)
+  // Keep a ref to fetchSessionData so the visibility effect always calls the latest version
+  const fetchSessionDataRef = useRef(fetchSessionData)
+  useEffect(() => { fetchSessionDataRef.current = fetchSessionData })
+
+  // Re-sync when the tab becomes visible or window regains focus
   useEffect(() => {
     function onVisible() {
       if (document.visibilityState === 'visible' && userRef.current && sessionIdRef.current) {
-        fetchSessionData(userRef.current.id, sessionIdRef.current)
+        fetchSessionDataRef.current(userRef.current.id, sessionIdRef.current)
+      }
+    }
+    function onFocus() {
+      if (userRef.current && sessionIdRef.current) {
+        fetchSessionDataRef.current(userRef.current.id, sessionIdRef.current)
       }
     }
     document.addEventListener('visibilitychange', onVisible)
-    return () => document.removeEventListener('visibilitychange', onVisible)
+    window.addEventListener('focus', onFocus)
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible)
+      window.removeEventListener('focus', onFocus)
+    }
   }, [])
 
   // ── Data loading ──────────────────────────────────────────────────────────
