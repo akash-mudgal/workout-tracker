@@ -63,6 +63,58 @@ export function StoreProvider({ children }) {
   const fetchSessionDataRef = useRef(fetchSessionData)
   useEffect(() => { fetchSessionDataRef.current = fetchSessionData })
 
+  // ── Realtime subscriptions ────────────────────────────────────────────────
+  useEffect(() => {
+    if (!user || !activeSessionId) return
+
+    const channel = supabase
+      .channel(`session-${activeSessionId}`)
+      .on('postgres_changes', {
+        event: '*', schema: 'public', table: 'daily_logs',
+        filter: `user_id=eq.${user.id}`,
+      }, ({ new: r }) => {
+        if (r.session_id !== activeSessionId) return
+        setDailyLogs((prev) => {
+          const next = { ...prev, [r.date]: {
+            water: r.water, steps: r.steps, protein: r.protein,
+            calories: r.calories, sleep: r.sleep, supplements: r.supplements,
+          }}
+          save('wt_daily_logs', next)
+          return next
+        })
+      })
+      .on('postgres_changes', {
+        event: '*', schema: 'public', table: 'workout_history',
+        filter: `user_id=eq.${user.id}`,
+      }, ({ new: r }) => {
+        if (r.session_id !== activeSessionId) return
+        setWorkoutHistory((prev) => {
+          const next = { ...prev, [r.date]: {
+            date: r.date, workoutId: r.workout_id, workoutName: r.workout_name,
+            durationMin: r.duration_min, exercises: r.exercises,
+          }}
+          save('wt_workout_history', next)
+          return next
+        })
+      })
+      .on('postgres_changes', {
+        event: '*', schema: 'public', table: 'body_metrics',
+        filter: `user_id=eq.${user.id}`,
+      }, ({ new: r }) => {
+        if (r.session_id !== activeSessionId) return
+        setBodyMetrics((prev) => {
+          const filtered = prev.filter((m) => m.date !== r.date)
+          const next = [...filtered, { date: r.date, weight: r.weight, waist: r.waist, notes: r.notes }]
+            .sort((a, b) => a.date.localeCompare(b.date))
+          save('wt_body_metrics', next)
+          return next
+        })
+      })
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
+  }, [user?.id, activeSessionId])
+
   // Re-sync when the tab becomes visible or window regains focus
   useEffect(() => {
     function onVisible() {
