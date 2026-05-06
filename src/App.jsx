@@ -1,5 +1,6 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { StoreProvider, useStore } from './store.jsx'
+import { useEffect } from 'react'
 import { supabase } from './lib/supabase'
 import AuthGate from './components/AuthGate'
 import OnboardingFlow from './components/OnboardingFlow'
@@ -20,7 +21,12 @@ export default function App() {
 }
 
 function AppInner() {
-  const { user, authLoading, syncing, needsOnboarding } = useStore()
+  const { user, authLoading, syncing, needsOnboarding, refetchSessionData } = useStore()
+  const location = useLocation()
+
+  useEffect(() => {
+    if (user) refetchSessionData()
+  }, [location.pathname])
 
   return (
     <AuthGate user={user} loading={authLoading}>

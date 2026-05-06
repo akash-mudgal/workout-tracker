@@ -352,6 +352,9 @@ export function StoreProvider({ children }) {
       activeWorkout, setActiveWorkout,
       updateTodayLog, toggleSupplement, saveWorkout, addBodyMetric,
       createSession, switchSession, updateSession, resetSessionProgress, deleteSession,
+      refetchSessionData: () => {
+        if (userRef.current && sessionIdRef.current) fetchSessionDataRef.current(userRef.current.id, sessionIdRef.current)
+      },
     }}>
       {children}
     </StoreContext.Provider>
