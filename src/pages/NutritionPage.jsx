@@ -37,42 +37,33 @@ export default function NutritionPage() {
   const [customCal, setCustomCal] = useState('')
   const [customName, setCustomName] = useState('')
 
-  // On mount: if localStorage has meals for today, reconcile totals into the store.
-  // This fixes the case where the DB sync failed last time — the local meal list is
-  // the source of truth, so we recompute protein/calories from it.
+  // Sync totals to store whenever meals change (covers mount + every add/remove).
+  // Uses meals as the single source of truth for protein and calories.
   useEffect(() => {
     const allFoods = Object.values(meals).flat()
-    if (allFoods.length === 0) return
-    const totalProtein = Math.round(allFoods.reduce((s, f) => s + f.protein, 0))
-    const totalCal = Math.round(allFoods.reduce((s, f) => s + f.cal, 0))
-    updateTodayLog({ protein: totalProtein, calories: totalCal })
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Display from store so Home page and Nutrition page always agree.
-  // syncTotals keeps the store up-to-date whenever meals change.
-  const protein = todayLog.protein
-  const calories = todayLog.calories || 0
-
-  function syncTotals(nextMeals) {
-    const allFoods = Object.values(nextMeals).flat()
     updateTodayLog({
       protein: Math.round(allFoods.reduce((s, f) => s + f.protein, 0)),
       calories: Math.round(allFoods.reduce((s, f) => s + f.cal, 0)),
     })
-  }
+  }, [meals]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const protein = todayLog.protein
+  const calories = todayLog.calories || 0
 
   function addFood(mealSlot, food) {
-    const next = { ...meals, [mealSlot]: [...(meals[mealSlot] || []), food] }
-    setMeals(next)
-    localStorage.setItem(MEALS_KEY, JSON.stringify(next))
-    syncTotals(next)
+    setMeals((prev) => {
+      const next = { ...prev, [mealSlot]: [...(prev[mealSlot] || []), food] }
+      localStorage.setItem(MEALS_KEY, JSON.stringify(next))
+      return next
+    })
   }
 
   function removeFood(mealSlot, idx) {
-    const next = { ...meals, [mealSlot]: meals[mealSlot].filter((_, i) => i !== idx) }
-    setMeals(next)
-    localStorage.setItem(MEALS_KEY, JSON.stringify(next))
-    syncTotals(next)
+    setMeals((prev) => {
+      const next = { ...prev, [mealSlot]: prev[mealSlot].filter((_, i) => i !== idx) }
+      localStorage.setItem(MEALS_KEY, JSON.stringify(next))
+      return next
+    })
   }
 
   function addCustom(mealSlot) {
