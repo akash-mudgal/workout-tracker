@@ -9,7 +9,18 @@
       "PowerShell(npm_config_yes=true npx *)",
       "PowerShell(cd D:\\\\workout-tracker; Start-Process powershell -ArgumentList '-NoExit', '-Command', \"cd D:\\\\workout-tracker; & 'C:\\\\Program Files\\\\nodejs\\\\npm.cmd' run dev\" -WindowStyle Normal)",
       "PowerShell(Start-Sleep -Seconds 4; Invoke-WebRequest -Uri \"http://localhost:5173\" -UseBasicParsing -TimeoutSec 5 2>&1 | Select-Object -ExpandProperty StatusCode)",
-      "PowerShell(Start-Process \"http://localhost:5173\")"
+      "PowerShell(Start-Process \"http://localhost:5173\")",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "PowerShell(cd D:\\\\workout-tracker; Start-Process powershell -ArgumentList '-NoExit', '-Command', \"cd D:\\\\workout-tracker; & 'C:\\\\Program Files\\\\nodejs\\\\npm.cmd' run dev\" -WindowStyle Normal; Start-Sleep -Seconds 4; Start-Process \"http://localhost:5173\")",
+      "PowerShell(Invoke-WebRequest -Uri \"http://localhost:5173\" -UseBasicParsing -TimeoutSec 3 2>&1 | Select-Object StatusCode; Invoke-WebRequest -Uri \"http://localhost:5174\" -UseBasicParsing -TimeoutSec 3 2>&1 | Select-Object StatusCode)",
+      "Bash(node --input-type=module)",
+      "Bash(\"C:\\\\Program Files\\\\nodejs\\\\npm.cmd\" run dev)",
+      "Bash(taskkill *)",
+      "PowerShell(Stop-Process *)",
+      "Bash(npm install *)",
+      "Bash(npm run *)"
     ]
   }
 }

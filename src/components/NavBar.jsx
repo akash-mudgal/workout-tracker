@@ -66,7 +66,7 @@ export default function NavBar() {
       </aside>
 
       {/* ── Mobile bottom pill ──────────────────────────── */}
-      <nav className="md:hidden fixed bottom-4 left-0 right-0 px-4 z-50">
+      <nav className="md:hidden fixed bottom-4 left-0 right-0 px-4 z-50" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
         <div
           className="w-full max-w-lg mx-auto flex items-center rounded-2xl px-2 py-1.5"
           style={{

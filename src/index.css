@@ -11,9 +11,13 @@
     background-attachment: fixed;
     color: white;
     min-height: 100vh;
+    min-height: 100dvh;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Respect iOS safe areas */
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
   }
 
   ::-webkit-scrollbar { width: 3px; }
