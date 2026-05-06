@@ -35,9 +35,12 @@ export function StoreProvider({ children }) {
   const userRef = useRef(null)
   const sessionIdRef = useRef(activeSessionId)
   const logSyncTimer = useRef(null)
+  const latestLogRef = useRef(DEFAULT_LOG)
+  const latestMealsRef = useRef(load(`wt_meals_${format(new Date(), 'yyyy-MM-dd')}`, {}))
 
   useEffect(() => { userRef.current = user }, [user])
   useEffect(() => { sessionIdRef.current = activeSessionId }, [activeSessionId])
+  useEffect(() => { latestLogRef.current = dailyLogs[today] || DEFAULT_LOG }, [dailyLogs, today])
 
   const activeSession = sessions.find((s) => s.id === activeSessionId) ?? sessions[0] ?? null
   const startDate = activeSession?.startDate ?? today
@@ -74,6 +77,10 @@ export function StoreProvider({ children }) {
         filter: `user_id=eq.${user.id}`,
       }, ({ new: r }) => {
         if (r.session_id !== activeSessionId) return
+        if (r.meals && Object.keys(r.meals).length > 0) {
+          save(`wt_meals_${r.date}`, r.meals)
+          if (r.date === today) latestMealsRef.current = r.meals
+        }
         setDailyLogs((prev) => {
           const next = { ...prev, [r.date]: {
             water: r.water, steps: r.steps, protein: r.protein,
@@ -144,10 +151,16 @@ export function StoreProvider({ children }) {
     ])
 
     const logs = l.data?.length
-      ? Object.fromEntries(l.data.map((r) => [r.date, {
-          water: r.water, steps: r.steps, protein: r.protein,
-          calories: r.calories, sleep: r.sleep, supplements: r.supplements,
-        }]))
+      ? Object.fromEntries(l.data.map((r) => {
+          if (r.meals && Object.keys(r.meals).length > 0) {
+            save(`wt_meals_${r.date}`, r.meals)
+            if (r.date === today) latestMealsRef.current = r.meals
+          }
+          return [r.date, {
+            water: r.water, steps: r.steps, protein: r.protein,
+            calories: r.calories, sleep: r.sleep, supplements: r.supplements,
+          }]
+        }))
       : {}
 
     const hist = w.data?.length
@@ -179,6 +192,15 @@ export function StoreProvider({ children }) {
   async function loadAllData(userId) {
     setSyncing(true)
     try {
+      // Load user profile from DB
+      const { data: profileData } = await supabase
+        .from('user_profiles').select('*').eq('user_id', userId).single()
+      if (profileData) {
+        const profile = { weightKg: profileData.weight_kg, heightCm: profileData.height_cm }
+        setUserProfile(profile)
+        save('wt_user_profile', profile)
+      }
+
       const { data: rawSessions } = await supabase
         .from('sessions').select('*').eq('user_id', userId).order('created_at')
 
@@ -319,10 +341,17 @@ export function StoreProvider({ children }) {
         user_id: userRef.current.id, session_id: sessionIdRef.current, date,
         water: log.water, steps: log.steps, protein: log.protein,
         calories: log.calories, sleep: log.sleep, supplements: log.supplements,
+        meals: latestMealsRef.current,
       }, { onConflict: 'user_id,session_id,date' })
       if (error) console.error('[kinetiq] daily_log sync failed:', error.message, error)
     }, 800)
   }
+
+  const updateTodayMeals = useCallback((meals) => {
+    latestMealsRef.current = meals
+    save(`wt_meals_${today}`, meals)
+    scheduledLogSync(today, latestLogRef.current)
+  }, [today])
 
   const todayLog = dailyLogs[today] || DEFAULT_LOG
 
@@ -377,9 +406,18 @@ export function StoreProvider({ children }) {
     }
   }, [])
 
-  const updateUserProfile = useCallback((profile) => {
+  const updateUserProfile = useCallback(async (profile) => {
     setUserProfile(profile)
     save('wt_user_profile', profile)
+    if (userRef.current) {
+      const { error } = await supabase.from('user_profiles').upsert({
+        user_id: userRef.current.id,
+        weight_kg: profile.weightKg,
+        height_cm: profile.heightCm,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'user_id' })
+      if (error) console.error('[kinetiq] profile sync failed:', error.message, error)
+    }
   }, [])
 
   const proteinGoal = userProfile.weightKg > 0
@@ -402,7 +440,7 @@ export function StoreProvider({ children }) {
       sessions, activeSession, activeSessionId,
       todayLog, dailyLogs, workoutHistory, bodyMetrics,
       activeWorkout, setActiveWorkout,
-      updateTodayLog, toggleSupplement, saveWorkout, addBodyMetric,
+      updateTodayLog, updateTodayMeals, toggleSupplement, saveWorkout, addBodyMetric,
       createSession, switchSession, updateSession, resetSessionProgress, deleteSession,
       refetchSessionData: () => {
         if (userRef.current && sessionIdRef.current) fetchSessionDataRef.current(userRef.current.id, sessionIdRef.current)

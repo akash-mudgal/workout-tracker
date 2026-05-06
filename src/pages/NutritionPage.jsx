@@ -24,7 +24,7 @@ const QUICK_FOODS = [
 const MEAL_SLOTS = ['Breakfast', 'Lunch', 'Snack', 'Dinner', 'Before Bed']
 
 export default function NutritionPage() {
-  const { todayLog, updateTodayLog, proteinGoal } = useStore()
+  const { todayLog, updateTodayLog, updateTodayMeals, proteinGoal } = useStore()
   const [meals, setMeals] = useState(() => {
     const stored = localStorage.getItem(MEALS_KEY)
     if (stored) {
@@ -53,7 +53,7 @@ export default function NutritionPage() {
   function addFood(mealSlot, food) {
     setMeals((prev) => {
       const next = { ...prev, [mealSlot]: [...(prev[mealSlot] || []), food] }
-      localStorage.setItem(MEALS_KEY, JSON.stringify(next))
+      updateTodayMeals(next)
       return next
     })
   }
@@ -61,7 +61,7 @@ export default function NutritionPage() {
   function removeFood(mealSlot, idx) {
     setMeals((prev) => {
       const next = { ...prev, [mealSlot]: prev[mealSlot].filter((_, i) => i !== idx) }
-      localStorage.setItem(MEALS_KEY, JSON.stringify(next))
+      updateTodayMeals(next)
       return next
     })
   }
