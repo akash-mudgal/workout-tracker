@@ -247,6 +247,10 @@ const BWS_DAYS = {
         name: 'Dumbbell Overhead Tricep Extension', sets: 4, repRange: '10–15', rpe: 9, restSec: 90,
         tip: 'Best single tricep exercise — stretches and loads the long head (the bulk of arm size). Keep upper arms close to your head. Full stretch at the bottom is the key stimulus.',
       },
+      {
+        name: 'Preacher Curl', sets: 3, repRange: '10–15', rpe: 9, restSec: 75,
+        tip: 'The bench locks the upper arm and eliminates cheating. Do not curl all the way to the top — stop just before vertical to keep tension on the bicep. The stretched position at the bottom is the key stimulus.',
+      },
     ],
   },
   bws_lower1: {
@@ -296,6 +300,10 @@ const BWS_DAYS = {
       {
         name: 'Prone Arm Circles', sets: 3, repRange: '10–12', rpe: 7, restSec: 60,
         tip: 'Lie face-down, arms out to the sides. Make slow controlled circles. Strengthens the rotator cuff and rear delts — important for shoulder health and posture when pressing heavy.',
+      },
+      {
+        name: 'Incline Dumbbell Curl', sets: 3, repRange: '10–15', rpe: 9, restSec: 75,
+        tip: 'Set bench to 45–60 degrees and let arms hang straight behind you. This pre-stretches the long head of the bicep before the rep starts — one of the highest-stimulus curl variations. Do not let elbows drift forward.',
       },
     ],
   },
