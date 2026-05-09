@@ -390,13 +390,18 @@ export function getWorkoutById(planId, dayId) {
   return getPlan(planId).days[dayId]
 }
 
-export function getRecommendedWorkout(planId, workoutHistory) {
+export function getRecommendedWorkout(planId, workoutHistory, today = new Date().toISOString().slice(0, 10)) {
   const plan = getPlan(planId)
   const sorted = Object.keys(workoutHistory).sort()
   if (!sorted.length) return plan.days[plan.cycle[0]]
-  const lastId = workoutHistory[sorted[sorted.length - 1]].workoutId
+
+  const lastDate = sorted[sorted.length - 1]
+  const lastId = workoutHistory[lastDate].workoutId
   const lastIdx = plan.cycle.indexOf(lastId)
-  const nextIdx = lastIdx === -1 ? 0 : (lastIdx + 1) % plan.cycle.length
+  if (lastIdx === -1) return plan.days[plan.cycle[0]]
+
+  const daysSince = Math.floor((new Date(today) - new Date(lastDate)) / 86400000)
+  const nextIdx = (lastIdx + Math.max(daysSince, 1)) % plan.cycle.length
   return plan.days[plan.cycle[nextIdx]]
 }
 
