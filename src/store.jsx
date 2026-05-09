@@ -70,6 +70,23 @@ export function StoreProvider({ children }) {
   useEffect(() => {
     if (!user || !activeSessionId) return
 
+    const lastSyncedRef = { current: Date.now() }
+    const hasConnectedRef = { current: false }
+
+    function doRefetch() {
+      if (userRef.current && sessionIdRef.current) {
+        fetchSessionDataRef.current(userRef.current.id, sessionIdRef.current)
+          .then(() => { lastSyncedRef.current = Date.now() })
+      }
+    }
+
+    function handleStatus(status) {
+      if (status === 'SUBSCRIBED') {
+        if (hasConnectedRef.current) doRefetch() // reconnect — catch missed events
+        hasConnectedRef.current = true
+      }
+    }
+
     const channel = supabase
       .channel(`session-${activeSessionId}`)
       .on('postgres_changes', {
@@ -117,9 +134,19 @@ export function StoreProvider({ children }) {
           return next
         })
       })
-      .subscribe()
+      .subscribe(handleStatus)
 
-    return () => { supabase.removeChannel(channel) }
+    // 15-minute polling fallback — skipped if a sync already ran in the last 14 minutes
+    const POLL_MS = 15 * 60 * 1000
+    const SKIP_MS = 14 * 60 * 1000
+    const timer = setInterval(() => {
+      if (Date.now() - lastSyncedRef.current > SKIP_MS) doRefetch()
+    }, POLL_MS)
+
+    return () => {
+      supabase.removeChannel(channel)
+      clearInterval(timer)
+    }
   }, [user?.id, activeSessionId])
 
   // Re-sync when the tab becomes visible or window regains focus
