@@ -8,7 +8,7 @@ const STEPS_GOAL = 9000
 const SLEEP_GOAL = 7.5
 
 export default function Dashboard() {
-  const { today, dayNumber, totalDays, todayLog, workoutHistory, updateTodayLog, toggleSupplement, activeSession, proteinGoal } = useStore()
+  const { today, dayNumber, totalDays, todayLog, workoutHistory, updateTodayLog, toggleSupplement, activeSession, proteinGoal, userProfile } = useStore()
   const navigate = useNavigate()
   const recommended = getRecommendedWorkout(activeSession?.planId ?? 'ppl', workoutHistory)
   const todayDone = workoutHistory[today]
@@ -36,7 +36,7 @@ export default function Dashboard() {
           <p className="text-xs font-medium text-zinc-500 tracking-widest uppercase">
             {format(new Date(today + 'T00:00:00'), 'EEE, MMM d')}
           </p>
-          <h1 className="text-2xl font-bold mt-0.5 text-white">Hey, Akash</h1>
+          <h1 className="text-2xl font-bold mt-0.5 text-white">Hey{userProfile.name ? `, ${userProfile.name}` : ''}</h1>
           {activeSession && (
             <Link to="/sessions" className="text-xs text-violet-400/60 hover:text-violet-400 transition-colors mt-0.5 inline-block">
               {activeSession.name} ›

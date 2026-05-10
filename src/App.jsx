@@ -11,6 +11,7 @@ import Progress from './pages/Progress'
 import NutritionPage from './pages/NutritionPage'
 import BodyMetrics from './pages/BodyMetrics'
 import SessionsPage from './pages/SessionsPage'
+import ProfilePage from './pages/ProfilePage'
 
 export default function App() {
   return (
@@ -61,6 +62,7 @@ function AppInner() {
                   <Route path="/nutrition" element={<NutritionPage />} />
                   <Route path="/metrics" element={<BodyMetrics />} />
                   <Route path="/sessions" element={<SessionsPage />} />
+                  <Route path="/profile" element={<ProfilePage />} />
                   <Route path="*" element={<Navigate to="/" />} />
                 </Routes>
               </div>

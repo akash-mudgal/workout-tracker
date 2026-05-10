@@ -29,7 +29,7 @@ export function StoreProvider({ children }) {
   const [bodyMetrics, setBodyMetrics] = useState(() => load('wt_body_metrics', []))
   const [activeWorkout, setActiveWorkout] = useState(null)
   const [needsOnboarding, setNeedsOnboarding] = useState(false)
-  const [userProfile, setUserProfile] = useState(() => load('wt_user_profile', { weightKg: 0, heightCm: 0 }))
+  const [userProfile, setUserProfile] = useState(() => load('wt_user_profile', { weightKg: 0, heightCm: 0, name: '' }))
 
   const today = format(new Date(), 'yyyy-MM-dd')
   const userRef = useRef(null)
@@ -223,7 +223,7 @@ export function StoreProvider({ children }) {
       const { data: profileData } = await supabase
         .from('user_profiles').select('*').eq('user_id', userId).single()
       if (profileData) {
-        const profile = { weightKg: profileData.weight_kg, heightCm: profileData.height_cm }
+        const profile = { weightKg: profileData.weight_kg, heightCm: profileData.height_cm, name: profileData.name ?? '' }
         setUserProfile(profile)
         save('wt_user_profile', profile)
       }
@@ -439,6 +439,7 @@ export function StoreProvider({ children }) {
     if (userRef.current) {
       const { error } = await supabase.from('user_profiles').upsert({
         user_id: userRef.current.id,
+        name: profile.name ?? '',
         weight_kg: profile.weightKg,
         height_cm: profile.heightCm,
         updated_at: new Date().toISOString(),

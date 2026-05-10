@@ -29,6 +29,7 @@ export default function OnboardingFlow() {
   const [totalDays, setTotalDays] = useState(90)
   const [weightKg, setWeightKg] = useState('')
   const [heightCm, setHeightCm] = useState('')
+  const [firstName, setFirstName] = useState('')
   const [loading, setLoading] = useState(false)
 
   const selectedPlan = PLAN_LIST.find((p) => p.id === planId)
@@ -40,9 +41,7 @@ export default function OnboardingFlow() {
     const days = Math.max(7, Math.min(365, Number(totalDays) || 90))
     setLoading(true)
     try {
-      if (weightKg || heightCm) {
-        updateUserProfile({ weightKg: Number(weightKg) || 0, heightCm: Number(heightCm) || 0 })
-      }
+      updateUserProfile({ name: firstName.trim(), weightKg: Number(weightKg) || 0, heightCm: Number(heightCm) || 0 })
       await createSession(name.trim(), startDate, planId, days)
     } finally {
       setLoading(false)
@@ -152,7 +151,7 @@ export default function OnboardingFlow() {
             <div className="card space-y-4">
               <div>
                 <label className="text-xs text-zinc-400 block mb-1">Start Date (Day 1)</label>
-                <input type="date" value={startDate} max={today} onChange={(e) => setStartDate(e.target.value)} className="input-field" />
+                <input type="date" value={startDate} min={today} onChange={(e) => setStartDate(e.target.value)} className="input-field" />
               </div>
               <div>
                 <label className="text-xs text-zinc-400 block mb-2">Duration</label>
@@ -196,6 +195,16 @@ export default function OnboardingFlow() {
               <p className="text-xs text-zinc-400">Used to calculate your daily protein target. You can update these anytime.</p>
             </div>
             <div className="card space-y-4">
+              <div>
+                <label className="text-xs text-zinc-400 block mb-1">First Name</label>
+                <input
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  placeholder="e.g. Alex"
+                  className="input-field"
+                  autoFocus
+                />
+              </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs text-zinc-400 block mb-1">Weight (kg)</label>

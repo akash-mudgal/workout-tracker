@@ -9,6 +9,7 @@ const links = [
   { to: '/metrics', label: 'Body', icon: BodyIcon },
   { to: '/progress', label: 'Progress', icon: ChartIcon },
   { to: '/sessions', label: 'Sessions', icon: SessionsIcon },
+  { to: '/profile', label: 'Profile', icon: ProfileIcon },
 ]
 
 export default function NavBar() {
@@ -158,6 +159,15 @@ function SessionsIcon({ active, size = 22 }) {
       <rect x="3" y="4" width="18" height="16" rx="2" />
       <path strokeLinecap="round" d="M8 4v4M16 4v4M3 10h18" />
       <path strokeLinecap="round" d="M8 14h4M8 17h6" />
+    </svg>
+  )
+}
+
+function ProfileIcon({ active, size = 22 }) {
+  return (
+    <svg width={size} height={size} fill="none" stroke={active ? '#a78bfa' : 'currentColor'} strokeWidth={active ? 2 : 1.75} viewBox="0 0 24 24">
+      <circle cx="12" cy="8" r="4" strokeLinecap="round" strokeLinejoin="round" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
     </svg>
   )
 }
