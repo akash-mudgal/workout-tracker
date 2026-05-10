@@ -2,15 +2,16 @@ import { useState } from 'react'
 import { useStore } from '../store.jsx'
 
 export default function ProfilePage() {
-  const { user, userProfile, updateUserProfile, proteinGoal } = useStore()
+  const { user, userProfile, updateUserProfile } = useStore()
   const [name, setName] = useState(userProfile.name || '')
   const [weightKg, setWeightKg] = useState(userProfile.weightKg || '')
   const [heightCm, setHeightCm] = useState(userProfile.heightCm || '')
   const [status, setStatus] = useState(null) // 'saving' | 'saved' | 'error'
 
-  const bmi = weightKg && heightCm
-    ? (Number(weightKg) / Math.pow(Number(heightCm) / 100, 2)).toFixed(1)
-    : null
+  const w = Number(weightKg)
+  const h = Number(heightCm)
+  const previewProtein = w > 0 ? Math.round((w * 1.8) / 10) * 10 : null
+  const bmi = w > 0 && h > 0 ? (w / Math.pow(h / 100, 2)).toFixed(1) : null
 
   async function handleSave() {
     setStatus('saving')
@@ -81,7 +82,7 @@ export default function ProfilePage() {
         <div className="grid grid-cols-2 gap-3">
           <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.18)' }}>
             <div className="text-xs text-zinc-500 mb-0.5">Daily Protein Goal</div>
-            <div className="text-xl font-black text-amber-400">{proteinGoal}g</div>
+            <div className="text-xl font-black text-amber-400">{previewProtein ?? '—'}g</div>
           </div>
           <div className="rounded-xl px-4 py-3" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
             <div className="text-xs text-zinc-500 mb-0.5">BMI</div>
