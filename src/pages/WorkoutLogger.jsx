@@ -228,6 +228,7 @@ function LoggingView({ workout, sessionSets, workoutHistory, selectedId, onUpdat
                           <input
                             type="number"
                             value={set.weight}
+                            onFocus={(e) => e.target.select()}
                             onChange={(e) => onUpdateSet(ex.name, i, 'weight', +e.target.value)}
                             className="input-field text-center text-sm py-1"
                             min="0"
@@ -238,6 +239,7 @@ function LoggingView({ workout, sessionSets, workoutHistory, selectedId, onUpdat
                           <input
                             type="number"
                             value={set.reps}
+                            onFocus={(e) => e.target.select()}
                             onChange={(e) => onUpdateSet(ex.name, i, 'reps', +e.target.value)}
                             className="input-field text-center text-sm py-1"
                             min="0"
