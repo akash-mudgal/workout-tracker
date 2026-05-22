@@ -10,63 +10,63 @@
       "push_a": {
         "id": "push_a", "name": "Push A", "subtitle": "Chest Dominant", "type": "push", "color": "red",
         "exercises": [
-          { "name": "Incline DB Press",              "sets": 4, "repRange": "6–10",  "rpe": 8, "restSec": 150 },
-          { "name": "Flat DB Press",                 "sets": 3, "repRange": "8–12",  "rpe": 8, "restSec": 150 },
-          { "name": "DB Shoulder Press",             "sets": 3, "repRange": "6–10",  "rpe": 8, "restSec": 120 },
-          { "name": "DB Lateral Raises",             "sets": 3, "repRange": "12–15", "rpe": 9, "restSec": 90  },
-          { "name": "Overhead DB Triceps Extension", "sets": 3, "repRange": "10–15", "rpe": 9, "restSec": 90  }
+          { "name": "Incline DB Press",              "sets": 4, "repRange": "6–10",  "rpe": 8, "restSec": 150, "tip": "Set the bench to 30–45°. Lower the dumbbells with elbows at roughly 60° from your torso — not flared wide. The incline shifts emphasis to the upper chest and front delts. Touch the upper chest at the bottom and press up and slightly inward. Control the descent — 2 seconds down." },
+          { "name": "Flat DB Press",                 "sets": 3, "repRange": "8–12",  "rpe": 8, "restSec": 150, "tip": "Lie flat, dumbbells at chest level with elbows at 45–60° from your sides. Press up and arc slightly inward at the top — imagine trying to bend the dumbbells together. The flat angle targets mid and lower chest fibers most directly. Full stretch at the bottom is the stimulus." },
+          { "name": "DB Shoulder Press",             "sets": 3, "repRange": "6–10",  "rpe": 8, "restSec": 120, "tip": "Sit upright, dumbbells at ear height with elbows at 90°. Press straight up, stopping just before lockout to keep constant tension on the delts. Avoid leaning back — that shifts load onto the upper chest. Control the descent; don't let the dumbbells drop." },
+          { "name": "DB Lateral Raises",             "sets": 3, "repRange": "12–15", "rpe": 9, "restSec": 90,  "tip": "Slight forward lean from the hips. Lead with the elbow, not the hand. Raise to shoulder height only — going higher engages the traps, not the side delt. Don't shrug. The side delt is small; use a weight light enough to actually feel it burn, not your traps taking over." },
+          { "name": "Overhead DB Triceps Extension", "sets": 3, "repRange": "10–15", "rpe": 9, "restSec": 90,  "tip": "Hold one dumbbell overhead with both hands, upper arms close to your ears. Lower behind your head until you feel a deep stretch in the triceps, then extend fully. The long head of the tricep (the biggest portion) only gets a true stretch when the arm is overhead — this is what makes this variation so effective for arm size." }
         ]
       },
       "pull_a": {
         "id": "pull_a", "name": "Pull A", "subtitle": "Back & Thickness", "type": "pull", "color": "blue",
         "exercises": [
-          { "name": "One-Arm DB Row",    "sets": 4, "repRange": "8–12",  "rpe": 8, "restSec": 150 },
-          { "name": "Band Lat Pulldown", "sets": 3, "repRange": "10–15", "rpe": 8, "restSec": 120 },
-          { "name": "Incline DB Curl",   "sets": 3, "repRange": "8–12",  "rpe": 9, "restSec": 90  },
-          { "name": "Rear Delt Fly",     "sets": 3, "repRange": "12–15", "rpe": 9, "restSec": 90  },
-          { "name": "Hammer Curl",       "sets": 2, "repRange": "10–12", "rpe": 9, "restSec": 90  }
+          { "name": "One-Arm DB Row",    "sets": 4, "repRange": "8–12",  "rpe": 8, "restSec": 150, "tip": "Place the opposite hand and knee on a bench, torso nearly parallel to the floor. Row toward your hip — not your shoulder. Think 'elbow to pocket.' Initiate with a slight shoulder blade retraction first, then pull. At the bottom, let the shoulder blade fully protract to get a complete range of motion." },
+          { "name": "Band Lat Pulldown", "sets": 3, "repRange": "10–15", "rpe": 8, "restSec": 120, "tip": "Anchor a band overhead. Pull down and slightly back toward your upper chest, keeping elbows pointed down and slightly forward. Lean back 10–15° for a better line of pull. Squeeze the lats at the bottom. Think about driving your elbows toward your back pockets — the lat's job is to pull the arm toward the body." },
+          { "name": "Incline DB Curl",   "sets": 3, "repRange": "8–12",  "rpe": 9, "restSec": 90,  "tip": "Set the bench to 45–60° and let your arms hang straight down behind you. This pre-stretches the long head of the bicep before the rep begins. Curl up while keeping your upper arms still — don't let elbows drift forward. The stretched position at the bottom is the key stimulus; don't rush through it." },
+          { "name": "Rear Delt Fly",     "sets": 3, "repRange": "12–15", "rpe": 9, "restSec": 90,  "tip": "Hinge forward at the hips until your torso is near parallel, dumbbells hanging below your chest. Raise them out to the sides with elbows slightly bent, squeezing the rear delts at the top. The rear delt is a small muscle — use slow, controlled reps and a light enough weight to actually feel it working, not your traps." },
+          { "name": "Hammer Curl",       "sets": 2, "repRange": "10–12", "rpe": 9, "restSec": 90,  "tip": "Stand with dumbbells in a neutral grip (thumbs up). Curl to full flexion and lower slowly. The neutral grip targets the brachialis — a muscle that sits underneath the bicep and pushes it up, adding thickness and height to the upper arm that supinated curls alone can't develop." }
         ]
       },
       "legs_a": {
         "id": "legs_a", "name": "Legs A", "subtitle": "Quad & Hamstring", "type": "legs", "color": "emerald",
         "exercises": [
-          { "name": "Bulgarian Split Squat", "sets": 4, "repRange": "8–12",  "rpe": 8, "restSec": 180 },
-          { "name": "DB Romanian Deadlift",  "sets": 4, "repRange": "8–12",  "rpe": 8, "restSec": 180 },
-          { "name": "Goblet Squat",          "sets": 3, "repRange": "10–15", "rpe": 8, "restSec": 120 },
-          { "name": "Standing Calf Raises",  "sets": 4, "repRange": "12–20", "rpe": 9, "restSec": 75  }
+          { "name": "Bulgarian Split Squat", "sets": 4, "repRange": "8–12",  "rpe": 8, "restSec": 180, "tip": "Elevate your back foot on a bench, front foot far enough forward that your shin stays near-vertical at the bottom. Lower until the front thigh is parallel to the floor. Control the descent — this is where most of the stimulus comes from. Upright torso targets the quads; a slight forward lean shifts emphasis to the glutes." },
+          { "name": "DB Romanian Deadlift",  "sets": 4, "repRange": "8–12",  "rpe": 8, "restSec": 180, "tip": "Stand with dumbbells in front of your thighs, soft bend in the knees. Hinge at the hips — not the waist — letting the dumbbells slide close to your legs as you descend. Stop when you feel a full hamstring stretch, then drive the hips forward to stand. Use a 3-second lowering to maximize time under tension." },
+          { "name": "Goblet Squat",          "sets": 3, "repRange": "10–15", "rpe": 8, "restSec": 120, "tip": "Hold a single dumbbell vertically at your chest. Squat to depth, keeping your torso upright and knees tracking over your toes. The counterbalance helps you sit deeper without falling back. Pause at the bottom to eliminate momentum, then drive through the full foot to stand." },
+          { "name": "Standing Calf Raises",  "sets": 4, "repRange": "12–20", "rpe": 9, "restSec": 75,  "tip": "If possible, do these on a step for full range — the stretch at the bottom (heel below the step) is what drives calf growth. Rise fully onto the ball of the foot and squeeze hard at the top. Lower slowly (3 seconds). The calves respond well to both high reps and controlled eccentrics." }
         ]
       },
       "push_b": {
         "id": "push_b", "name": "Push B", "subtitle": "Shoulder Dominant", "type": "push", "color": "red",
         "exercises": [
-          { "name": "DB Shoulder Press",             "sets": 4, "repRange": "6–10",  "rpe": 8, "restSec": 150 },
-          { "name": "Incline DB Press",              "sets": 3, "repRange": "10–12", "rpe": 8, "restSec": 120 },
-          { "name": "DB Lateral Raises",             "sets": 4, "repRange": "12–15", "rpe": 9, "restSec": 75  },
-          { "name": "DB Front Raises",               "sets": 2, "repRange": "12–15", "rpe": 8, "restSec": 75  },
-          { "name": "Diamond Push-Ups",              "sets": 3, "repRange": "10–15", "rpe": 8, "restSec": 90  },
-          { "name": "Overhead DB Triceps Extension", "sets": 3, "repRange": "10–15", "rpe": 9, "restSec": 90  }
+          { "name": "DB Shoulder Press",             "sets": 4, "repRange": "6–10",  "rpe": 8, "restSec": 150, "tip": "Sit upright, dumbbells at ear height with elbows at 90°. Press straight up, stopping just before lockout to keep constant tension on the delts. Avoid leaning back — that shifts load onto the upper chest. Control the descent; don't let the dumbbells drop." },
+          { "name": "Incline DB Press",              "sets": 3, "repRange": "10–12", "rpe": 8, "restSec": 120, "tip": "Set the bench to 30–45°. Lower the dumbbells with elbows at roughly 60° from your torso — not flared wide. The incline shifts emphasis to the upper chest and front delts. Touch the upper chest at the bottom and press up and slightly inward. Control the descent — 2 seconds down." },
+          { "name": "DB Lateral Raises",             "sets": 4, "repRange": "12–15", "rpe": 9, "restSec": 75,  "tip": "Slight forward lean from the hips. Lead with the elbow, not the hand. Raise to shoulder height only — going higher engages the traps, not the side delt. Don't shrug. The side delt is small; use a weight light enough to actually feel it burn, not your traps taking over." },
+          { "name": "DB Front Raises",               "sets": 2, "repRange": "12–15", "rpe": 8, "restSec": 75,  "tip": "Raise the dumbbells in front to shoulder height with a slight elbow bend, then lower slowly. The front delt is heavily trained by all pressing movements, so keep volume moderate here. Avoid swinging — the stimulus comes from a slow, controlled lift, not momentum." },
+          { "name": "Diamond Push-Ups",              "sets": 3, "repRange": "10–15", "rpe": 8, "restSec": 90,  "tip": "Place hands close together under your sternum, forming a diamond shape with your fingers. Keep elbows close to your sides throughout. This position loads the triceps and inner chest far more than standard push-ups. Lower your chest to your hands, stop 1cm from the floor, and press back up." },
+          { "name": "Overhead DB Triceps Extension", "sets": 3, "repRange": "10–15", "rpe": 9, "restSec": 90,  "tip": "Hold one dumbbell overhead with both hands, upper arms close to your ears. Lower behind your head until you feel a deep stretch in the triceps, then extend fully. The long head of the tricep (the biggest portion) only gets a true stretch when the arm is overhead — this is what makes this variation so effective for arm size." }
         ]
       },
       "pull_b": {
         "id": "pull_b", "name": "Pull B", "subtitle": "Width & Bicep Peak", "type": "pull", "color": "blue",
         "exercises": [
-          { "name": "DB Pullover",                  "sets": 3, "repRange": "12–15", "rpe": 8, "restSec": 120 },
-          { "name": "One-Arm DB Row (Supinated)",   "sets": 3, "repRange": "10–12", "rpe": 8, "restSec": 150 },
-          { "name": "Band Lat Pulldown",            "sets": 3, "repRange": "12–15", "rpe": 8, "restSec": 120 },
-          { "name": "Concentration Curl",           "sets": 3, "repRange": "10–12", "rpe": 9, "restSec": 90  },
-          { "name": "Rear Delt Fly",                "sets": 3, "repRange": "12–15", "rpe": 9, "restSec": 90  },
-          { "name": "Band Face Pull",               "sets": 3, "repRange": "15–20", "rpe": 8, "restSec": 75  }
+          { "name": "DB Pullover",                  "sets": 3, "repRange": "12–15", "rpe": 8, "restSec": 120, "tip": "Lie across a bench with only your upper back in contact, hips dropped. Hold one dumbbell overhead with both hands. Lower it behind your head in an arc with arms nearly straight until you feel a big stretch across the lats and chest, then pull it back over. Full shoulder flexion at the bottom is the whole point." },
+          { "name": "One-Arm DB Row (Supinated)",   "sets": 3, "repRange": "10–12", "rpe": 8, "restSec": 150, "tip": "Same setup as a standard row — hand and knee on the bench, torso parallel. But rotate your grip so your palm faces forward at the top of the pull. This supination engages more bicep and hits the lower lats from a slightly different angle. Squeeze hard at the top and lower slowly." },
+          { "name": "Band Lat Pulldown",            "sets": 3, "repRange": "12–15", "rpe": 8, "restSec": 120, "tip": "Anchor a band overhead. Pull down and slightly back toward your upper chest, keeping elbows pointed down and slightly forward. Lean back 10–15° for a better line of pull. Squeeze the lats at the bottom. Think about driving your elbows toward your back pockets — the lat's job is to pull the arm toward the body." },
+          { "name": "Concentration Curl",           "sets": 3, "repRange": "10–12", "rpe": 9, "restSec": 90,  "tip": "Sit with your feet wide, brace the working elbow against your inner thigh. Curl slowly and squeeze the bicep hard at the top. The fixed elbow eliminates all cheating, isolating the bicep peak. Lower under full control — 2–3 seconds down. This is a finishing move; use a weight you can actually feel." },
+          { "name": "Rear Delt Fly",                "sets": 3, "repRange": "12–15", "rpe": 9, "restSec": 90,  "tip": "Hinge forward at the hips until your torso is near parallel, dumbbells hanging below your chest. Raise them out to the sides with elbows slightly bent, squeezing the rear delts at the top. The rear delt is a small muscle — use slow, controlled reps and a light enough weight to actually feel it working, not your traps." },
+          { "name": "Band Face Pull",               "sets": 3, "repRange": "15–20", "rpe": 8, "restSec": 75,  "tip": "Attach a band at face height. Pull toward your face with elbows flared high and wide, externally rotating your shoulders at the end of the pull so your fists finish beside your ears. This trains the rear delts, rhomboids, and rotator cuff — critical for shoulder health and posture. Use light resistance and focus on the external rotation." }
         ]
       },
       "legs_b": {
         "id": "legs_b", "name": "Legs B + Core", "subtitle": "Glutes, Calves & Core", "type": "legs", "color": "emerald",
         "exercises": [
-          { "name": "Goblet Squat",          "sets": 4, "repRange": "10–15",      "rpe": 8, "restSec": 150 },
-          { "name": "DB Romanian Deadlift",  "sets": 3, "repRange": "10–12",      "rpe": 8, "restSec": 150 },
-          { "name": "Reverse Lunges",        "sets": 3, "repRange": "10–12 each", "rpe": 8, "restSec": 120 },
-          { "name": "Standing Calf Raises",  "sets": 4, "repRange": "12–20",      "rpe": 9, "restSec": 75  },
-          { "name": "Plank",                 "sets": 3, "repRange": "30–60s",     "rpe": 8, "restSec": 60  },
-          { "name": "DB Crunch",             "sets": 3, "repRange": "15–20",      "rpe": 9, "restSec": 60  }
+          { "name": "Goblet Squat",          "sets": 4, "repRange": "10–15",      "rpe": 8, "restSec": 150, "tip": "Hold a single dumbbell vertically at your chest. Squat to depth, keeping your torso upright and knees tracking over your toes. The counterbalance helps you sit deeper without falling back. Pause at the bottom to eliminate momentum, then drive through the full foot to stand." },
+          { "name": "DB Romanian Deadlift",  "sets": 3, "repRange": "10–12",      "rpe": 8, "restSec": 150, "tip": "Stand with dumbbells in front of your thighs, soft bend in the knees. Hinge at the hips — not the waist — letting the dumbbells slide close to your legs as you descend. Stop when you feel a full hamstring stretch, then drive the hips forward to stand. Use a 3-second lowering to maximize time under tension." },
+          { "name": "Reverse Lunges",        "sets": 3, "repRange": "10–12 each", "rpe": 8, "restSec": 120, "tip": "Step backward with one foot and lower the back knee toward the floor. Keep your front shin vertical — the front knee should stay directly over the ankle, not drifting past the toes. Drive through the front heel to return to standing. Reverse lunges are knee-friendlier than forward lunges because there's no braking force at the bottom." },
+          { "name": "Standing Calf Raises",  "sets": 4, "repRange": "12–20",      "rpe": 9, "restSec": 75,  "tip": "If possible, do these on a step for full range — the stretch at the bottom (heel below the step) is what drives calf growth. Rise fully onto the ball of the foot and squeeze hard at the top. Lower slowly (3 seconds). The calves respond well to both high reps and controlled eccentrics." },
+          { "name": "Plank",                 "sets": 3, "repRange": "30–60s",     "rpe": 8, "restSec": 60,  "tip": "Forearms on the floor, elbows directly under shoulders. Squeeze everything — glutes, abs, quads — and hold a straight line from head to heel. Don't let the hips sag or pike up. Breathe normally. If you can hold past 60s with ease, elevate your feet or add weight — a hard 30s plank beats a lazy 90s one." },
+          { "name": "DB Crunch",             "sets": 3, "repRange": "15–20",      "rpe": 9, "restSec": 60,  "tip": "Lie on your back, hold a dumbbell on your chest or behind your head. Curl your upper back off the floor by contracting the abs — not by yanking your neck forward. Lower slowly and under control. Adding load forces the abs to generate more tension than bodyweight crunches alone." }
         ]
       },
       "rest": { "id": "rest", "name": "Rest", "subtitle": "Active Recovery", "type": "rest", "color": "zinc", "exercises": [] }
@@ -84,44 +84,88 @@
       "upper_a": {
         "id": "upper_a", "name": "Upper A", "subtitle": "Horizontal Push & Pull", "type": "push", "color": "violet",
         "exercises": [
-          { "name": "Flat DB Press",     "sets": 4, "repRange": "8–12",  "rpe": 8, "restSec": 150 },
-          { "name": "One-Arm DB Row",    "sets": 4, "repRange": "8–12",  "rpe": 8, "restSec": 150 },
-          { "name": "Incline DB Press",  "sets": 3, "repRange": "10–12", "rpe": 8, "restSec": 120 },
-          { "name": "Band Lat Pulldown", "sets": 3, "repRange": "12–15", "rpe": 8, "restSec": 120 },
-          { "name": "DB Shoulder Press", "sets": 3, "repRange": "8–12",  "rpe": 8, "restSec": 120 },
-          { "name": "DB Lateral Raises", "sets": 3, "repRange": "12–15", "rpe": 9, "restSec": 75  }
+          { "name": "Flat DB Press",     "sets": 4, "repRange": "8–12",  "rpe": 8, "restSec": 150, "tip": "Lie flat, dumbbells at chest level with elbows at 45–60° from your sides. Press up and arc slightly inward at the top — imagine trying to bend the dumbbells together. The flat angle targets mid and lower chest fibers most directly. Full stretch at the bottom is the stimulus." },
+          { "name": "One-Arm DB Row",    "sets": 4, "repRange": "8–12",  "rpe": 8, "restSec": 150, "tip": "Place the opposite hand and knee on a bench, torso nearly parallel to the floor. Row toward your hip — not your shoulder. Think 'elbow to pocket.' Initiate with a slight shoulder blade retraction first, then pull. At the bottom, let the shoulder blade fully protract to get a complete range of motion." },
+          { "name": "Incline DB Press",  "sets": 3, "repRange": "10–12", "rpe": 8, "restSec": 120, "tip": "Set the bench to 30–45°. Lower the dumbbells with elbows at roughly 60° from your torso — not flared wide. The incline shifts emphasis to the upper chest and front delts. Touch the upper chest at the bottom and press up and slightly inward. Control the descent — 2 seconds down." },
+          { "name": "Band Lat Pulldown", "sets": 3, "repRange": "12–15", "rpe": 8, "restSec": 120, "tip": "Anchor a band overhead. Pull down and slightly back toward your upper chest, keeping elbows pointed down and slightly forward. Lean back 10–15° for a better line of pull. Squeeze the lats at the bottom. Think about driving your elbows toward your back pockets — the lat's job is to pull the arm toward the body." },
+          { "name": "DB Shoulder Press", "sets": 3, "repRange": "8–12",  "rpe": 8, "restSec": 120, "tip": "Sit upright, dumbbells at ear height with elbows at 90°. Press straight up, stopping just before lockout to keep constant tension on the delts. Avoid leaning back — that shifts load onto the upper chest. Control the descent; don't let the dumbbells drop." },
+          { "name": "DB Lateral Raises", "sets": 3, "repRange": "12–15", "rpe": 9, "restSec": 75,  "tip": "Slight forward lean from the hips. Lead with the elbow, not the hand. Raise to shoulder height only — going higher engages the traps, not the side delt. Don't shrug. The side delt is small; use a weight light enough to actually feel it burn, not your traps taking over." }
         ]
       },
       "lower_a": {
         "id": "lower_a", "name": "Lower A", "subtitle": "Quad Dominant", "type": "legs", "color": "emerald",
         "exercises": [
-          { "name": "Bulgarian Split Squat", "sets": 4, "repRange": "8–12",       "rpe": 8, "restSec": 180 },
-          { "name": "DB Romanian Deadlift",  "sets": 3, "repRange": "10–12",      "rpe": 8, "restSec": 150 },
-          { "name": "Goblet Squat",          "sets": 3, "repRange": "12–15",      "rpe": 8, "restSec": 120 },
-          { "name": "Reverse Lunges",        "sets": 3, "repRange": "10–12 each", "rpe": 8, "restSec": 120 },
-          { "name": "Standing Calf Raises",  "sets": 4, "repRange": "15–20",      "rpe": 9, "restSec": 75  }
+          { "name": "Bulgarian Split Squat", "sets": 4, "repRange": "8–12",       "rpe": 8, "restSec": 180, "tip": "Elevate your back foot on a bench, front foot far enough forward that your shin stays near-vertical at the bottom. Lower until the front thigh is parallel to the floor. Control the descent — this is where most of the stimulus comes from. Upright torso targets the quads; a slight forward lean shifts emphasis to the glutes." },
+          { "name": "DB Romanian Deadlift",  "sets": 3, "repRange": "10–12",      "rpe": 8, "restSec": 150, "tip": "Stand with dumbbells in front of your thighs, soft bend in the knees. Hinge at the hips — not the waist — letting the dumbbells slide close to your legs as you descend. Stop when you feel a full hamstring stretch, then drive the hips forward to stand. Use a 3-second lowering to maximize time under tension." },
+          { "name": "Goblet Squat",          "sets": 3, "repRange": "12–15",      "rpe": 8, "restSec": 120, "tip": "Hold a single dumbbell vertically at your chest. Squat to depth, keeping your torso upright and knees tracking over your toes. The counterbalance helps you sit deeper without falling back. Pause at the bottom to eliminate momentum, then drive through the full foot to stand." },
+          { "name": "Reverse Lunges",        "sets": 3, "repRange": "10–12 each", "rpe": 8, "restSec": 120, "tip": "Step backward with one foot and lower the back knee toward the floor. Keep your front shin vertical — the front knee should stay directly over the ankle, not drifting past the toes. Drive through the front heel to return to standing. Reverse lunges are knee-friendlier than forward lunges because there's no braking force at the bottom." },
+          { "name": "Standing Calf Raises",  "sets": 4, "repRange": "15–20",      "rpe": 9, "restSec": 75,  "tip": "If possible, do these on a step for full range — the stretch at the bottom (heel below the step) is what drives calf growth. Rise fully onto the ball of the foot and squeeze hard at the top. Lower slowly (3 seconds). The calves respond well to both high reps and controlled eccentrics." }
         ]
       },
       "upper_b": {
         "id": "upper_b", "name": "Upper B", "subtitle": "Vertical Pull & Arms", "type": "pull", "color": "blue",
         "exercises": [
-          { "name": "DB Pullover",                   "sets": 3, "repRange": "12–15", "rpe": 8, "restSec": 120 },
-          { "name": "One-Arm DB Row (Supinated)",    "sets": 3, "repRange": "10–12", "rpe": 8, "restSec": 150 },
-          { "name": "Incline DB Curl",               "sets": 3, "repRange": "10–12", "rpe": 9, "restSec": 90  },
-          { "name": "Hammer Curl",                   "sets": 3, "repRange": "10–12", "rpe": 9, "restSec": 90  },
-          { "name": "Overhead DB Triceps Extension", "sets": 3, "repRange": "12–15", "rpe": 9, "restSec": 90  },
-          { "name": "Rear Delt Fly",                 "sets": 3, "repRange": "15–20", "rpe": 9, "restSec": 75  }
+          { "name": "DB Pullover",                   "sets": 3, "repRange": "12–15", "rpe": 8, "restSec": 120, "tip": "Lie across a bench with only your upper back in contact, hips dropped. Hold one dumbbell overhead with both hands. Lower it behind your head in an arc with arms nearly straight until you feel a big stretch across the lats and chest, then pull it back over. Full shoulder flexion at the bottom is the whole point." },
+          { "name": "One-Arm DB Row (Supinated)",    "sets": 3, "repRange": "10–12", "rpe": 8, "restSec": 150, "tip": "Same setup as a standard row — hand and knee on the bench, torso parallel. But rotate your grip so your palm faces forward at the top of the pull. This supination engages more bicep and hits the lower lats from a slightly different angle. Squeeze hard at the top and lower slowly." },
+          { "name": "Incline DB Curl",               "sets": 3, "repRange": "10–12", "rpe": 9, "restSec": 90,  "tip": "Set the bench to 45–60° and let your arms hang straight down behind you. This pre-stretches the long head of the bicep before the rep begins. Curl up while keeping your upper arms still — don't let elbows drift forward. The stretched position at the bottom is the key stimulus; don't rush through it." },
+          { "name": "Hammer Curl",                   "sets": 3, "repRange": "10–12", "rpe": 9, "restSec": 90,  "tip": "Stand with dumbbells in a neutral grip (thumbs up). Curl to full flexion and lower slowly. The neutral grip targets the brachialis — a muscle that sits underneath the bicep and pushes it up, adding thickness and height to the upper arm that supinated curls alone can't develop." },
+          { "name": "Overhead DB Triceps Extension", "sets": 3, "repRange": "12–15", "rpe": 9, "restSec": 90,  "tip": "Hold one dumbbell overhead with both hands, upper arms close to your ears. Lower behind your head until you feel a deep stretch in the triceps, then extend fully. The long head of the tricep (the biggest portion) only gets a true stretch when the arm is overhead — this is what makes this variation so effective for arm size." },
+          { "name": "Rear Delt Fly",                 "sets": 3, "repRange": "15–20", "rpe": 9, "restSec": 75,  "tip": "Hinge forward at the hips until your torso is near parallel, dumbbells hanging below your chest. Raise them out to the sides with elbows slightly bent, squeezing the rear delts at the top. The rear delt is a small muscle — use slow, controlled reps and a light enough weight to actually feel it working, not your traps." }
         ]
       },
       "lower_b": {
         "id": "lower_b", "name": "Lower B + Core", "subtitle": "Posterior Chain & Core", "type": "legs", "color": "emerald",
         "exercises": [
-          { "name": "DB Romanian Deadlift",  "sets": 4, "repRange": "8–12",  "rpe": 8, "restSec": 180 },
-          { "name": "Bulgarian Split Squat", "sets": 3, "repRange": "10–12", "rpe": 8, "restSec": 150 },
-          { "name": "Goblet Squat",          "sets": 3, "repRange": "12–15", "rpe": 8, "restSec": 120 },
-          { "name": "Standing Calf Raises",  "sets": 4, "repRange": "15–20", "rpe": 9, "restSec": 75  },
-          { "name": "Plank",                 "sets": 3, "repRange": "30–60s","rpe": 8, "restSec": 60  },
-          { "name": "DB Crunch",             "sets": 3, "repRange": "15–20", "rpe": 9, "restSec": 60  }
+          { "name": "DB Romanian Deadlift",  "sets": 4, "repRange": "8–12",  "rpe": 8, "restSec": 180, "tip": "Stand with dumbbells in front of your thighs, soft bend in the knees. Hinge at the hips — not the waist — letting the dumbbells slide close to your legs as you descend. Stop when you feel a full hamstring stretch, then drive the hips forward to stand. Use a 3-second lowering to maximize time under tension." },
+          { "name": "Bulgarian Split Squat", "sets": 3, "repRange": "10–12", "rpe": 8, "restSec": 150, "tip": "Elevate your back foot on a bench, front foot far enough forward that your shin stays near-vertical at the bottom. Lower until the front thigh is parallel to the floor. Control the descent — this is where most of the stimulus comes from. Upright torso targets the quads; a slight forward lean shifts emphasis to the glutes." },
+          { "name": "Goblet Squat",          "sets": 3, "repRange": "12–15", "rpe": 8, "restSec": 120, "tip": "Hold a single dumbbell vertically at your chest. Squat to depth, keeping your torso upright and knees tracking over your toes. The counterbalance helps you sit deeper without falling back. Pause at the bottom to eliminate momentum, then drive through the full foot to stand." },
+          { "name": "Standing Calf Raises",  "sets": 4, "repRange": "15–20", "rpe": 9, "restSec": 75,  "tip": "If possible, do these on a step for full range — the stretch at the bottom (heel below the step) is what drives calf growth. Rise fully onto the ball of the foot and squeeze hard at the top. Lower slowly (3 seconds). The calves respond well to both high reps and controlled eccentrics." },
+          { "name": "Plank",                 "sets": 3, "repRange": "30–60s","rpe": 8, "restSec": 60,  "tip": "Forearms on the floor, elbows directly under shoulders. Squeeze everything — glutes, abs, quads — and hold a straight line from head to heel. Don't let the hips sag or pike up. Breathe normally. If you can hold past 60s with ease, elevate your feet or add weight — a hard 30s plank beats a lazy 90s one." },
+          { "name": "DB Crunch",             "sets": 3, "repRange": "15–20", "rpe": 9, "restSec": 60,  "tip": "Lie on your back, hold a dumbbell on your chest or behind your head. Curl your upper back off the floor by contracting the abs — not by yanking your neck forward. Lower slowly and under control. Adding load forces the abs to generate more tension than bodyweight crunches alone." }
+        ]
+      },
+      "rest": { "id": "rest", "name": "Rest", "subtitle": "Active Recovery", "type": "rest", "color": "zinc", "exercises": [] }
+    }
+  },
+
+  "full_body": {
+    "id": "full_body",
+    "name": "Full Body 3×",
+    "description": "3 days/week · Maximum frequency · Great for beginners",
+    "daysPerWeek": 3,
+    "accentColor": "amber",
+    "cycle": ["full_a", "rest", "full_b", "rest", "full_c", "rest", "rest"],
+    "days": {
+      "full_a": {
+        "id": "full_a", "name": "Full Body A", "subtitle": "Squat + Horizontal", "type": "push", "color": "amber",
+        "exercises": [
+          { "name": "Goblet Squat",      "sets": 4, "repRange": "8–12",  "rpe": 8, "restSec": 150, "tip": "Hold a single dumbbell vertically at your chest. Squat to depth, keeping your torso upright and knees tracking over your toes. The counterbalance helps you sit deeper without falling back. Pause at the bottom to eliminate momentum, then drive through the full foot to stand." },
+          { "name": "Flat DB Press",     "sets": 3, "repRange": "10–12", "rpe": 8, "restSec": 120, "tip": "Lie flat, dumbbells at chest level with elbows at 45–60° from your sides. Press up and arc slightly inward at the top — imagine trying to bend the dumbbells together. The flat angle targets mid and lower chest fibers most directly. Full stretch at the bottom is the stimulus." },
+          { "name": "One-Arm DB Row",    "sets": 3, "repRange": "10–12", "rpe": 8, "restSec": 120, "tip": "Place the opposite hand and knee on a bench, torso nearly parallel to the floor. Row toward your hip — not your shoulder. Think 'elbow to pocket.' Initiate with a slight shoulder blade retraction first, then pull. At the bottom, let the shoulder blade fully protract to get a complete range of motion." },
+          { "name": "DB Shoulder Press", "sets": 3, "repRange": "10–12", "rpe": 8, "restSec": 120, "tip": "Sit upright, dumbbells at ear height with elbows at 90°. Press straight up, stopping just before lockout to keep constant tension on the delts. Avoid leaning back — that shifts load onto the upper chest. Control the descent; don't let the dumbbells drop." },
+          { "name": "DB Lateral Raises", "sets": 2, "repRange": "15–20", "rpe": 8, "restSec": 75,  "tip": "Slight forward lean from the hips. Lead with the elbow, not the hand. Raise to shoulder height only — going higher engages the traps, not the side delt. Don't shrug. The side delt is small; use a weight light enough to actually feel it burn, not your traps taking over." }
+        ]
+      },
+      "full_b": {
+        "id": "full_b", "name": "Full Body B", "subtitle": "Hinge + Vertical", "type": "pull", "color": "amber",
+        "exercises": [
+          { "name": "DB Romanian Deadlift", "sets": 4, "repRange": "8–12",  "rpe": 8, "restSec": 150, "tip": "Stand with dumbbells in front of your thighs, soft bend in the knees. Hinge at the hips — not the waist — letting the dumbbells slide close to your legs as you descend. Stop when you feel a full hamstring stretch, then drive the hips forward to stand. Use a 3-second lowering to maximize time under tension." },
+          { "name": "Incline DB Press",     "sets": 3, "repRange": "10–12", "rpe": 8, "restSec": 120, "tip": "Set the bench to 30–45°. Lower the dumbbells with elbows at roughly 60° from your torso — not flared wide. The incline shifts emphasis to the upper chest and front delts. Touch the upper chest at the bottom and press up and slightly inward. Control the descent — 2 seconds down." },
+          { "name": "Band Lat Pulldown",    "sets": 3, "repRange": "12–15", "rpe": 8, "restSec": 120, "tip": "Anchor a band overhead. Pull down and slightly back toward your upper chest, keeping elbows pointed down and slightly forward. Lean back 10–15° for a better line of pull. Squeeze the lats at the bottom. Think about driving your elbows toward your back pockets — the lat's job is to pull the arm toward the body." },
+          { "name": "DB Shoulder Press",    "sets": 3, "repRange": "10–12", "rpe": 8, "restSec": 120, "tip": "Sit upright, dumbbells at ear height with elbows at 90°. Press straight up, stopping just before lockout to keep constant tension on the delts. Avoid leaning back — that shifts load onto the upper chest. Control the descent; don't let the dumbbells drop." },
+          { "name": "Incline DB Curl",      "sets": 3, "repRange": "10–12", "rpe": 9, "restSec": 90,  "tip": "Set the bench to 45–60° and let your arms hang straight down behind you. This pre-stretches the long head of the bicep before the rep begins. Curl up while keeping your upper arms still — don't let elbows drift forward. The stretched position at the bottom is the key stimulus; don't rush through it." },
+          { "name": "Standing Calf Raises", "sets": 3, "repRange": "15–20", "rpe": 9, "restSec": 75,  "tip": "If possible, do these on a step for full range — the stretch at the bottom (heel below the step) is what drives calf growth. Rise fully onto the ball of the foot and squeeze hard at the top. Lower slowly (3 seconds). The calves respond well to both high reps and controlled eccentrics." }
+        ]
+      },
+      "full_c": {
+        "id": "full_c", "name": "Full Body C", "subtitle": "Lunge + Arms + Core", "type": "legs", "color": "amber",
+        "exercises": [
+          { "name": "Bulgarian Split Squat",         "sets": 3, "repRange": "10–12",      "rpe": 8, "restSec": 150, "tip": "Elevate your back foot on a bench, front foot far enough forward that your shin stays near-vertical at the bottom. Lower until the front thigh is parallel to the floor. Control the descent — this is where most of the stimulus comes from. Upright torso targets the quads; a slight forward lean shifts emphasis to the glutes." },
+          { "name": "DB Pullover",                   "sets": 3, "repRange": "12–15",      "rpe": 8, "restSec": 120, "tip": "Lie across a bench with only your upper back in contact, hips dropped. Hold one dumbbell overhead with both hands. Lower it behind your head in an arc with arms nearly straight until you feel a big stretch across the lats and chest, then pull it back over. Full shoulder flexion at the bottom is the whole point." },
+          { "name": "Overhead DB Triceps Extension", "sets": 3, "repRange": "12–15",      "rpe": 9, "restSec": 90,  "tip": "Hold one dumbbell overhead with both hands, upper arms close to your ears. Lower behind your head until you feel a deep stretch in the triceps, then extend fully. The long head of the tricep (the biggest portion) only gets a true stretch when the arm is overhead — this is what makes this variation so effective for arm size." },
+          { "name": "Hammer Curl",                   "sets": 3, "repRange": "10–12",      "rpe": 9, "restSec": 90,  "tip": "Stand with dumbbells in a neutral grip (thumbs up). Curl to full flexion and lower slowly. The neutral grip targets the brachialis — a muscle that sits underneath the bicep and pushes it up, adding thickness and height to the upper arm that supinated curls alone can't develop." },
+          { "name": "Reverse Lunges",                "sets": 3, "repRange": "10–12 each", "rpe": 8, "restSec": 120, "tip": "Step backward with one foot and lower the back knee toward the floor. Keep your front shin vertical — the front knee should stay directly over the ankle, not drifting past the toes. Drive through the front heel to return to standing. Reverse lunges are knee-friendlier than forward lunges because there's no braking force at the bottom." },
+          { "name": "Plank",                         "sets": 3, "repRange": "30–60s",     "rpe": 8, "restSec": 60,  "tip": "Forearms on the floor, elbows directly under shoulders. Squeeze everything — glutes, abs, quads — and hold a straight line from head to heel. Don't let the hips sag or pike up. Breathe normally. If you can hold past 60s with ease, elevate your feet or add weight — a hard 30s plank beats a lazy 90s one." }
         ]
       },
       "rest": { "id": "rest", "name": "Rest", "subtitle": "Active Recovery", "type": "rest", "color": "zinc", "exercises": [] }
@@ -139,53 +183,53 @@
       "chest": {
         "id": "chest", "name": "Chest", "subtitle": "Chest & Triceps", "type": "push", "color": "red",
         "exercises": [
-          { "name": "Incline DB Press",              "sets": 4, "repRange": "6–10",  "rpe": 8, "restSec": 150 },
-          { "name": "Flat DB Press",                 "sets": 4, "repRange": "8–12",  "rpe": 8, "restSec": 150 },
-          { "name": "DB Fly",                        "sets": 3, "repRange": "12–15", "rpe": 9, "restSec": 90  },
-          { "name": "Push-Ups",                      "sets": 3, "repRange": "Max",   "rpe": 8, "restSec": 90  },
-          { "name": "Overhead DB Triceps Extension", "sets": 3, "repRange": "12–15", "rpe": 9, "restSec": 90  }
+          { "name": "Incline DB Press",              "sets": 4, "repRange": "6–10",  "rpe": 8, "restSec": 150, "tip": "Set the bench to 30–45°. Lower the dumbbells with elbows at roughly 60° from your torso — not flared wide. The incline shifts emphasis to the upper chest and front delts. Touch the upper chest at the bottom and press up and slightly inward. Control the descent — 2 seconds down." },
+          { "name": "Flat DB Press",                 "sets": 4, "repRange": "8–12",  "rpe": 8, "restSec": 150, "tip": "Lie flat, dumbbells at chest level with elbows at 45–60° from your sides. Press up and arc slightly inward at the top — imagine trying to bend the dumbbells together. The flat angle targets mid and lower chest fibers most directly. Full stretch at the bottom is the stimulus." },
+          { "name": "DB Fly",                        "sets": 3, "repRange": "12–15", "rpe": 9, "restSec": 90,  "tip": "Lie flat, dumbbells with a soft bend in the elbows. Lower them out to the sides in a wide arc — feel the chest stretch at the bottom. Reverse the arc to bring the dumbbells back up and squeeze the chest at the top. This is a stretch-focused isolation move; keep weight light enough to feel the pec, not your shoulder." },
+          { "name": "Push-Ups",                      "sets": 3, "repRange": "Max",   "rpe": 8, "restSec": 90,  "tip": "Hands slightly wider than shoulders, core braced, body in a rigid straight line from head to heel. Lower your chest to the floor with elbows at roughly 45° from the torso — not flared wide. Squeeze the chest at the top. Full range of motion on every rep — touch the floor and lock out at the top." },
+          { "name": "Overhead DB Triceps Extension", "sets": 3, "repRange": "12–15", "rpe": 9, "restSec": 90,  "tip": "Hold one dumbbell overhead with both hands, upper arms close to your ears. Lower behind your head until you feel a deep stretch in the triceps, then extend fully. The long head of the tricep (the biggest portion) only gets a true stretch when the arm is overhead — this is what makes this variation so effective for arm size." }
         ]
       },
       "back": {
         "id": "back", "name": "Back", "subtitle": "Back & Rear Delts", "type": "pull", "color": "blue",
         "exercises": [
-          { "name": "One-Arm DB Row",             "sets": 4, "repRange": "8–12",  "rpe": 8, "restSec": 150 },
-          { "name": "Band Lat Pulldown",          "sets": 4, "repRange": "10–15", "rpe": 8, "restSec": 120 },
-          { "name": "DB Pullover",                "sets": 3, "repRange": "12–15", "rpe": 8, "restSec": 120 },
-          { "name": "One-Arm DB Row (Supinated)", "sets": 3, "repRange": "10–12", "rpe": 8, "restSec": 150 },
-          { "name": "Rear Delt Fly",              "sets": 3, "repRange": "15–20", "rpe": 9, "restSec": 75  }
+          { "name": "One-Arm DB Row",             "sets": 4, "repRange": "8–12",  "rpe": 8, "restSec": 150, "tip": "Place the opposite hand and knee on a bench, torso nearly parallel to the floor. Row toward your hip — not your shoulder. Think 'elbow to pocket.' Initiate with a slight shoulder blade retraction first, then pull. At the bottom, let the shoulder blade fully protract to get a complete range of motion." },
+          { "name": "Band Lat Pulldown",          "sets": 4, "repRange": "10–15", "rpe": 8, "restSec": 120, "tip": "Anchor a band overhead. Pull down and slightly back toward your upper chest, keeping elbows pointed down and slightly forward. Lean back 10–15° for a better line of pull. Squeeze the lats at the bottom. Think about driving your elbows toward your back pockets — the lat's job is to pull the arm toward the body." },
+          { "name": "DB Pullover",                "sets": 3, "repRange": "12–15", "rpe": 8, "restSec": 120, "tip": "Lie across a bench with only your upper back in contact, hips dropped. Hold one dumbbell overhead with both hands. Lower it behind your head in an arc with arms nearly straight until you feel a big stretch across the lats and chest, then pull it back over. Full shoulder flexion at the bottom is the whole point." },
+          { "name": "One-Arm DB Row (Supinated)", "sets": 3, "repRange": "10–12", "rpe": 8, "restSec": 150, "tip": "Same setup as a standard row — hand and knee on the bench, torso parallel. But rotate your grip so your palm faces forward at the top of the pull. This supination engages more bicep and hits the lower lats from a slightly different angle. Squeeze hard at the top and lower slowly." },
+          { "name": "Rear Delt Fly",              "sets": 3, "repRange": "15–20", "rpe": 9, "restSec": 75,  "tip": "Hinge forward at the hips until your torso is near parallel, dumbbells hanging below your chest. Raise them out to the sides with elbows slightly bent, squeezing the rear delts at the top. The rear delt is a small muscle — use slow, controlled reps and a light enough weight to actually feel it working, not your traps." }
         ]
       },
       "shoulders": {
         "id": "shoulders", "name": "Shoulders", "subtitle": "All Three Heads", "type": "push", "color": "orange",
         "exercises": [
-          { "name": "DB Shoulder Press", "sets": 4, "repRange": "8–12",  "rpe": 8, "restSec": 150 },
-          { "name": "DB Lateral Raises", "sets": 4, "repRange": "12–15", "rpe": 9, "restSec": 75  },
-          { "name": "DB Front Raises",   "sets": 3, "repRange": "12–15", "rpe": 8, "restSec": 75  },
-          { "name": "Rear Delt Fly",     "sets": 3, "repRange": "15–20", "rpe": 9, "restSec": 75  },
-          { "name": "Band Face Pull",    "sets": 3, "repRange": "15–20", "rpe": 8, "restSec": 75  }
+          { "name": "DB Shoulder Press", "sets": 4, "repRange": "8–12",  "rpe": 8, "restSec": 150, "tip": "Sit upright, dumbbells at ear height with elbows at 90°. Press straight up, stopping just before lockout to keep constant tension on the delts. Avoid leaning back — that shifts load onto the upper chest. Control the descent; don't let the dumbbells drop." },
+          { "name": "DB Lateral Raises", "sets": 4, "repRange": "12–15", "rpe": 9, "restSec": 75,  "tip": "Slight forward lean from the hips. Lead with the elbow, not the hand. Raise to shoulder height only — going higher engages the traps, not the side delt. Don't shrug. The side delt is small; use a weight light enough to actually feel it burn, not your traps taking over." },
+          { "name": "DB Front Raises",   "sets": 3, "repRange": "12–15", "rpe": 8, "restSec": 75,  "tip": "Raise the dumbbells in front to shoulder height with a slight elbow bend, then lower slowly. The front delt is heavily trained by all pressing movements, so keep volume moderate here. Avoid swinging — the stimulus comes from a slow, controlled lift, not momentum." },
+          { "name": "Rear Delt Fly",     "sets": 3, "repRange": "15–20", "rpe": 9, "restSec": 75,  "tip": "Hinge forward at the hips until your torso is near parallel, dumbbells hanging below your chest. Raise them out to the sides with elbows slightly bent, squeezing the rear delts at the top. The rear delt is a small muscle — use slow, controlled reps and a light enough weight to actually feel it working, not your traps." },
+          { "name": "Band Face Pull",    "sets": 3, "repRange": "15–20", "rpe": 8, "restSec": 75,  "tip": "Attach a band at face height. Pull toward your face with elbows flared high and wide, externally rotating your shoulders at the end of the pull so your fists finish beside your ears. This trains the rear delts, rhomboids, and rotator cuff — critical for shoulder health and posture. Use light resistance and focus on the external rotation." }
         ]
       },
       "arms": {
         "id": "arms", "name": "Arms", "subtitle": "Biceps & Triceps", "type": "pull", "color": "violet",
         "exercises": [
-          { "name": "Incline DB Curl",               "sets": 3, "repRange": "10–12", "rpe": 9, "restSec": 90 },
-          { "name": "Hammer Curl",                   "sets": 3, "repRange": "10–12", "rpe": 9, "restSec": 90 },
-          { "name": "Concentration Curl",            "sets": 3, "repRange": "10–12", "rpe": 9, "restSec": 90 },
-          { "name": "Overhead DB Triceps Extension", "sets": 3, "repRange": "12–15", "rpe": 9, "restSec": 90 },
-          { "name": "Diamond Push-Ups",              "sets": 3, "repRange": "10–15", "rpe": 8, "restSec": 90 },
-          { "name": "Close-Grip DB Press",           "sets": 3, "repRange": "10–12", "rpe": 8, "restSec": 90 }
+          { "name": "Incline DB Curl",               "sets": 3, "repRange": "10–12", "rpe": 9, "restSec": 90, "tip": "Set the bench to 45–60° and let your arms hang straight down behind you. This pre-stretches the long head of the bicep before the rep begins. Curl up while keeping your upper arms still — don't let elbows drift forward. The stretched position at the bottom is the key stimulus; don't rush through it." },
+          { "name": "Hammer Curl",                   "sets": 3, "repRange": "10–12", "rpe": 9, "restSec": 90, "tip": "Stand with dumbbells in a neutral grip (thumbs up). Curl to full flexion and lower slowly. The neutral grip targets the brachialis — a muscle that sits underneath the bicep and pushes it up, adding thickness and height to the upper arm that supinated curls alone can't develop." },
+          { "name": "Concentration Curl",            "sets": 3, "repRange": "10–12", "rpe": 9, "restSec": 90, "tip": "Sit with your feet wide, brace the working elbow against your inner thigh. Curl slowly and squeeze the bicep hard at the top. The fixed elbow eliminates all cheating, isolating the bicep peak. Lower under full control — 2–3 seconds down. This is a finishing move; use a weight you can actually feel." },
+          { "name": "Overhead DB Triceps Extension", "sets": 3, "repRange": "12–15", "rpe": 9, "restSec": 90, "tip": "Hold one dumbbell overhead with both hands, upper arms close to your ears. Lower behind your head until you feel a deep stretch in the triceps, then extend fully. The long head of the tricep (the biggest portion) only gets a true stretch when the arm is overhead — this is what makes this variation so effective for arm size." },
+          { "name": "Diamond Push-Ups",              "sets": 3, "repRange": "10–15", "rpe": 8, "restSec": 90, "tip": "Place hands close together under your sternum, forming a diamond shape with your fingers. Keep elbows close to your sides throughout. This position loads the triceps and inner chest far more than standard push-ups. Lower your chest to your hands, stop 1cm from the floor, and press back up." },
+          { "name": "Close-Grip DB Press",           "sets": 3, "repRange": "10–12", "rpe": 8, "restSec": 90, "tip": "Lie flat, hold two dumbbells together in neutral grip over the center of your chest. Press up while keeping the dumbbells touching or nearly touching throughout. The close, neutral grip shifts the emphasis from the chest to the triceps. Keep elbows tight to your sides on the way down." }
         ]
       },
       "legs": {
         "id": "legs", "name": "Legs", "subtitle": "Full Leg Day + Core", "type": "legs", "color": "emerald",
         "exercises": [
-          { "name": "Bulgarian Split Squat", "sets": 4, "repRange": "8–12",       "rpe": 8, "restSec": 180 },
-          { "name": "DB Romanian Deadlift",  "sets": 4, "repRange": "8–12",       "rpe": 8, "restSec": 180 },
-          { "name": "Goblet Squat",          "sets": 3, "repRange": "12–15",      "rpe": 8, "restSec": 120 },
-          { "name": "Reverse Lunges",        "sets": 3, "repRange": "10–12 each", "rpe": 8, "restSec": 120 },
-          { "name": "Standing Calf Raises",  "sets": 4, "repRange": "15–20",      "rpe": 9, "restSec": 75  },
-          { "name": "DB Crunch",             "sets": 3, "repRange": "15–20",      "rpe": 9, "restSec": 60  }
+          { "name": "Bulgarian Split Squat", "sets": 4, "repRange": "8–12",       "rpe": 8, "restSec": 180, "tip": "Elevate your back foot on a bench, front foot far enough forward that your shin stays near-vertical at the bottom. Lower until the front thigh is parallel to the floor. Control the descent — this is where most of the stimulus comes from. Upright torso targets the quads; a slight forward lean shifts emphasis to the glutes." },
+          { "name": "DB Romanian Deadlift",  "sets": 4, "repRange": "8–12",       "rpe": 8, "restSec": 180, "tip": "Stand with dumbbells in front of your thighs, soft bend in the knees. Hinge at the hips — not the waist — letting the dumbbells slide close to your legs as you descend. Stop when you feel a full hamstring stretch, then drive the hips forward to stand. Use a 3-second lowering to maximize time under tension." },
+          { "name": "Goblet Squat",          "sets": 3, "repRange": "12–15",      "rpe": 8, "restSec": 120, "tip": "Hold a single dumbbell vertically at your chest. Squat to depth, keeping your torso upright and knees tracking over your toes. The counterbalance helps you sit deeper without falling back. Pause at the bottom to eliminate momentum, then drive through the full foot to stand." },
+          { "name": "Reverse Lunges",        "sets": 3, "repRange": "10–12 each", "rpe": 8, "restSec": 120, "tip": "Step backward with one foot and lower the back knee toward the floor. Keep your front shin vertical — the front knee should stay directly over the ankle, not drifting past the toes. Drive through the front heel to return to standing. Reverse lunges are knee-friendlier than forward lunges because there's no braking force at the bottom." },
+          { "name": "Standing Calf Raises",  "sets": 4, "repRange": "15–20",      "rpe": 9, "restSec": 75,  "tip": "If possible, do these on a step for full range — the stretch at the bottom (heel below the step) is what drives calf growth. Rise fully onto the ball of the foot and squeeze hard at the top. Lower slowly (3 seconds). The calves respond well to both high reps and controlled eccentrics." },
+          { "name": "DB Crunch",             "sets": 3, "repRange": "15–20",      "rpe": 9, "restSec": 60,  "tip": "Lie on your back, hold a dumbbell on your chest or behind your head. Curl your upper back off the floor by contracting the abs — not by yanking your neck forward. Lower slowly and under control. Adding load forces the abs to generate more tension than bodyweight crunches alone." }
         ]
       },
       "rest": { "id": "rest", "name": "Rest", "subtitle": "Active Recovery", "type": "rest", "color": "zinc", "exercises": [] }
@@ -257,31 +301,31 @@
       "ab_a": {
         "id": "ab_a", "name": "Workout A", "subtitle": "Full Body · Squat + Hinge", "type": "push", "color": "orange",
         "exercises": [
-          { "name": "DB Bench Press",          "sets": 3, "repRange": "8–15",       "rpe": 8, "restSec": 90 },
-          { "name": "DB Row",                  "sets": 3, "repRange": "8–15",       "rpe": 8, "restSec": 90 },
-          { "name": "Overhead Shoulder Press", "sets": 3, "repRange": "8–15",       "rpe": 8, "restSec": 90 },
-          { "name": "Goblet Squat",            "sets": 3, "repRange": "8–15",       "rpe": 8, "restSec": 90 },
-          { "name": "Romanian Deadlift",       "sets": 3, "repRange": "8–15",       "rpe": 8, "restSec": 90 },
-          { "name": "Lateral Raises",          "sets": 3, "repRange": "15–20",      "rpe": 9, "restSec": 75 },
-          { "name": "Rear Delt Fly",           "sets": 3, "repRange": "15–20",      "rpe": 9, "restSec": 75 },
-          { "name": "Bicep Curls",             "sets": 3, "repRange": "12–20",      "rpe": 9, "restSec": 75 },
-          { "name": "Triceps Extension",       "sets": 3, "repRange": "15–20",      "rpe": 9, "restSec": 75 },
-          { "name": "Calf Raises",             "sets": 3, "repRange": "15–25",      "rpe": 9, "restSec": 60 }
+          { "name": "DB Bench Press",          "sets": 3, "repRange": "8–15",       "rpe": 8, "restSec": 90, "tip": "Lie flat, dumbbells at chest level with elbows at 45–60° from your sides. Press up and arc slightly inward at the top. The flat angle targets mid and lower chest fibers most directly. Full stretch at the bottom — control the descent for 2 seconds. Use double progression: once you hit 15 reps on all sets, add weight next session." },
+          { "name": "DB Row",                  "sets": 3, "repRange": "8–15",       "rpe": 8, "restSec": 90, "tip": "Superset with Bench Press — this is your antagonist pair. Place the opposite hand and knee on a bench, torso nearly parallel to the floor. Row toward your hip — think 'elbow to pocket.' At the bottom, let the shoulder blade fully protract for a complete range of motion. Superset by alternating sides with minimal rest." },
+          { "name": "Overhead Shoulder Press", "sets": 3, "repRange": "8–15",       "rpe": 8, "restSec": 90, "tip": "Superset with Goblet Squat. Sit upright, dumbbells at ear height with elbows at 90°. Press straight up and stop just before lockout to keep constant tension on the delts. Avoid leaning back. The OHP and squat pair well because one is upper body and one lower — minimal interference when supersetted." },
+          { "name": "Goblet Squat",            "sets": 3, "repRange": "8–15",       "rpe": 8, "restSec": 90, "tip": "Hold a single dumbbell vertically at your chest. Squat to depth, keeping your torso upright and knees tracking over your toes. The counterbalance helps you sit deeper without falling back. Pause at the bottom to eliminate momentum, then drive through the full foot to stand." },
+          { "name": "Romanian Deadlift",       "sets": 3, "repRange": "8–15",       "rpe": 8, "restSec": 90, "tip": "Superset with Calf Raises. Hinge at the hips letting the dumbbells slide close to your legs, stop at full hamstring stretch, then drive hips forward to stand. 3-second lowering maximizes the stimulus. The RDL and calf raise target opposite ends of the posterior lower leg chain — a natural antagonist pair." },
+          { "name": "Lateral Raises",          "sets": 3, "repRange": "15–20",      "rpe": 9, "restSec": 75, "tip": "Superset with Rear Delt Flies. Slight forward lean from the hips. Lead with the elbow, raise to shoulder height, don't shrug. These two are the antagonist shoulder pair — lateral raises hit the medial delt (external rotation plane) while rear delt flies hit the posterior delt. Rest 75s between supersets." },
+          { "name": "Rear Delt Fly",           "sets": 3, "repRange": "15–20",      "rpe": 9, "restSec": 75, "tip": "Hinge forward until your torso is near parallel. Raise the dumbbells out to the sides with a slight elbow bend, squeezing the rear delts at the top. Small muscle — use controlled reps with a weight you can actually feel. Supersetted with Lateral Raises for the shoulder antagonist pairing." },
+          { "name": "Bicep Curls",             "sets": 3, "repRange": "12–20",      "rpe": 9, "restSec": 75, "tip": "Superset with Triceps Extension — biceps and triceps are the classic antagonist arm pair. Curl with a supinated grip (palms up) through the full range. Squeeze the bicep hard at the top. Lower slowly (2–3 seconds) — the eccentric phase is equally important for growth. Avoid swinging the elbows forward." },
+          { "name": "Triceps Extension",       "sets": 3, "repRange": "15–20",      "rpe": 9, "restSec": 75, "tip": "Hold one dumbbell overhead with both hands, upper arms close to your ears. Lower behind your head until you feel a deep stretch in the triceps long head, then extend fully. The long head is only fully loaded in the overhead position — which is what makes this the most effective tricep exercise. Supersetted with Bicep Curls." },
+          { "name": "Calf Raises",             "sets": 3, "repRange": "15–25",      "rpe": 9, "restSec": 60, "tip": "Do these on a step for full range — the stretch at the bottom (heel below the step) is the key stimulus. Rise fully onto the ball of the foot, squeeze at the top, lower slowly (3 seconds). Supersetted with Romanian Deadlift as the RDL/calf raise antagonist pair from the routine." }
         ]
       },
       "ab_b": {
         "id": "ab_b", "name": "Workout B", "subtitle": "Full Body · Lunge + Incline", "type": "pull", "color": "violet",
         "exercises": [
-          { "name": "Incline DB Press",        "sets": 3, "repRange": "8–15",       "rpe": 8, "restSec": 90 },
-          { "name": "One-Arm DB Row",          "sets": 3, "repRange": "8–15",       "rpe": 8, "restSec": 90 },
-          { "name": "Overhead Shoulder Press", "sets": 3, "repRange": "8–15",       "rpe": 8, "restSec": 90 },
-          { "name": "Reverse Lunges",          "sets": 3, "repRange": "12–15 each", "rpe": 8, "restSec": 90 },
-          { "name": "Goblet Squat / RDL",      "sets": 3, "repRange": "8–15",       "rpe": 8, "restSec": 90 },
-          { "name": "Hammer Curls",            "sets": 3, "repRange": "12–20",      "rpe": 9, "restSec": 75 },
-          { "name": "Tricep Kickbacks",        "sets": 3, "repRange": "15–20",      "rpe": 9, "restSec": 75 },
-          { "name": "Rear Delt Fly",           "sets": 3, "repRange": "15–20",      "rpe": 9, "restSec": 75 },
-          { "name": "Lateral Raises",          "sets": 3, "repRange": "15–20",      "rpe": 9, "restSec": 75 },
-          { "name": "Calf Raises",             "sets": 3, "repRange": "15–25",      "rpe": 9, "restSec": 60 }
+          { "name": "Incline DB Press",        "sets": 3, "repRange": "8–15",       "rpe": 8, "restSec": 90, "tip": "Set the bench to 30–45°. Superset with One-Arm DB Row. Lower the dumbbells with elbows at roughly 60° from your torso — not flared wide. The incline hits the upper chest and front delts. Touch the upper chest at the bottom and press up and slightly inward. Use double progression: once you can do 15 reps on all sets, add weight." },
+          { "name": "One-Arm DB Row",          "sets": 3, "repRange": "8–15",       "rpe": 8, "restSec": 90, "tip": "Superset with Incline Bench. Place the opposite hand and knee on a bench, torso nearly parallel to the floor. Row toward your hip — think 'elbow to pocket.' Let the shoulder blade fully protract at the bottom for full range. Alternate sides without rest between them." },
+          { "name": "Overhead Shoulder Press", "sets": 3, "repRange": "8–15",       "rpe": 8, "restSec": 90, "tip": "Superset with Reverse Lunges. Sit upright, dumbbells at ear height with elbows at 90°. Press straight up, stopping just before lockout. Avoid leaning back. Pairing the OHP with lunges works well because the press is upper body pushing — the lower body lunge causes no interference." },
+          { "name": "Reverse Lunges",          "sets": 3, "repRange": "12–15 each", "rpe": 8, "restSec": 90, "tip": "Superset with OHP. Step backward and lower the back knee toward the floor. Keep the front shin vertical — front knee stays over the ankle. Drive through the front heel to return. Reverse lunges are knee-friendlier than forward lunges because there's no braking force at the bottom." },
+          { "name": "Goblet Squat / RDL",      "sets": 3, "repRange": "8–15",       "rpe": 8, "restSec": 90, "tip": "Superset with Calf Raises. Pick whichever feels weaker that day. For Goblet Squat — hold dumbbell at chest, squat to depth, pause at the bottom. For RDL — hinge at the hips, feel the full hamstring stretch, 3-second lowering. Alternate with calves for the lower body antagonist pairing." },
+          { "name": "Hammer Curls",            "sets": 3, "repRange": "12–20",      "rpe": 9, "restSec": 75, "tip": "Superset with Tricep Kickbacks. Neutral grip (thumbs up), curl to full flexion and lower slowly. The neutral grip targets the brachialis — the muscle under the bicep that adds thickness and height to the upper arm. These and kickbacks are the arm antagonist pair for Workout B." },
+          { "name": "Tricep Kickbacks",        "sets": 3, "repRange": "15–20",      "rpe": 9, "restSec": 75, "tip": "Hinge forward, upper arm parallel to the floor and held there throughout. Extend the forearm back until the arm is fully straight and squeeze the tricep hard at the top. Hold the contraction for a beat — the tricep is only loaded at the top of this movement, so don't rush through the extension. Supersetted with Hammer Curls." },
+          { "name": "Rear Delt Fly",           "sets": 3, "repRange": "15–20",      "rpe": 9, "restSec": 75, "tip": "Superset with Lateral Raises. Hinge forward until your torso is near parallel, dumbbells hanging below your chest. Raise them out to the sides with elbows slightly bent, squeezing the rear delts at the top. Small muscle — use slow, controlled reps. This is the shoulder antagonist pair for Workout B." },
+          { "name": "Lateral Raises",          "sets": 3, "repRange": "15–20",      "rpe": 9, "restSec": 75, "tip": "Superset with Rear Delt Flies. Slight forward lean from the hips. Lead with the elbow, raise to shoulder height, don't shrug. The lateral and rear delt are antagonists in the shoulder — one pulls the arm out to the side, the other pulls it back. Together they build balanced, full-looking shoulders." },
+          { "name": "Calf Raises",             "sets": 3, "repRange": "15–25",      "rpe": 9, "restSec": 60, "tip": "Superset with Goblet Squat / RDL. Do these on a step for full range — the stretch at the bottom is the key stimulus for calf growth. Rise fully onto the ball of the foot, squeeze at the top, lower slowly (3 seconds). This finishes the lower body antagonist pair for the session." }
         ]
       },
       "rest": { "id": "rest", "name": "Rest", "subtitle": "Active Recovery", "type": "rest", "color": "zinc", "exercises": [] }
