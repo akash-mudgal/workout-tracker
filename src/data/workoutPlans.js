@@ -335,6 +335,41 @@ const BWS_DAYS = {
   rest: REST_DAY,
 }
 
+// ─── Plan: Full-Body A/B Dumbbell ────────────────────────────────────────────
+const AB_DAYS = {
+  ab_a: {
+    id: 'ab_a', name: 'Workout A', subtitle: 'Full Body · Squat + Hinge', type: 'push', colorClasses: COLORS.orange,
+    exercises: [
+      { name: 'DB Bench Press',          sets: 3, repRange: '8–15',       rpe: 8, restSec: 90 },
+      { name: 'DB Row',                  sets: 3, repRange: '8–15',       rpe: 8, restSec: 90 },
+      { name: 'Overhead Shoulder Press', sets: 3, repRange: '8–15',       rpe: 8, restSec: 90 },
+      { name: 'Goblet Squat',            sets: 3, repRange: '8–15',       rpe: 8, restSec: 90 },
+      { name: 'Romanian Deadlift',       sets: 3, repRange: '8–15',       rpe: 8, restSec: 90 },
+      { name: 'Lateral Raises',          sets: 3, repRange: '15–20',      rpe: 9, restSec: 75 },
+      { name: 'Rear Delt Fly',           sets: 3, repRange: '15–20',      rpe: 9, restSec: 75 },
+      { name: 'Bicep Curls',             sets: 3, repRange: '12–20',      rpe: 9, restSec: 75 },
+      { name: 'Triceps Extension',       sets: 3, repRange: '15–20',      rpe: 9, restSec: 75 },
+      { name: 'Calf Raises',             sets: 3, repRange: '15–25',      rpe: 9, restSec: 60 },
+    ],
+  },
+  ab_b: {
+    id: 'ab_b', name: 'Workout B', subtitle: 'Full Body · Lunge + Incline', type: 'pull', colorClasses: COLORS.violet,
+    exercises: [
+      { name: 'Incline DB Press',        sets: 3, repRange: '8–15',       rpe: 8, restSec: 90 },
+      { name: 'One-Arm DB Row',          sets: 3, repRange: '8–15',       rpe: 8, restSec: 90 },
+      { name: 'Overhead Shoulder Press', sets: 3, repRange: '8–15',       rpe: 8, restSec: 90 },
+      { name: 'Reverse Lunges',          sets: 3, repRange: '12–15 each', rpe: 8, restSec: 90 },
+      { name: 'Goblet Squat / RDL',      sets: 3, repRange: '8–15',       rpe: 8, restSec: 90 },
+      { name: 'Hammer Curls',            sets: 3, repRange: '12–20',      rpe: 9, restSec: 75 },
+      { name: 'Tricep Kickbacks',        sets: 3, repRange: '15–20',      rpe: 9, restSec: 75 },
+      { name: 'Rear Delt Fly',           sets: 3, repRange: '15–20',      rpe: 9, restSec: 75 },
+      { name: 'Lateral Raises',          sets: 3, repRange: '15–20',      rpe: 9, restSec: 75 },
+      { name: 'Calf Raises',             sets: 3, repRange: '15–25',      rpe: 9, restSec: 60 },
+    ],
+  },
+  rest: REST_DAY,
+}
+
 // ─── Plan registry ────────────────────────────────────────────────────────────
 export const PLANS = {
   ppl: {
@@ -381,6 +416,15 @@ export const PLANS = {
     accentColor: 'violet',
     cycle: ['bws_upper1', 'bws_lower1', 'rest', 'bws_upper2', 'bws_lower2', 'rest', 'rest'],
     days: BWS_DAYS,
+  },
+  full_body_ab: {
+    id: 'full_body_ab',
+    name: 'Full-Body A/B',
+    description: '4 days/week · A/B alternation · Mon/Tue/Thu/Fri · Double progression',
+    daysPerWeek: 4,
+    accentColor: 'orange',
+    cycle: ['ab_a', 'ab_b', 'rest', 'ab_a', 'ab_b', 'rest', 'rest'],
+    days: AB_DAYS,
   },
 }
 
