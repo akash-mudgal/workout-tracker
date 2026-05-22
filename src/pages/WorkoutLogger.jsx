@@ -226,23 +226,22 @@ function LoggingView({ workout, sessionSets, workoutHistory, selectedId, onUpdat
                         <div className="col-span-1 text-xs text-zinc-400">{i + 1}</div>
                         <div className="col-span-4">
                           <input
-                            type="number"
+                            type="text"
+                            inputMode="decimal"
                             value={set.weight}
                             onFocus={(e) => e.target.select()}
                             onChange={(e) => onUpdateSet(ex.name, i, 'weight', +e.target.value)}
                             className="input-field text-center text-sm py-1"
-                            min="0"
-                            step="0.5"
                           />
                         </div>
                         <div className="col-span-4">
                           <input
-                            type="number"
+                            type="text"
+                            inputMode="numeric"
                             value={set.reps}
                             onFocus={(e) => e.target.select()}
                             onChange={(e) => onUpdateSet(ex.name, i, 'reps', +e.target.value)}
                             className="input-field text-center text-sm py-1"
-                            min="0"
                           />
                         </div>
                         <div className="col-span-3 flex justify-center">
