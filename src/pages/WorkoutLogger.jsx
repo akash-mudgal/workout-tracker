@@ -1,7 +1,33 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { format } from 'date-fns'
 import { useStore } from '../store.jsx'
 import { getPlan, getRecommendedWorkout, getWorkoutById, getWorkoutDays } from '../data/workoutPlans'
+
+function NumericInput({ value, onCommit, inputMode = 'decimal', className }) {
+  const [display, setDisplay] = useState(String(value ?? 0))
+
+  useEffect(() => { setDisplay(String(value ?? 0)) }, [value])
+
+  return (
+    <input
+      type="text"
+      inputMode={inputMode}
+      value={display}
+      onFocus={(e) => e.target.select()}
+      onChange={(e) => {
+        setDisplay(e.target.value)
+        const num = parseFloat(e.target.value)
+        if (!isNaN(num)) onCommit(num)
+      }}
+      onBlur={() => {
+        const num = parseFloat(display) || 0
+        setDisplay(String(num))
+        onCommit(num)
+      }}
+      className={className}
+    />
+  )
+}
 
 export default function WorkoutLogger() {
   const { today, workoutHistory, saveWorkout, activeSession } = useStore()
@@ -225,22 +251,18 @@ function LoggingView({ workout, sessionSets, workoutHistory, selectedId, onUpdat
                       <div key={i} className={`grid grid-cols-12 gap-1 items-center ${set.done ? 'opacity-60' : ''}`}>
                         <div className="col-span-1 text-xs text-zinc-400">{i + 1}</div>
                         <div className="col-span-4">
-                          <input
-                            type="text"
-                            inputMode="decimal"
+                          <NumericInput
                             value={set.weight}
-                            onFocus={(e) => e.target.select()}
-                            onChange={(e) => onUpdateSet(ex.name, i, 'weight', +e.target.value)}
+                            onCommit={(v) => onUpdateSet(ex.name, i, 'weight', v)}
+                            inputMode="decimal"
                             className="input-field text-center text-sm py-1"
                           />
                         </div>
                         <div className="col-span-4">
-                          <input
-                            type="text"
-                            inputMode="numeric"
+                          <NumericInput
                             value={set.reps}
-                            onFocus={(e) => e.target.select()}
-                            onChange={(e) => onUpdateSet(ex.name, i, 'reps', +e.target.value)}
+                            onCommit={(v) => onUpdateSet(ex.name, i, 'reps', v)}
+                            inputMode="numeric"
                             className="input-field text-center text-sm py-1"
                           />
                         </div>
