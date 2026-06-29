@@ -9,6 +9,7 @@ export default function ProfilePage() {
   const [heightCm, setHeightCm] = useState(userProfile.heightCm || '')
   const [age, setAge] = useState(userProfile.age || '')
   const [sex, setSex] = useState(userProfile.sex || '')
+  const [activityLevel, setActivityLevel] = useState(userProfile.activityLevel || '')
   const [status, setStatus] = useState(null) // 'saving' | 'saved' | 'error'
   const [notifPrefs, setNotifPrefs] = useState(() => getNotifPrefs())
   const [notifPermission, setNotifPermission] = useState(() => getNotifPermission())
@@ -46,6 +47,7 @@ export default function ProfilePage() {
         heightCm: Number(heightCm) || 0,
         age: Number(age) || 0,
         sex,
+        activityLevel,
       })
       setStatus('saved')
       setTimeout(() => setStatus(null), 2000)
@@ -120,6 +122,35 @@ export default function ProfilePage() {
               <option value="male">Male</option>
               <option value="female">Female</option>
             </select>
+          </div>
+        </div>
+
+        <div>
+          <label className="text-xs text-zinc-400 block mb-2">Activity Level</label>
+          <div className="space-y-1.5">
+            {[
+              { value: 'sedentary',  label: 'Sedentary',     desc: 'Desk job, little/no exercise' },
+              { value: 'light',      label: 'Lightly Active', desc: '1–3 workouts/week' },
+              { value: 'moderate',   label: 'Moderate',      desc: '3–5 workouts/week' },
+              { value: 'active',     label: 'Active',        desc: '6–7 workouts/week' },
+              { value: 'very_active',label: 'Very Active',   desc: 'Athlete / physical job' },
+            ].map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setActivityLevel(opt.value)}
+                className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl border text-left transition-colors"
+                style={activityLevel === opt.value
+                  ? { background: 'rgba(124,58,237,0.12)', border: '1px solid rgba(124,58,237,0.35)' }
+                  : { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
+              >
+                <div>
+                  <span className={`text-sm font-medium ${activityLevel === opt.value ? 'text-violet-300' : 'text-zinc-300'}`}>{opt.label}</span>
+                  <span className="text-xs text-zinc-500 ml-2">{opt.desc}</span>
+                </div>
+                {activityLevel === opt.value && <span className="text-violet-400 text-xs">●</span>}
+              </button>
+            ))}
           </div>
         </div>
 

@@ -16,12 +16,16 @@ function calcProtein(weightKg, goal) {
   return Math.round((weightKg * multiplier) / 10) * 10
 }
 
-function calcCalories(weightKg, heightCm, age, sex, goal) {
-  if (!weightKg || !heightCm || !age || !sex) return null
+const ACTIVITY_MULTIPLIERS = {
+  sedentary: 1.2, light: 1.375, moderate: 1.55, active: 1.725, very_active: 1.9,
+}
+
+function calcCalories(weightKg, heightCm, age, sex, goal, activityLevel) {
+  if (!weightKg || !heightCm || !age || !sex || !activityLevel) return null
   const bmr = sex === 'male'
     ? 10 * weightKg + 6.25 * heightCm - 5 * age + 5
     : 10 * weightKg + 6.25 * heightCm - 5 * age - 161
-  const tdee = bmr * 1.55
+  const tdee = bmr * (ACTIVITY_MULTIPLIERS[activityLevel] ?? 1.55)
   const adj = goal === 'fat_loss' ? -400 : goal === 'muscle_gain' ? 300 : 0
   return Math.round((tdee + adj) / 50) * 50
 }
@@ -43,12 +47,13 @@ export default function OnboardingFlow() {
   const [heightCm, setHeightCm] = useState('')
   const [age, setAge] = useState('')
   const [sex, setSex] = useState('')
+  const [activityLevel, setActivityLevel] = useState('')
   const [firstName, setFirstName] = useState('')
   const [loading, setLoading] = useState(false)
 
   const selectedPlan = PLAN_LIST.find((p) => p.id === planId)
   const protein = calcProtein(Number(weightKg), goal)
-  const calories = calcCalories(Number(weightKg), Number(heightCm), Number(age), sex, goal)
+  const calories = calcCalories(Number(weightKg), Number(heightCm), Number(age), sex, goal, activityLevel)
   const bmi = calcBMI(Number(weightKg), Number(heightCm))
 
   async function handleFinish() {
@@ -56,7 +61,7 @@ export default function OnboardingFlow() {
     const days = Math.max(7, Math.min(365, Number(totalDays) || 90))
     setLoading(true)
     try {
-      updateUserProfile({ name: firstName.trim(), weightKg: Number(weightKg) || 0, heightCm: Number(heightCm) || 0, age: Number(age) || 0, sex })
+      updateUserProfile({ name: firstName.trim(), weightKg: Number(weightKg) || 0, heightCm: Number(heightCm) || 0, age: Number(age) || 0, sex, activityLevel })
       await createSession(name.trim(), startDate, planId, days, goal)
     } finally {
       setLoading(false)
@@ -285,6 +290,35 @@ export default function OnboardingFlow() {
                     <option value="male">Male</option>
                     <option value="female">Female</option>
                   </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs text-zinc-400 block mb-2">Activity Level</label>
+                <div className="space-y-1.5">
+                  {[
+                    { value: 'sedentary',   label: 'Sedentary',      desc: 'Desk job, little/no exercise' },
+                    { value: 'light',       label: 'Lightly Active',  desc: '1–3 workouts/week' },
+                    { value: 'moderate',    label: 'Moderate',        desc: '3–5 workouts/week' },
+                    { value: 'active',      label: 'Active',          desc: '6–7 workouts/week' },
+                    { value: 'very_active', label: 'Very Active',     desc: 'Athlete / physical job' },
+                  ].map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setActivityLevel(opt.value)}
+                      className="w-full flex items-center justify-between px-3 py-2 rounded-xl border text-left transition-colors"
+                      style={activityLevel === opt.value
+                        ? { background: 'rgba(124,58,237,0.12)', border: '1px solid rgba(124,58,237,0.35)' }
+                        : { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
+                    >
+                      <div>
+                        <span className={`text-xs font-semibold ${activityLevel === opt.value ? 'text-violet-300' : 'text-zinc-300'}`}>{opt.label}</span>
+                        <span className="text-xs text-zinc-500 ml-1.5">{opt.desc}</span>
+                      </div>
+                      {activityLevel === opt.value && <span className="text-violet-400 text-xs">●</span>}
+                    </button>
+                  ))}
                 </div>
               </div>
 

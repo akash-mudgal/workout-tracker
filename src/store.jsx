@@ -32,7 +32,7 @@ export function StoreProvider({ children }) {
   const [bodyMetrics, setBodyMetrics] = useState(() => load('wt_body_metrics', []))
   const [activeWorkout, setActiveWorkout] = useState(null)
   const [needsOnboarding, setNeedsOnboarding] = useState(false)
-  const [userProfile, setUserProfile] = useState(() => load('wt_user_profile', { weightKg: 0, heightCm: 0, name: '', age: 0, sex: '' }))
+  const [userProfile, setUserProfile] = useState(() => load('wt_user_profile', { weightKg: 0, heightCm: 0, name: '', age: 0, sex: '', activityLevel: '' }))
   const [streakFreezeState, setStreakFreezeState] = useState(
     () => getStreakFreezeState(format(new Date(), 'yyyy-MM-dd'))
   )
@@ -235,6 +235,7 @@ export function StoreProvider({ children }) {
           name: profileData.name ?? '',
           age: profileData.age ?? 0,
           sex: profileData.sex ?? '',
+          activityLevel: profileData.activity_level ?? '',
         }
         setUserProfile(profile)
         save('wt_user_profile', profile)
@@ -458,6 +459,7 @@ export function StoreProvider({ children }) {
         height_cm: profile.heightCm,
         age: profile.age ?? 0,
         sex: profile.sex ?? '',
+        activity_level: profile.activityLevel ?? '',
         updated_at: new Date().toISOString(),
       }, { onConflict: 'user_id' })
       if (error) console.error('[kinetiq] profile sync failed:', error.message, error)
@@ -472,14 +474,22 @@ export function StoreProvider({ children }) {
     ? Math.round((userProfile.weightKg * proteinMultiplier) / 10) * 10
     : 130
 
+  const ACTIVITY_MULTIPLIERS = {
+    sedentary: 1.2,
+    light: 1.375,
+    moderate: 1.55,
+    active: 1.725,
+    very_active: 1.9,
+  }
+
   const calorieGoal = useMemo(() => {
-    const { weightKg, heightCm, age, sex } = userProfile
+    const { weightKg, heightCm, age, sex, activityLevel } = userProfile
     const sessionGoal = activeSession?.goal ?? 'recomp'
-    if (!weightKg || !heightCm || !age || !sex) return 2100
+    if (!weightKg || !heightCm || !age || !sex || !activityLevel) return 2100
     const bmr = sex === 'male'
       ? 10 * weightKg + 6.25 * heightCm - 5 * age + 5
       : 10 * weightKg + 6.25 * heightCm - 5 * age - 161
-    const tdee = bmr * 1.55
+    const tdee = bmr * (ACTIVITY_MULTIPLIERS[activityLevel] ?? 1.55)
     const adjustment = sessionGoal === 'fat_loss' ? -400 : sessionGoal === 'muscle_gain' ? 300 : 0
     return Math.round((tdee + adjustment) / 50) * 50
   }, [userProfile, activeSession?.goal])
