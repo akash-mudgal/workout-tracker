@@ -20,12 +20,14 @@ export default function SessionsPage() {
   const [newStart, setNewStart] = useState(today)
   const [newPlanId, setNewPlanId] = useState('ppl')
   const [newTotalDays, setNewTotalDays] = useState(90)
+  const [newGoal, setNewGoal] = useState('recomp')
 
   const [editingId, setEditingId] = useState(null)
   const [editName, setEditName] = useState('')
   const [editStart, setEditStart] = useState('')
   const [editTotalDays, setEditTotalDays] = useState(90)
   const [editPlanId, setEditPlanId] = useState('ppl')
+  const [editGoal, setEditGoal] = useState('recomp')
 
   const [resetConfirmId, setResetConfirmId] = useState(null)
   const [deleteConfirmId, setDeleteConfirmId] = useState(null)
@@ -46,12 +48,13 @@ export default function SessionsPage() {
     const days = Math.max(7, Math.min(365, Number(newTotalDays) || 90))
     setLoading(true)
     try {
-      await createSession(newName.trim(), newStart, newPlanId, days)
+      await createSession(newName.trim(), newStart, newPlanId, days, newGoal)
       setCreating(false)
       setNewName('90-Day Cycle')
       setNewStart(today)
       setNewPlanId('ppl')
       setNewTotalDays(90)
+      setNewGoal('recomp')
     } finally {
       setLoading(false)
     }
@@ -70,11 +73,12 @@ export default function SessionsPage() {
     setEditStart(session.startDate)
     setEditTotalDays(session.totalDays ?? 90)
     setEditPlanId(session.planId ?? 'ppl')
+    setEditGoal(session.goal ?? 'recomp')
   }
 
   async function handleSaveEdit(id) {
     const days = Math.max(7, Math.min(365, Number(editTotalDays) || 90))
-    await updateSession(id, { name: editName.trim() || undefined, startDate: editStart, totalDays: days, planId: editPlanId })
+    await updateSession(id, { name: editName.trim() || undefined, startDate: editStart, totalDays: days, planId: editPlanId, goal: editGoal })
     setEditingId(null)
   }
 
@@ -126,6 +130,27 @@ export default function SessionsPage() {
             <div>
               <label className="text-xs text-zinc-400 block mb-1">Duration (days)</label>
               <input type="number" value={newTotalDays} min={7} max={365} onChange={(e) => setNewTotalDays(e.target.value)} className="input-field" />
+            </div>
+          </div>
+          <div>
+            <label className="text-xs text-zinc-400 block mb-2">Goal</label>
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { value: 'fat_loss', label: 'Fat Loss' },
+                { value: 'recomp', label: 'Recomp' },
+                { value: 'muscle_gain', label: 'Muscle Gain' },
+              ].map((g) => (
+                <button
+                  key={g.value}
+                  onClick={() => setNewGoal(g.value)}
+                  className="py-2 rounded-xl text-xs font-semibold border transition-colors"
+                  style={newGoal === g.value
+                    ? { background: 'rgba(124,58,237,0.2)', border: '1px solid rgba(124,58,237,0.4)', color: '#c4b5fd' }
+                    : glassBg}
+                >
+                  {g.label}
+                </button>
+              ))}
             </div>
           </div>
           <div>
@@ -194,6 +219,11 @@ export default function SessionsPage() {
                   <div className="text-xs text-zinc-400 mt-0.5">
                     {PLANS[session.planId ?? 'ppl']?.name ?? 'PPL'} · {totalDays} days · Started {format(new Date(session.startDate + 'T00:00:00'), 'MMM d, yyyy')}
                     {' · '}{getWorkoutCount(session.id)} workouts
+                    {session.goal && session.goal !== 'recomp' && (
+                      <span className="ml-1 text-zinc-500">
+                        · {session.goal === 'fat_loss' ? 'Fat Loss' : 'Muscle Gain'}
+                      </span>
+                    )}
                   </div>
                 </div>
                 <div className="text-right flex-shrink-0">
@@ -232,6 +262,27 @@ export default function SessionsPage() {
                     <div>
                       <label className="text-xs text-zinc-400 block mb-1">Duration (days)</label>
                       <input type="number" value={editTotalDays} min={7} max={365} onChange={(e) => setEditTotalDays(e.target.value)} className="input-field text-sm py-1" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-xs text-zinc-400 block mb-2">Goal</label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {[
+                        { value: 'fat_loss', label: 'Fat Loss' },
+                        { value: 'recomp', label: 'Recomp' },
+                        { value: 'muscle_gain', label: 'Muscle Gain' },
+                      ].map((g) => (
+                        <button
+                          key={g.value}
+                          onClick={() => setEditGoal(g.value)}
+                          className="py-1.5 rounded-xl text-xs font-semibold border transition-colors"
+                          style={editGoal === g.value
+                            ? { background: 'rgba(124,58,237,0.2)', border: '1px solid rgba(124,58,237,0.4)', color: '#c4b5fd' }
+                            : glassBg}
+                        >
+                          {g.label}
+                        </button>
+                      ))}
                     </div>
                   </div>
                   <div>

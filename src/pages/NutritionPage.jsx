@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { format } from 'date-fns'
 import { useStore } from '../store.jsx'
 
-const CALORIE_GOAL = 2100
 const TODAY = format(new Date(), 'yyyy-MM-dd')
 
 const QUICK_FOODS = [
@@ -24,7 +23,7 @@ const MEAL_SLOTS = ['Breakfast', 'Lunch', 'Snack', 'Dinner', 'Before Bed']
 const EMPTY_MEALS = MEAL_SLOTS.reduce((acc, m) => ({ ...acc, [m]: [] }), {})
 
 export default function NutritionPage() {
-  const { todayLog, updateTodayLog, updateTodayMeals, proteinGoal } = useStore()
+  const { todayLog, updateTodayLog, updateTodayMeals, proteinGoal, calorieGoal } = useStore()
   const [meals, setMeals] = useState(() => {
     try {
       const stored = localStorage.getItem(`wt_meals_${TODAY}`)
@@ -60,7 +59,7 @@ export default function NutritionPage() {
   const protein = todayLog.protein
   const calories = todayLog.calories || 0
   const proteinPct = Math.min((protein / proteinGoal) * 100, 100)
-  const calPct = Math.min((calories / CALORIE_GOAL) * 100, 100)
+  const calPct = Math.min((calories / calorieGoal) * 100, 100)
 
   return (
     <div className="space-y-4">
@@ -69,7 +68,7 @@ export default function NutritionPage() {
       {/* Macro totals */}
       <div className="grid grid-cols-2 gap-3">
         <MacroCard label="Protein" value={protein} goal={proteinGoal} unit="g" pct={proteinPct} color="amber" />
-        <MacroCard label="Calories" value={calories} goal={CALORIE_GOAL} unit="kcal" pct={calPct} color="orange" />
+        <MacroCard label="Calories" value={calories} goal={calorieGoal} unit="kcal" pct={calPct} color="orange" />
       </div>
 
       {/* Food diary */}

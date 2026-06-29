@@ -10,9 +10,20 @@ const STEPS = ['Name', 'Plan', 'Schedule', 'Stats']
 
 const glassBg = { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }
 
-function calcProtein(weightKg) {
+function calcProtein(weightKg, goal) {
   if (!weightKg || weightKg <= 0) return null
-  return Math.round((weightKg * 2.0) / 5) * 5
+  const multiplier = goal === 'fat_loss' ? 2.2 : goal === 'muscle_gain' ? 1.6 : 1.8
+  return Math.round((weightKg * multiplier) / 10) * 10
+}
+
+function calcCalories(weightKg, heightCm, age, sex, goal) {
+  if (!weightKg || !heightCm || !age || !sex) return null
+  const bmr = sex === 'male'
+    ? 10 * weightKg + 6.25 * heightCm - 5 * age + 5
+    : 10 * weightKg + 6.25 * heightCm - 5 * age - 161
+  const tdee = bmr * 1.55
+  const adj = goal === 'fat_loss' ? -400 : goal === 'muscle_gain' ? 300 : 0
+  return Math.round((tdee + adj) / 50) * 50
 }
 
 function calcBMI(weightKg, heightCm) {
@@ -25,15 +36,19 @@ export default function OnboardingFlow() {
   const [step, setStep] = useState(0)
   const [name, setName] = useState('')
   const [planId, setPlanId] = useState(null)
+  const [goal, setGoal] = useState('recomp')
   const [startDate, setStartDate] = useState(today)
   const [totalDays, setTotalDays] = useState(90)
   const [weightKg, setWeightKg] = useState('')
   const [heightCm, setHeightCm] = useState('')
+  const [age, setAge] = useState('')
+  const [sex, setSex] = useState('')
   const [firstName, setFirstName] = useState('')
   const [loading, setLoading] = useState(false)
 
   const selectedPlan = PLAN_LIST.find((p) => p.id === planId)
-  const protein = calcProtein(Number(weightKg))
+  const protein = calcProtein(Number(weightKg), goal)
+  const calories = calcCalories(Number(weightKg), Number(heightCm), Number(age), sex, goal)
   const bmi = calcBMI(Number(weightKg), Number(heightCm))
 
   async function handleFinish() {
@@ -41,8 +56,8 @@ export default function OnboardingFlow() {
     const days = Math.max(7, Math.min(365, Number(totalDays) || 90))
     setLoading(true)
     try {
-      updateUserProfile({ name: firstName.trim(), weightKg: Number(weightKg) || 0, heightCm: Number(heightCm) || 0 })
-      await createSession(name.trim(), startDate, planId, days)
+      updateUserProfile({ name: firstName.trim(), weightKg: Number(weightKg) || 0, heightCm: Number(heightCm) || 0, age: Number(age) || 0, sex })
+      await createSession(name.trim(), startDate, planId, days, goal)
     } finally {
       setLoading(false)
     }
@@ -108,9 +123,29 @@ export default function OnboardingFlow() {
         {step === 1 && (
           <div className="space-y-4">
             <div className="space-y-1">
-              <h2 className="font-semibold text-lg text-white">Choose your workout plan</h2>
-              <p className="text-xs text-zinc-400">Pick the split that fits your schedule. You can change it later from Sessions.</p>
+              <h2 className="font-semibold text-lg text-white">Choose your goal & plan</h2>
+              <p className="text-xs text-zinc-400">What are you training for? This sets your calorie and protein targets.</p>
             </div>
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { value: 'fat_loss', label: 'Fat Loss', desc: '−400 kcal deficit' },
+                { value: 'recomp', label: 'Recomp', desc: 'Maintenance' },
+                { value: 'muscle_gain', label: 'Muscle Gain', desc: '+300 kcal surplus' },
+              ].map((g) => (
+                <button
+                  key={g.value}
+                  onClick={() => setGoal(g.value)}
+                  className="flex flex-col items-center py-3 px-2 rounded-2xl transition-all"
+                  style={goal === g.value
+                    ? { border: '1px solid rgba(124,58,237,0.6)', background: 'rgba(124,58,237,0.15)' }
+                    : { border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.04)' }}
+                >
+                  <span className={`text-xs font-bold ${goal === g.value ? 'text-violet-300' : 'text-zinc-300'}`}>{g.label}</span>
+                  <span className="text-[10px] text-zinc-500 mt-0.5">{g.desc}</span>
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-zinc-500">Pick the split that fits your schedule.</p>
             <div className="space-y-2">
               {PLAN_LIST.map((plan) => (
                 <button
@@ -192,7 +227,7 @@ export default function OnboardingFlow() {
           <div className="space-y-4">
             <div className="space-y-1">
               <h2 className="font-semibold text-lg text-white">Your stats</h2>
-              <p className="text-xs text-zinc-400">Used to calculate your daily protein target. You can update these anytime.</p>
+              <p className="text-xs text-zinc-400">Used to calculate your personalised calorie and protein targets.</p>
             </div>
             <div className="card space-y-4">
               <div>
@@ -217,7 +252,6 @@ export default function OnboardingFlow() {
                     min={30}
                     max={200}
                     step={0.5}
-                    autoFocus
                   />
                 </div>
                 <div>
@@ -232,15 +266,40 @@ export default function OnboardingFlow() {
                     max={250}
                   />
                 </div>
+                <div>
+                  <label className="text-xs text-zinc-400 block mb-1">Age</label>
+                  <input
+                    type="number"
+                    value={age}
+                    onChange={(e) => setAge(e.target.value)}
+                    placeholder="e.g. 25"
+                    className="input-field"
+                    min={10}
+                    max={100}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-zinc-400 block mb-1">Sex</label>
+                  <select value={sex} onChange={(e) => setSex(e.target.value)} className="input-field">
+                    <option value="">Select…</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                  </select>
+                </div>
               </div>
 
               {protein && (
-                <div className="rounded-xl px-4 py-3 space-y-1" style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)' }}>
+                <div className="rounded-xl px-4 py-3 space-y-2" style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)' }}>
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-amber-400 font-semibold">Daily Protein Target</span>
                     <span className="text-xl font-black text-amber-400">{protein}g</span>
                   </div>
-                  <p className="text-xs text-zinc-400">Based on 2g per kg bodyweight — optimal for muscle building and recomposition.</p>
+                  {calories && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-orange-400 font-semibold">Daily Calorie Target</span>
+                      <span className="text-xl font-black text-orange-400">{calories} kcal</span>
+                    </div>
+                  )}
                   {bmi && <p className="text-xs text-zinc-400">BMI: {bmi}</p>}
                 </div>
               )}
@@ -251,10 +310,12 @@ export default function OnboardingFlow() {
               <div className="text-xs font-semibold text-violet-400 mb-1">Your cycle</div>
               {[
                 { label: 'Name', value: name },
+                { label: 'Goal', value: goal === 'fat_loss' ? 'Fat Loss' : goal === 'muscle_gain' ? 'Muscle Gain' : 'Recomp' },
                 { label: 'Plan', value: selectedPlan?.name },
                 { label: 'Start', value: format(new Date(startDate + 'T00:00:00'), 'MMM d, yyyy') },
                 { label: 'Duration', value: `${totalDays} days` },
-                protein && { label: 'Protein goal', value: `${protein}g / day`, valueClass: 'text-amber-400' },
+                protein ? { label: 'Protein goal', value: `${protein}g / day`, valueClass: 'text-amber-400' } : null,
+                calories ? { label: 'Calorie target', value: `${calories} kcal / day`, valueClass: 'text-orange-400' } : null,
               ].filter(Boolean).map(({ label, value, valueClass }) => (
                 <div key={label} className="flex justify-between text-xs">
                   <span className="text-zinc-400">{label}</span>

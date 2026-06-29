@@ -1,6 +1,9 @@
-import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react'
-import { format } from 'date-fns'
+import { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from 'react'
+import { format, addDays } from 'date-fns'
 import { supabase } from './lib/supabase'
+import { getPlan } from './data/workoutPlans'
+import { computeStreak, getWeeklySummary, getStreakFreezeState, applyStreakFreeze } from './utils/streakUtils'
+import { getNotifPrefs, scheduleDailyNotifications, clearScheduledNotifications, sendWeeklyDigestNotif } from './utils/notifications'
 
 const StoreContext = createContext(null)
 
@@ -29,7 +32,10 @@ export function StoreProvider({ children }) {
   const [bodyMetrics, setBodyMetrics] = useState(() => load('wt_body_metrics', []))
   const [activeWorkout, setActiveWorkout] = useState(null)
   const [needsOnboarding, setNeedsOnboarding] = useState(false)
-  const [userProfile, setUserProfile] = useState(() => load('wt_user_profile', { weightKg: 0, heightCm: 0, name: '' }))
+  const [userProfile, setUserProfile] = useState(() => load('wt_user_profile', { weightKg: 0, heightCm: 0, name: '', age: 0, sex: '' }))
+  const [streakFreezeState, setStreakFreezeState] = useState(
+    () => getStreakFreezeState(format(new Date(), 'yyyy-MM-dd'))
+  )
 
   const today = format(new Date(), 'yyyy-MM-dd')
   const userRef = useRef(null)
@@ -206,14 +212,14 @@ export function StoreProvider({ children }) {
     setBodyMetrics(metrics); save('wt_body_metrics', metrics)
   }
 
-  async function insertSession(userId, name, startDate, planId = 'ppl', totalDays = 90) {
+  async function insertSession(userId, name, startDate, planId = 'ppl', totalDays = 90, goal = 'recomp') {
     const { data, error } = await supabase
       .from('sessions')
-      .insert({ user_id: userId, name, start_date: startDate, plan_id: planId, total_days: totalDays })
+      .insert({ user_id: userId, name, start_date: startDate, plan_id: planId, total_days: totalDays, goal })
       .select()
       .single()
     if (error) throw error
-    return { id: data.id, name: data.name, startDate: data.start_date, planId: data.plan_id, totalDays: data.total_days ?? 90, createdAt: data.created_at }
+    return { id: data.id, name: data.name, startDate: data.start_date, planId: data.plan_id, totalDays: data.total_days ?? 90, goal: data.goal ?? 'recomp', createdAt: data.created_at }
   }
 
   async function loadAllData(userId) {
@@ -223,7 +229,13 @@ export function StoreProvider({ children }) {
       const { data: profileData } = await supabase
         .from('user_profiles').select('*').eq('user_id', userId).single()
       if (profileData) {
-        const profile = { weightKg: profileData.weight_kg, heightCm: profileData.height_cm, name: profileData.name ?? '' }
+        const profile = {
+          weightKg: profileData.weight_kg,
+          heightCm: profileData.height_cm,
+          name: profileData.name ?? '',
+          age: profileData.age ?? 0,
+          sex: profileData.sex ?? '',
+        }
         setUserProfile(profile)
         save('wt_user_profile', profile)
       }
@@ -236,7 +248,8 @@ export function StoreProvider({ children }) {
 
       if (rawSessions?.length) {
         resolvedSessions = rawSessions.map((s) => ({
-          id: s.id, name: s.name, startDate: s.start_date, planId: s.plan_id ?? 'ppl', totalDays: s.total_days ?? 90, createdAt: s.created_at,
+          id: s.id, name: s.name, startDate: s.start_date, planId: s.plan_id ?? 'ppl',
+          totalDays: s.total_days ?? 90, goal: s.goal ?? 'recomp', createdAt: s.created_at,
         }))
       } else {
         // Check if there's old pre-sessions data to migrate
@@ -279,12 +292,12 @@ export function StoreProvider({ children }) {
   }
 
   // ── Session management ────────────────────────────────────────────────────
-  const createSession = useCallback(async (name, startDate, planId = 'ppl', totalDays = 90) => {
+  const createSession = useCallback(async (name, startDate, planId = 'ppl', totalDays = 90, goal = 'recomp') => {
     let newSession
     if (userRef.current) {
-      newSession = await insertSession(userRef.current.id, name, startDate, planId, totalDays)
+      newSession = await insertSession(userRef.current.id, name, startDate, planId, totalDays, goal)
     } else {
-      newSession = { id: crypto.randomUUID(), name, startDate, planId, totalDays, createdAt: new Date().toISOString() }
+      newSession = { id: crypto.randomUUID(), name, startDate, planId, totalDays, goal, createdAt: new Date().toISOString() }
     }
     setNeedsOnboarding(false)
     setSessions((prev) => { const next = [...prev, newSession]; save('wt_sessions', next); return next })
@@ -318,6 +331,7 @@ export function StoreProvider({ children }) {
       if (updates.startDate !== undefined) dbUpdates.start_date = updates.startDate
       if (updates.totalDays !== undefined) dbUpdates.total_days = updates.totalDays
       if (updates.planId !== undefined) dbUpdates.plan_id = updates.planId
+      if (updates.goal !== undefined) dbUpdates.goal = updates.goal
       await supabase.from('sessions').update(dbUpdates).eq('id', sessionId).eq('user_id', userRef.current.id)
     }
   }, [])
@@ -442,15 +456,33 @@ export function StoreProvider({ children }) {
         name: profile.name ?? '',
         weight_kg: profile.weightKg,
         height_cm: profile.heightCm,
+        age: profile.age ?? 0,
+        sex: profile.sex ?? '',
         updated_at: new Date().toISOString(),
       }, { onConflict: 'user_id' })
       if (error) console.error('[kinetiq] profile sync failed:', error.message, error)
     }
   }, [])
 
+  const proteinMultiplier =
+    activeSession?.goal === 'fat_loss' ? 2.2 :
+    activeSession?.goal === 'muscle_gain' ? 1.6 : 1.8
+
   const proteinGoal = userProfile.weightKg > 0
-    ? Math.round((userProfile.weightKg * 1.8) / 10) * 10
+    ? Math.round((userProfile.weightKg * proteinMultiplier) / 10) * 10
     : 130
+
+  const calorieGoal = useMemo(() => {
+    const { weightKg, heightCm, age, sex } = userProfile
+    const sessionGoal = activeSession?.goal ?? 'recomp'
+    if (!weightKg || !heightCm || !age || !sex) return 2100
+    const bmr = sex === 'male'
+      ? 10 * weightKg + 6.25 * heightCm - 5 * age + 5
+      : 10 * weightKg + 6.25 * heightCm - 5 * age - 161
+    const tdee = bmr * 1.55
+    const adjustment = sessionGoal === 'fat_loss' ? -400 : sessionGoal === 'muscle_gain' ? 300 : 0
+    return Math.round((tdee + adjustment) / 50) * 50
+  }, [userProfile, activeSession?.goal])
 
   const totalDays = activeSession?.totalDays ?? 90
   const dayNumber = (() => {
@@ -460,16 +492,62 @@ export function StoreProvider({ children }) {
     return Math.min(diff + 1, totalDays)
   })()
 
+  // ── Streak ────────────────────────────────────────────────────────────────
+  const planCycle = useMemo(
+    () => getPlan(activeSession?.planId ?? 'ppl').cycle,
+    [activeSession?.planId]
+  )
+
+  const streakData = useMemo(
+    () => computeStreak(workoutHistory, activeSession, planCycle, today, streakFreezeState),
+    [workoutHistory, activeSession, planCycle, today, streakFreezeState]
+  )
+
+  const thisMonday = useMemo(() => {
+    const d = new Date(today + 'T00:00:00')
+    const offset = d.getDay() === 0 ? 6 : d.getDay() - 1
+    d.setDate(d.getDate() - offset)
+    return format(d, 'yyyy-MM-dd')
+  }, [today])
+
+  const useStreakFreeze = useCallback(() => {
+    if (!streakData.missedDate || !activeSession) return
+    const updated = applyStreakFreeze(streakData.missedDate, today, planCycle, activeSession.startDate)
+    if (updated) setStreakFreezeState(updated)
+  }, [streakData.missedDate, today, planCycle, activeSession])
+
+  // Schedule daily reminder notifications whenever streak or workout status changes
+  useEffect(() => {
+    const prefs = getNotifPrefs()
+    const todayDone = !!workoutHistory[today]
+    scheduleDailyNotifications(streakData.currentStreak, todayDone, prefs)
+    return () => clearScheduledNotifications()
+  }, [streakData.currentStreak, workoutHistory, today])
+
+  // Send weekly digest notification once per week on Monday
+  useEffect(() => {
+    const isMonday = new Date(today + 'T00:00:00').getDay() === 1
+    const lastShown = localStorage.getItem('wt_last_weekly_notif')
+    if (!isMonday || lastShown === today || !activeSession) return
+    const lastMondayDate = format(addDays(new Date(today + 'T00:00:00'), -7), 'yyyy-MM-dd')
+    const summary = getWeeklySummary(workoutHistory, dailyLogs, lastMondayDate, activeSession, planCycle, proteinGoal)
+    if (summary && summary.workoutsDone > 0) {
+      sendWeeklyDigestNotif(summary)
+      localStorage.setItem('wt_last_weekly_notif', today)
+    }
+  }, [today]) // intentionally only runs when today changes
+
   return (
     <StoreContext.Provider value={{
       user, authLoading, syncing, needsOnboarding,
-      userProfile, updateUserProfile, proteinGoal,
+      userProfile, updateUserProfile, proteinGoal, calorieGoal,
       today, startDate, dayNumber, totalDays,
       sessions, activeSession, activeSessionId,
       todayLog, dailyLogs, workoutHistory, bodyMetrics,
       activeWorkout, setActiveWorkout,
       updateTodayLog, updateTodayMeals, toggleSupplement, saveWorkout, addBodyMetric,
       createSession, switchSession, updateSession, resetSessionProgress, deleteSession,
+      streakData, streakFreezeState, useStreakFreeze,
       refetchSessionData: () => {
         if (userRef.current && sessionIdRef.current) fetchSessionDataRef.current(userRef.current.id, sessionIdRef.current)
       },

@@ -1,15 +1,20 @@
+import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { format } from 'date-fns'
 import { useStore } from '../store.jsx'
 import { getRecommendedWorkout, PHASE_INFO } from '../data/workoutPlans'
+import { requestNotifPermission, getNotifPermission } from '../utils/notifications'
 
 const WATER_GOAL = 10
 const STEPS_GOAL = 9000
 const SLEEP_GOAL = 7.5
 
 export default function Dashboard() {
-  const { today, dayNumber, totalDays, todayLog, workoutHistory, updateTodayLog, toggleSupplement, activeSession, proteinGoal, userProfile } = useStore()
+  const { today, dayNumber, totalDays, todayLog, workoutHistory, updateTodayLog, toggleSupplement, activeSession, proteinGoal, userProfile, streakData, streakFreezeState, useStreakFreeze } = useStore()
   const navigate = useNavigate()
+  const [showNotifPrompt, setShowNotifPrompt] = useState(
+    () => typeof window !== 'undefined' && 'Notification' in window && getNotifPermission() === 'default'
+  )
   const recommended = getRecommendedWorkout(activeSession?.planId ?? 'ppl', workoutHistory)
   const todayDone = workoutHistory[today]
 
@@ -30,6 +35,28 @@ export default function Dashboard() {
   return (
     <div className="space-y-4">
 
+      {/* Notification permission prompt */}
+      {showNotifPrompt && (
+        <div className="rounded-2xl bg-amber-500/8 border border-amber-500/25 p-4 flex items-start gap-3">
+          <span className="text-xl flex-shrink-0">🔔</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-white">Enable workout reminders?</p>
+            <p className="text-xs text-zinc-400 mt-0.5">Get a daily nudge so you never miss a session.</p>
+          </div>
+          <div className="flex gap-2 flex-shrink-0">
+            <button
+              onClick={() => { requestNotifPermission(); setShowNotifPrompt(false) }}
+              className="text-xs bg-amber-500 text-black font-semibold px-3 py-1.5 rounded-lg"
+            >
+              Enable
+            </button>
+            <button onClick={() => setShowNotifPrompt(false)} className="text-xs text-zinc-500 px-2 py-1.5">
+              Later
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between pt-1">
         <div>
@@ -41,6 +68,32 @@ export default function Dashboard() {
             <Link to="/sessions" className="text-xs text-violet-400/60 hover:text-violet-400 transition-colors mt-0.5 inline-block">
               {activeSession.name} ›
             </Link>
+          )}
+
+          {/* Streak badge row */}
+          {activeSession && streakData && (
+            <div className="flex items-center gap-3 mt-2">
+              <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${
+                streakData.currentStreak > 0
+                  ? 'bg-amber-500/15 border border-amber-500/25 text-amber-300'
+                  : 'bg-white/[0.04] border border-white/[0.08] text-zinc-400'
+              }`}>
+                <span className="text-sm leading-none">🔥</span>
+                <span>{streakData.currentStreak}</span>
+                <span className="font-normal opacity-70">day{streakData.currentStreak !== 1 ? 's' : ''}</span>
+              </div>
+              {streakData.longestStreak > streakData.currentStreak && streakData.longestStreak > 0 && (
+                <span className="text-[10px] text-zinc-500">Best: {streakData.longestStreak}d</span>
+              )}
+              {streakData.streakBroken && streakFreezeState && streakFreezeState.freezesUsed < 1 && (
+                <button
+                  onClick={useStreakFreeze}
+                  className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-500/15 border border-blue-500/25 text-blue-300 hover:bg-blue-500/25 transition-colors"
+                >
+                  <span>🧊</span><span>Freeze</span>
+                </button>
+              )}
+            </div>
           )}
         </div>
 
