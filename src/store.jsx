@@ -62,12 +62,20 @@ export function StoreProvider({ children }) {
   )
 
   const today = format(new Date(), 'yyyy-MM-dd')
-  const [todayMeals, setTodayMeals] = useState(() => loadMeals(activeSessionId, format(new Date(), 'yyyy-MM-dd')))
+
+  // Meals are held per date, not just for today, so a missed or mistyped day
+  // can be corrected from the Nutrition page.
+  const [mealsByDate, setMealsByDate] = useState(() => {
+    const d = format(new Date(), 'yyyy-MM-dd')
+    return { [d]: loadMeals(activeSessionId, d) }
+  })
 
   const userRef = useRef(null)
   const sessionIdRef = useRef(activeSessionId)
-  const logSyncTimer = useRef(null)
-  const latestMealsRef = useRef(todayMeals)
+  const logSyncTimers = useRef({})
+  // Mirrors mealsByDate and is updated synchronously, so a log write triggered
+  // in the same tick as a meal edit can't persist a stale meals payload.
+  const mealsRef = useRef(mealsByDate)
 
   useEffect(() => { userRef.current = user }, [user])
   useEffect(() => { sessionIdRef.current = activeSessionId }, [activeSessionId])
@@ -126,10 +134,8 @@ export function StoreProvider({ children }) {
         if (r.session_id !== activeSessionId) return
         if (r.meals && Object.keys(r.meals).length > 0) {
           save(mealsKey(activeSessionId, r.date), r.meals)
-          if (r.date === today) {
-            latestMealsRef.current = r.meals
-            setTodayMeals(r.meals)
-          }
+          mealsRef.current = { ...mealsRef.current, [r.date]: r.meals }
+          setMealsByDate((prev) => ({ ...prev, [r.date]: r.meals }))
         }
         setDailyLogs((prev) => {
           const next = { ...prev, [r.date]: {
@@ -222,11 +228,12 @@ export function StoreProvider({ children }) {
         }))
       : {}
 
-    // Set today's meals from the server unconditionally — including to empty.
-    // Without the empty case, switching sessions left the previous cycle's food in place.
-    const serverTodayMeals = l.data?.find((r) => r.date === today)?.meals ?? {}
-    latestMealsRef.current = serverTodayMeals
-    setTodayMeals(serverTodayMeals)
+    // Rebuild the whole per-date meal map from the server, including the empty
+    // case — without that, switching sessions left the previous cycle's food in place.
+    const serverMeals = Object.fromEntries((l.data ?? []).map((r) => [r.date, r.meals ?? {}]))
+    if (!serverMeals[today]) serverMeals[today] = {}
+    mealsRef.current = serverMeals
+    setMealsByDate(serverMeals)
 
     const hist = w.data?.length
       ? Object.fromEntries(w.data.map((r) => [r.date, {
@@ -340,7 +347,7 @@ export function StoreProvider({ children }) {
     setDailyLogs({}); save('wt_daily_logs', {})
     setWorkoutHistory({}); save('wt_workout_history', {})
     setBodyMetrics([]); save('wt_body_metrics', [])
-    setTodayMeals({}); latestMealsRef.current = {}
+    setMealsByDate({}); mealsRef.current = {}
     return newSession
   }, [])
 
@@ -383,7 +390,7 @@ export function StoreProvider({ children }) {
       setDailyLogs({}); save('wt_daily_logs', {})
       setWorkoutHistory({}); save('wt_workout_history', {})
       setBodyMetrics([]); save('wt_body_metrics', [])
-      setTodayMeals({}); latestMealsRef.current = {}
+      setMealsByDate({}); mealsRef.current = {}
     }
     if (userRef.current) {
       await Promise.all([
@@ -410,19 +417,21 @@ export function StoreProvider({ children }) {
   }, [])
 
   // ── Daily data sync ───────────────────────────────────────────────────────
-  function scheduledLogSync(date, log) {
+  // Timers are keyed by date: a single shared timer meant editing two different
+  // days in quick succession dropped one of the writes.
+  function scheduledLogSync(date, log, meals) {
     if (!userRef.current || !sessionIdRef.current) return
-    if (logSyncTimer.current) clearTimeout(logSyncTimer.current)
-    logSyncTimer.current = setTimeout(async () => {
+    clearTimeout(logSyncTimers.current[date])
+    logSyncTimers.current[date] = setTimeout(async () => {
       const { error } = await supabase.from('daily_logs').upsert({
         user_id: userRef.current.id, session_id: sessionIdRef.current, date,
         water: log.water, steps: log.steps, protein: log.protein,
         calories: log.calories, sleep: log.sleep, supplements: log.supplements,
-        meals: latestMealsRef.current,
+        meals: meals ?? mealsRef.current[date] ?? {},
       }, { onConflict: 'user_id,session_id,date' })
       if (error) {
         console.error('[kinetiq] daily_log sync failed:', error.message, error)
-        setSyncError("Today's log didn't reach the cloud.")
+        setSyncError(date === today ? "Today's log didn't reach the cloud." : "That day's log didn't reach the cloud.")
       } else {
         setSyncError(null)
       }
@@ -431,33 +440,40 @@ export function StoreProvider({ children }) {
 
   const todayLog = dailyLogs[today] || DEFAULT_LOG
 
-  const applyTodayLog = useCallback((updates) => {
+  const applyLogForDate = useCallback((date, updates, meals) => {
     setDailyLogs((prev) => {
-      const updated = { ...(prev[today] || DEFAULT_LOG), ...updates }
-      const next = { ...prev, [today]: updated }
+      const updated = { ...(prev[date] || DEFAULT_LOG), ...updates }
+      const next = { ...prev, [date]: updated }
       save('wt_daily_logs', next)
-      scheduledLogSync(today, updated)
+      scheduledLogSync(date, updated, meals)
       return next
     })
   }, [today])
 
   // Water, steps, sleep. Protein and calories deliberately do NOT come through
   // here — they are derived from meals so there is exactly one writer.
-  const updateTodayLog = applyTodayLog
+  const updateTodayLog = useCallback((updates) => applyLogForDate(today, updates), [applyLogForDate, today])
 
-  const updateTodayMeals = useCallback((meals) => {
-    latestMealsRef.current = meals
-    setTodayMeals(meals)
-    save(mealsKey(sessionIdRef.current, today), meals)
-    applyTodayLog(mealTotals(meals))
-  }, [today, applyTodayLog])
+  const updateMealsForDate = useCallback((date, meals) => {
+    mealsRef.current = { ...mealsRef.current, [date]: meals }
+    setMealsByDate((prev) => ({ ...prev, [date]: meals }))
+    save(mealsKey(sessionIdRef.current, date), meals)
+    applyLogForDate(date, mealTotals(meals), meals)
+  }, [applyLogForDate])
+
+  const updateTodayMeals = useCallback((meals) => updateMealsForDate(today, meals), [updateMealsForDate, today])
+
+  const getMealsForDate = useCallback(
+    (date) => mealsByDate[date] ?? loadMeals(sessionIdRef.current, date),
+    [mealsByDate]
+  )
 
   // The Dashboard slider sets the day's TOTAL protein. Whatever exceeds what the
   // diary already accounts for is held as a single "Quick add" item, so the diary
   // stays the only writer and the number on screen is always explainable.
   const setTotalProtein = useCallback((grams) => {
-    updateTodayMeals(withTotalProtein(latestMealsRef.current, grams))
-  }, [updateTodayMeals])
+    updateTodayMeals(withTotalProtein(mealsRef.current[today], grams))
+  }, [updateTodayMeals, today])
 
   const toggleSupplement = useCallback((key) => {
     setDailyLogs((prev) => {
@@ -638,9 +654,10 @@ export function StoreProvider({ children }) {
       effectiveWeightKg, latestLoggedWeight,
       today, startDate, dayNumber, totalDays,
       sessions, activeSession, activeSessionId,
-      todayLog, dailyLogs, workoutHistory, bodyMetrics, todayMeals,
+      todayLog, dailyLogs, workoutHistory, bodyMetrics,
+      todayMeals: mealsByDate[today] || {}, mealsByDate, getMealsForDate,
       activeWorkout, setActiveWorkout,
-      updateTodayLog, updateTodayMeals, setTotalProtein, toggleSupplement, saveWorkout, addBodyMetric,
+      updateTodayLog, updateTodayMeals, updateMealsForDate, setTotalProtein, toggleSupplement, saveWorkout, addBodyMetric,
       createSession, switchSession, updateSession, resetSessionProgress, deleteSession,
       streakData, streakFreezeState, useStreakFreeze,
       refetchSessionData: () => {

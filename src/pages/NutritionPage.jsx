@@ -1,267 +1,456 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import { format, addDays, parseISO } from 'date-fns'
 import { useStore } from '../store.jsx'
-import { QUICK_ADD_SLOT } from '../utils/nutritionTotals'
-
-const QUICK_FOODS = [
-  { name: 'Soya Chunks (100g)', protein: 52, cal: 345 },
-  { name: 'Paneer (100g)', protein: 18, cal: 265 },
-  { name: 'Dal (1 cup)', protein: 18, cal: 230 },
-  { name: 'Milk (250ml)', protein: 8, cal: 150 },
-  { name: 'Curd (200g)', protein: 7, cal: 120 },
-  { name: 'Oats (80g)', protein: 10, cal: 300 },
-  { name: 'Whey Protein (1 scoop)', protein: 24, cal: 120 },
-  { name: 'Peanuts (30g)', protein: 8, cal: 175 },
-  { name: 'Tofu (100g)', protein: 17, cal: 145 },
-  { name: 'Roasted Chana (50g)', protein: 11, cal: 190 },
-  { name: 'Roti (1 piece)', protein: 3, cal: 80 },
-  { name: 'Egg (1 whole)', protein: 6, cal: 70 },
-]
+import { QUICK_ADD_SLOT, mealTotals, scaleFood } from '../utils/nutritionTotals'
+import {
+  SEED_FOODS, loadCatalog, rememberFood, loadTemplates, saveTemplate,
+  removeTemplate,
+} from '../utils/foodCatalog'
 
 const MEAL_SLOTS = ['Breakfast', 'Lunch', 'Snack', 'Dinner', 'Before Bed']
-const EMPTY_MEALS = MEAL_SLOTS.reduce((acc, m) => ({ ...acc, [m]: [] }), {})
+const PORTIONS = [0.5, 1, 1.5, 2]
+
+function byRank(a, b) {
+  const d = (b.useCount ?? 0) - (a.useCount ?? 0)
+  return d !== 0 ? d : a.name.localeCompare(b.name)
+}
 
 export default function NutritionPage() {
-  const { todayLog, updateTodayMeals, todayMeals, proteinGoal, calorieGoal } = useStore()
+  const { user, today, proteinGoal, calorieGoal, getMealsForDate, updateMealsForDate } = useStore()
 
-  // Meals live in the store, which derives protein/calories from them. This page
-  // used to keep its own copy and overwrite those totals on every mount, which
-  // silently clobbered the Dashboard slider and missed cross-device updates.
-  const meals = todayMeals && Object.keys(todayMeals).length > 0 ? todayMeals : EMPTY_MEALS
+  const [date, setDate] = useState(today)
+  const [catalog, setCatalog] = useState(SEED_FOODS)
+  const [catalogAvailable, setCatalogAvailable] = useState(false)
+  const [templates, setTemplates] = useState([])
 
-  function addFood(mealSlot, food) {
-    updateTodayMeals({ ...meals, [mealSlot]: [...(meals[mealSlot] || []), food] })
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      const { foods, available } = await loadCatalog(user?.id)
+      if (cancelled) return
+      setCatalog([...foods].sort(byRank))
+      setCatalogAvailable(available)
+      const t = await loadTemplates(user?.id)
+      if (!cancelled) setTemplates(t.templates)
+    })()
+    return () => { cancelled = true }
+  }, [user?.id])
+
+  const meals = getMealsForDate(date) || {}
+  const totals = mealTotals(meals)
+  const yesterday = format(addDays(parseISO(date), -1), 'yyyy-MM-dd')
+  const yesterdayMeals = getMealsForDate(yesterday) || {}
+
+  const setMeals = useCallback((next) => updateMealsForDate(date, next), [date, updateMealsForDate])
+
+  function addFoods(slot, foods) {
+    setMeals({ ...meals, [slot]: [...(meals[slot] || []), ...foods] })
   }
 
-  function removeFood(mealSlot, idx) {
-    updateTodayMeals({ ...meals, [mealSlot]: (meals[mealSlot] || []).filter((_, i) => i !== idx) })
+  function removeFood(slot, idx) {
+    setMeals({ ...meals, [slot]: (meals[slot] || []).filter((_, i) => i !== idx) })
   }
 
-  const quickAdded = meals[QUICK_ADD_SLOT] || []
-  const quickProtein = quickAdded.reduce((s, f) => s + (Number(f?.protein) || 0), 0)
+  // Every add also teaches the catalog, so the list reorders around what's
+  // actually eaten and a typed food is never typed twice.
+  async function remember(food) {
+    if (!catalogAvailable || !user?.id) return
+    const saved = await rememberFood(
+      user.id,
+      { name: food.name, protein: food.protein, cal: food.cal },
+      food.useCount ?? 0
+    )
+    if (saved) {
+      setCatalog((prev) => [saved, ...prev.filter((f) => f.name !== saved.name)].sort(byRank))
+    }
+  }
 
-  const protein = todayLog.protein
-  const calories = todayLog.calories || 0
-  const proteinPct = Math.min((protein / proteinGoal) * 100, 100)
-  const calPct = Math.min((calories / calorieGoal) * 100, 100)
+  async function logFood(slot, food, portion) {
+    addFoods(slot, [scaleFood(food, portion)])
+    await remember(food)
+  }
+
+  async function logCustom(slot, name, protein, cal) {
+    const food = { name: name.trim(), protein: Number(protein) || 0, cal: Number(cal) || 0 }
+    addFoods(slot, [food])
+    await remember(food)
+  }
+
+  async function handleSaveTemplate(slot, name) {
+    const items = (meals[slot] || []).map((f) => ({ name: f.name, protein: f.protein, cal: f.cal }))
+    if (!items.length || !name.trim()) return
+    const saved = await saveTemplate(user?.id, name.trim(), slot, items)
+    if (saved) setTemplates((prev) => [saved, ...prev.filter((t) => t.id !== saved.id)])
+  }
+
+  async function handleDeleteTemplate(id) {
+    setTemplates((prev) => prev.filter((t) => t.id !== id))
+    await removeTemplate(user?.id, id)
+  }
+
+  const proteinLeft = Math.max(0, proteinGoal - totals.protein)
+  const calLeft = Math.max(0, calorieGoal - totals.calories)
+  const isToday = date === today
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-semibold">Nutrition</h1>
+    <div className="space-y-6">
+      <header>
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-micro text-muted">Nutrition</p>
+          {!isToday && (
+            <button onClick={() => setDate(today)} className="text-micro text-muted hover:text-ink px-2 py-1">
+              Back to today
+            </button>
+          )}
+        </div>
 
-      {/* Macro totals */}
-      <div className="grid grid-cols-2 gap-3">
-        <MacroCard label="Protein" value={protein} goal={proteinGoal} unit="g" pct={proteinPct} color="amber" />
-        <MacroCard label="Calories" value={calories} goal={calorieGoal} unit="kcal" pct={calPct} color="orange" />
+        {/* Past days can be corrected — the page used to show only today. */}
+        <div className="flex items-center gap-2 mt-1.5">
+          <button
+            onClick={() => setDate(format(addDays(parseISO(date), -1), 'yyyy-MM-dd'))}
+            aria-label="Previous day"
+            className="w-11 h-11 flex items-center justify-center rounded-lg text-muted hover:text-ink"
+            style={{ border: '1px solid var(--rule)' }}
+          >
+            ‹
+          </button>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl font-semibold truncate">
+              {isToday ? 'Today' : format(parseISO(date), 'EEE d MMM')}
+            </h1>
+            <input
+              type="date"
+              value={date}
+              max={today}
+              onChange={(e) => e.target.value && setDate(e.target.value)}
+              className="text-micro text-muted bg-transparent mt-0.5"
+              aria-label="Pick a date"
+            />
+          </div>
+          <button
+            onClick={() => setDate(format(addDays(parseISO(date), 1), 'yyyy-MM-dd'))}
+            disabled={isToday}
+            aria-label="Next day"
+            className="w-11 h-11 flex items-center justify-center rounded-lg text-muted hover:text-ink disabled:opacity-30"
+            style={{ border: '1px solid var(--rule)' }}
+          >
+            ›
+          </button>
+        </div>
+      </header>
+
+      {/* What's left, which is the number you actually act on while eating. */}
+      <div className="panel rule-group">
+        <MacroRow label="Protein" value={totals.protein} goal={proteinGoal} left={proteinLeft} unit="g" />
+        <MacroRow label="Calories" value={totals.calories} goal={calorieGoal} left={calLeft} unit="kcal" />
       </div>
 
-      {/* Food diary */}
       {MEAL_SLOTS.map((slot) => (
         <MealSection
           key={slot}
           slot={slot}
           foods={meals[slot] || []}
-          onAdd={(food) => addFood(slot, food)}
+          catalog={catalog}
+          templates={templates.filter((t) => !t.slot || t.slot === slot)}
+          yesterdayFoods={yesterdayMeals[slot] || []}
+          canSaveMeals={catalogAvailable}
+          onLog={(food, portion) => logFood(slot, food, portion)}
+          onLogCustom={(n, p, c) => logCustom(slot, n, p, c)}
+          onLogMany={(foods) => addFoods(slot, foods)}
           onRemove={(idx) => removeFood(slot, idx)}
+          onSaveTemplate={(name) => handleSaveTemplate(slot, name)}
+          onDeleteTemplate={handleDeleteTemplate}
         />
       ))}
 
-      {/* Protein set straight from the Dashboard slider, surfaced here so the
-          day's total is always explainable rather than appearing out of nowhere. */}
-      {quickProtein > 0 && (
-        <div className="card flex items-center justify-between gap-3">
+      {/* Protein set from the Dashboard slider, surfaced so the day's total is
+          always explainable rather than appearing out of nowhere. */}
+      {(meals[QUICK_ADD_SLOT] || []).length > 0 && (
+        <div className="panel px-4 py-3 flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <span className="font-semibold text-sm text-ink">{QUICK_ADD_SLOT}</span>
-            <span className="text-xs text-muted ml-2">{quickProtein}g protein, set on the Dashboard</span>
+            <span className="text-sm">{QUICK_ADD_SLOT}</span>
+            <span className="text-micro text-muted ml-2 num">
+              {mealTotals({ q: meals[QUICK_ADD_SLOT] }).protein}g protein, set on the Dashboard
+            </span>
           </div>
           <button
-            onClick={() => updateTodayMeals({ ...meals, [QUICK_ADD_SLOT]: [] })}
-            className="text-xs font-semibold px-3 py-1.5 rounded-lg flex-shrink-0"
-            style={{ background: 'var(--raised)', color: '#8B949E', border: '1px solid var(--rule)' }}
+            onClick={() => setMeals({ ...meals, [QUICK_ADD_SLOT]: [] })}
+            className="text-micro text-muted hover:text-ink px-3 py-2 flex-shrink-0"
           >
             Clear
           </button>
         </div>
       )}
+
+      {!catalogAvailable && (
+        <p className="text-micro text-muted px-1">
+          Your food list isn't syncing yet — run the food catalog migration and it
+          will start learning what you eat. Logging works either way.
+        </p>
+      )}
     </div>
   )
 }
 
-function MealSection({ slot, foods, onAdd, onRemove }) {
+function MacroRow({ label, value, goal, left, unit }) {
+  const met = value >= goal
+  const pct = Math.min((value / goal) * 100, 100)
+  return (
+    <div className="px-4 py-3.5">
+      <div className="flex items-baseline justify-between gap-3">
+        <span className="text-xs text-muted">{label}</span>
+        <span className="text-micro num text-muted">
+          {met ? 'met' : `${left} ${unit} left`}
+        </span>
+      </div>
+      <div className="flex items-baseline gap-2 mt-1">
+        <span className={`num-lg text-[26px] ${met ? 'text-signal' : 'text-ink'}`}>{value}</span>
+        <span className="text-xs text-muted num">of {goal} {unit}</span>
+      </div>
+      <div className="progress-bar mt-2.5">
+        <div className="progress-fill" data-met={met} style={{ width: `${pct}%` }} />
+      </div>
+    </div>
+  )
+}
+
+function MealSection({
+  slot, foods, catalog, templates, yesterdayFoods, canSaveMeals,
+  onLog, onLogCustom, onLogMany, onRemove, onSaveTemplate, onDeleteTemplate,
+}) {
   const [adding, setAdding] = useState(false)
-  const [tab, setTab] = useState('quick') // 'quick' | 'custom'
+  const [tab, setTab] = useState('list')
+  const [query, setQuery] = useState('')
+  const [portion, setPortion] = useState(1)
   const [customName, setCustomName] = useState('')
   const [customProtein, setCustomProtein] = useState('')
   const [customCal, setCustomCal] = useState('')
+  const [namingMeal, setNamingMeal] = useState(false)
+  const [mealName, setMealName] = useState('')
 
-  const mealProtein = foods.reduce((s, f) => s + f.protein, 0)
-  const mealCal = foods.reduce((s, f) => s + f.cal, 0)
+  const t = mealTotals({ s: foods })
+  const q = query.trim().toLowerCase()
+  const matches = q ? catalog.filter((f) => f.name.toLowerCase().includes(q)) : catalog
 
-  function handleQuickAdd(food) {
-    onAdd(food)
+  function log(food) {
+    onLog(food, portion)
+    setPortion(1)
+    setQuery('')
     setAdding(false)
   }
 
-  function handleCustomAdd() {
+  function addCustom() {
     if (!customName.trim()) return
-    onAdd({
-      name: customName.trim(),
-      protein: +customProtein || 0,
-      cal: +customCal || 0,
-    })
-    setCustomName('')
-    setCustomProtein('')
-    setCustomCal('')
+    onLogCustom(customName, customProtein, customCal)
+    setCustomName(''); setCustomProtein(''); setCustomCal('')
     setAdding(false)
+  }
+
+  function commitMealName() {
+    if (!mealName.trim()) return
+    onSaveTemplate(mealName)
+    setMealName('')
+    setNamingMeal(false)
   }
 
   return (
-    <div className="card space-y-3">
-      {/* Meal header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <span className="font-semibold text-sm text-ink">{slot}</span>
-          {foods.length > 0 && (
-            <span className="text-xs text-muted ml-2">
-              {mealProtein}g protein · {mealCal} kcal
-            </span>
-          )}
-        </div>
-        <button
-          onClick={() => setAdding((v) => !v)}
-          className="text-xs font-semibold px-3 py-1 rounded-lg transition-colors"
-          style={{
-            background: adding ? 'var(--raised)' : 'var(--raised)',
-            color: adding ? 'var(--ink)' : '#8B949E',
-            border: `1px solid ${adding ? '#3C4650' : 'var(--rule)'}`,
-          }}
-        >
-          {adding ? 'Done' : '+ Add'}
-        </button>
+    <section>
+      <div className="flex items-baseline justify-between gap-3 mb-2 px-1">
+        <h3 className="text-xs font-medium text-muted">{slot}</h3>
+        {foods.length > 0 && (
+          <span className="text-micro text-muted num">{t.protein}g protein, {t.calories} kcal</span>
+        )}
       </div>
 
-      {/* Logged food items */}
-      {foods.length > 0 && (
-        <div className="space-y-1.5">
-          {foods.map((food, i) => (
-            <div
-              key={i}
-              className="flex items-center justify-between rounded-xl px-3 py-2"
-              style={{ background: 'var(--raised)', border: '1px solid var(--raised)' }}
-            >
-              <div className="min-w-0 flex-1">
-                <div className="text-sm text-ink font-medium truncate">{food.name}</div>
-                <div className="text-xs text-muted mt-0.5">
-                  {food.protein}g protein · {food.cal} kcal
-                </div>
-              </div>
-              <button
-                onClick={() => onRemove(i)}
-                className="ml-3 text-muted hover:text-warn transition-colors text-lg leading-none flex-shrink-0"
-              >
-                ×
-              </button>
+      <div className="panel rule-group">
+        {foods.map((food, i) => (
+          <div key={i} className="flex items-center justify-between gap-3 px-4 py-2.5">
+            <div className="min-w-0">
+              <div className="text-sm truncate">{food.name}</div>
+              <div className="text-micro text-muted num mt-0.5">{food.protein}g protein, {food.cal} kcal</div>
             </div>
-          ))}
-        </div>
-      )}
-
-      {foods.length === 0 && !adding && (
-        <p className="text-xs text-muted italic">Nothing logged yet</p>
-      )}
-
-      {/* Add food panel */}
-      {adding && (
-        <div className="space-y-3 pt-2" style={{ borderTop: '1px solid var(--rule)' }}>
-          {/* Tab switcher */}
-          <div className="flex gap-1 p-0.5 rounded-xl" style={{ background: 'var(--raised)' }}>
-            {['quick', 'custom'].map((t) => (
-              <button
-                key={t}
-                onClick={() => setTab(t)}
-                className="flex-1 text-xs py-1.5 rounded-lg font-medium transition-all capitalize"
-                style={{
-                  background: tab === t ? '#3C4650' : 'transparent',
-                  color: tab === t ? 'var(--ink)' : '#8B949E',
-                }}
-              >
-                {t === 'quick' ? 'Quick Add' : 'Custom'}
-              </button>
-            ))}
+            <button
+              onClick={() => onRemove(i)}
+              aria-label={`Remove ${food.name}`}
+              className="w-11 h-11 flex items-center justify-center text-muted hover:text-warn flex-shrink-0"
+            >
+              ×
+            </button>
           </div>
+        ))}
 
-          {tab === 'quick' && (
-            <div className="space-y-1">
-              {QUICK_FOODS.map((food) => (
+        {foods.length === 0 && !adding && (
+          <p className="px-4 py-3 text-xs text-muted">Nothing logged.</p>
+        )}
+
+        {/* One-tap paths before the full picker, because they cover most days. */}
+        {!adding && (
+          <div className="px-3 py-2.5 flex flex-wrap gap-2">
+            <button onClick={() => setAdding(true)} className="btn-primary px-3 text-xs">Add food</button>
+
+            {/* A saved meal needs a reachable delete, not a hidden long-press. */}
+            {templates.map((tpl) => (
+              <span
+                key={tpl.id}
+                className="inline-flex items-stretch rounded-lg overflow-hidden"
+                style={{ border: '1px solid var(--rule)' }}
+              >
                 <button
-                  key={food.name}
-                  onClick={() => handleQuickAdd(food)}
-                  className="w-full flex items-center justify-between rounded-xl px-3 py-2 text-left transition-all hover:border-white/15"
-                  style={{ background: 'var(--raised)', border: '1px solid var(--raised)' }}
+                  onClick={() => onLogMany(tpl.items)}
+                  className="text-xs text-muted hover:text-ink px-3 min-h-[44px]"
                 >
-                  <span className="text-sm text-ink">{food.name}</span>
-                  <span className="text-xs text-muted flex-shrink-0 ml-2">
-                    {food.protein}g · {food.cal} kcal
-                  </span>
+                  {tpl.name}
+                </button>
+                <button
+                  onClick={() => onDeleteTemplate(tpl.id)}
+                  aria-label={`Delete saved meal ${tpl.name}`}
+                  className="text-xs text-muted hover:text-warn px-2.5 min-h-[44px]"
+                  style={{ borderLeft: '1px solid var(--rule)' }}
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+
+            {foods.length === 0 && yesterdayFoods.length > 0 && (
+              <button onClick={() => onLogMany(yesterdayFoods)} className="btn-ghost px-3 text-xs">
+                Repeat yesterday
+              </button>
+            )}
+
+            {foods.length > 0 && canSaveMeals && !namingMeal && (
+              <button onClick={() => setNamingMeal(true)} className="btn-ghost px-3 text-xs">
+                Save as meal
+              </button>
+            )}
+          </div>
+        )}
+
+        {namingMeal && (
+          <div className="px-3 py-3 flex gap-2">
+            <input
+              autoFocus
+              value={mealName}
+              onChange={(e) => setMealName(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && commitMealName()}
+              placeholder="Name this meal"
+              className="input-field text-sm flex-1"
+            />
+            <button onClick={commitMealName} disabled={!mealName.trim()} className="btn-primary px-3 text-xs">
+              Save
+            </button>
+            <button onClick={() => { setNamingMeal(false); setMealName('') }} className="btn-ghost px-3 text-xs">
+              Cancel
+            </button>
+          </div>
+        )}
+
+        {adding && (
+          <div className="px-3 py-3 space-y-3">
+            <div className="flex gap-1 p-0.5 rounded-lg" style={{ background: 'var(--raised)' }}>
+              {[['list', 'My foods'], ['custom', 'Something new']].map(([id, label]) => (
+                <button
+                  key={id}
+                  onClick={() => setTab(id)}
+                  className="flex-1 text-xs py-2 rounded-md font-medium transition-colors"
+                  style={{
+                    background: tab === id ? '#3C4650' : 'transparent',
+                    color: tab === id ? 'var(--ink)' : 'var(--muted)',
+                  }}
+                >
+                  {label}
                 </button>
               ))}
             </div>
-          )}
 
-          {tab === 'custom' && (
-            <div className="space-y-2">
-              <input
-                placeholder="Food name (required)"
-                value={customName}
-                onChange={(e) => setCustomName(e.target.value)}
-                className="input-field text-sm w-full"
-              />
-              <div className="grid grid-cols-2 gap-2">
+            {tab === 'list' && (
+              <>
                 <input
-                  placeholder="Protein (g)"
-                  type="number"
-                  value={customProtein}
-                  onChange={(e) => setCustomProtein(e.target.value)}
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search your foods"
                   className="input-field text-sm"
                 />
+
+                {/* One shared portion control instead of per-row steppers: pick
+                    a portion, then tap the food. Resets to 1 after each add. */}
+                <div className="flex items-center gap-2">
+                  <span className="text-micro text-muted">Portion</span>
+                  {PORTIONS.map((p) => (
+                    <button
+                      key={p}
+                      onClick={() => setPortion(p)}
+                      className="text-micro num px-2.5 py-2 rounded-md min-h-[36px]"
+                      style={{
+                        border: `1px solid ${portion === p ? '#3C4650' : 'var(--rule)'}`,
+                        background: portion === p ? 'var(--raised)' : 'transparent',
+                        color: portion === p ? 'var(--ink)' : 'var(--muted)',
+                      }}
+                    >
+                      ×{p}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="rule-group" style={{ maxHeight: 280, overflowY: 'auto' }}>
+                  {matches.map((food) => (
+                    <button
+                      key={food.name}
+                      onClick={() => log(food)}
+                      className="w-full flex items-center justify-between gap-3 px-1 py-3 text-left min-h-[48px]"
+                    >
+                      <span className="text-sm truncate">{food.name}</span>
+                      <span className="text-micro text-muted num flex-shrink-0">
+                        {Math.round(food.protein * portion * 10) / 10}g, {Math.round(food.cal * portion)} kcal
+                      </span>
+                    </button>
+                  ))}
+                  {matches.length === 0 && (
+                    <p className="px-1 py-3 text-xs text-muted">
+                      Nothing matches. Add it under “Something new” and it'll be here next time.
+                    </p>
+                  )}
+                </div>
+              </>
+            )}
+
+            {tab === 'custom' && (
+              <div className="space-y-2">
                 <input
-                  placeholder="Calories (kcal)"
-                  type="number"
-                  value={customCal}
-                  onChange={(e) => setCustomCal(e.target.value)}
+                  placeholder="Food name"
+                  value={customName}
+                  onChange={(e) => setCustomName(e.target.value)}
                   className="input-field text-sm"
                 />
+                <div className="grid grid-cols-2 gap-2">
+                  <input
+                    placeholder="Protein (g)" inputMode="decimal"
+                    value={customProtein}
+                    onChange={(e) => setCustomProtein(e.target.value)}
+                    className="input-field num text-sm"
+                  />
+                  <input
+                    placeholder="Calories" inputMode="numeric"
+                    value={customCal}
+                    onChange={(e) => setCustomCal(e.target.value)}
+                    className="input-field num text-sm"
+                  />
+                </div>
+                <button onClick={addCustom} disabled={!customName.trim()} className="w-full btn-primary text-sm">
+                  Add to {slot}
+                </button>
+                {canSaveMeals && (
+                  <p className="text-micro text-muted">Saved to your food list, so you won't type it again.</p>
+                )}
               </div>
-              <button
-                onClick={handleCustomAdd}
-                disabled={!customName.trim()}
-                className="w-full btn-primary py-2 text-sm disabled:opacity-40"
-              >
-                Add to {slot}
-              </button>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  )
-}
+            )}
 
-function MacroCard({ label, value, goal, unit, pct, color }) {
-  const colorMap = {
-    amber: { bar: '#E8EBED', text: 'text-ink' },
-    orange: { bar: '#8B949E', text: 'text-ink' },
-  }
-  const c = colorMap[color]
-  return (
-    <div className="card overflow-hidden">
-      <div className="h-1 w-full -mx-4 -mt-4 mb-3" style={{ width: 'calc(100% + 2rem)' }}>
-        <div className="h-full transition-all duration-500" style={{ width: `${pct}%`, background: c.bar }} />
+            <button onClick={() => setAdding(false)} className="w-full btn-ghost text-xs">
+              Done
+            </button>
+          </div>
+        )}
       </div>
-      <div className="text-xs text-muted">{label}</div>
-      <div className={`text-2xl font-semibold mt-1 ${c.text}`}>
-        {value} <span className="text-sm font-normal text-muted">{unit}</span>
-      </div>
-      <div className="text-xs text-muted mt-1">Goal: {goal} {unit}</div>
-    </div>
+    </section>
   )
 }

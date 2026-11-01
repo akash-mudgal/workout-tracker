@@ -17,6 +17,19 @@ export function mealTotals(meals) {
 // displays. Anything above what the diary already accounts for is parked in a
 // single Quick add item, so the displayed number is always explainable and the
 // diary's own entries are never touched.
+// Scale a food's macros for a portion multiplier, keeping the name honest
+// about what was actually logged.
+export function scaleFood(food, multiplier) {
+  const p = Number(food?.protein) || 0
+  const c = Number(food?.cal) || 0
+  if (!multiplier || multiplier === 1) return { name: food.name, protein: p, cal: c }
+  return {
+    name: `${food.name} × ${multiplier}`,
+    protein: Math.round(p * multiplier * 10) / 10,
+    cal: Math.round(c * multiplier),
+  }
+}
+
 export function withTotalProtein(meals, totalGrams) {
   const rest = { ...(meals || {}) }
   delete rest[QUICK_ADD_SLOT]
