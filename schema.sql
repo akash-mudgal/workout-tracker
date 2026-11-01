@@ -4,6 +4,16 @@
 -- Requires the pgcrypto / uuid-ossp extension for gen_random_uuid().
 -- Supabase enables this by default; on vanilla Postgres run:
 --   CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+--
+-- ⚠ This file only bootstraps a FRESH database. Every statement below is
+-- CREATE TABLE IF NOT EXISTS, so on a database where the tables already exist
+-- it is a no-op — including the ON DELETE CASCADE clauses, which are part of
+-- CREATE TABLE and are NOT applied retroactively. That is exactly how the live
+-- project ended up with NO ACTION on four user_id foreign keys, which made
+-- deleting a user fail with a 500. To change an existing schema, add a
+-- migration under supabase/migrations/ instead of editing this file and
+-- assuming a re-run will pick the change up.
+-- See supabase/migrations/fix_user_id_on_delete_cascade.sql.
 -- ─────────────────────────────────────────────────────────────────────────────
 
 -- ── sessions ─────────────────────────────────────────────────────────────────
