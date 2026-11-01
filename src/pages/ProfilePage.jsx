@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useStore } from '../store.jsx'
+import { supabase } from '../lib/supabase'
 import { getNotifPrefs, saveNotifPrefs, requestNotifPermission, getNotifPermission } from '../utils/notifications'
 
 export default function ProfilePage() {
@@ -58,17 +59,17 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Profile</h1>
+      <h1 className="text-2xl font-semibold">Profile</h1>
 
       {/* Account */}
       <div className="card space-y-4">
-        <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-widest">Account</h2>
+        <h2 className="text-xs font-semibold text-muted uppercase tracking-widest">Account</h2>
         <div>
-          <label className="text-xs text-zinc-400 block mb-1">Email</label>
-          <div className="input-field text-zinc-400 cursor-default select-all">{user?.email}</div>
+          <label className="text-xs text-muted block mb-1">Email</label>
+          <div className="input-field text-muted cursor-default select-all">{user?.email}</div>
         </div>
         <div>
-          <label className="text-xs text-zinc-400 block mb-1">First Name</label>
+          <label className="text-xs text-muted block mb-1">First Name</label>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -80,10 +81,10 @@ export default function ProfilePage() {
 
       {/* Body stats */}
       <div className="card space-y-4">
-        <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-widest">Body Stats</h2>
+        <h2 className="text-xs font-semibold text-muted uppercase tracking-widest">Body Stats</h2>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-xs text-zinc-400 block mb-1">Weight (kg)</label>
+            <label className="text-xs text-muted block mb-1">Weight (kg)</label>
             <input
               type="number"
               value={weightKg}
@@ -94,7 +95,7 @@ export default function ProfilePage() {
             />
           </div>
           <div>
-            <label className="text-xs text-zinc-400 block mb-1">Height (cm)</label>
+            <label className="text-xs text-muted block mb-1">Height (cm)</label>
             <input
               type="number"
               value={heightCm}
@@ -105,7 +106,7 @@ export default function ProfilePage() {
             />
           </div>
           <div>
-            <label className="text-xs text-zinc-400 block mb-1">Age</label>
+            <label className="text-xs text-muted block mb-1">Age</label>
             <input
               type="number"
               value={age}
@@ -116,7 +117,7 @@ export default function ProfilePage() {
             />
           </div>
           <div>
-            <label className="text-xs text-zinc-400 block mb-1">Sex</label>
+            <label className="text-xs text-muted block mb-1">Sex</label>
             <select value={sex} onChange={(e) => setSex(e.target.value)} className="input-field">
               <option value="">Select…</option>
               <option value="male">Male</option>
@@ -126,7 +127,7 @@ export default function ProfilePage() {
         </div>
 
         <div>
-          <label className="text-xs text-zinc-400 block mb-2">Activity Level</label>
+          <label className="text-xs text-muted block mb-2">Activity Level</label>
           <div className="space-y-1.5">
             {[
               { value: 'sedentary',  label: 'Sedentary',     desc: 'Desk job, little/no exercise' },
@@ -141,14 +142,14 @@ export default function ProfilePage() {
                 onClick={() => setActivityLevel(opt.value)}
                 className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl border text-left transition-colors"
                 style={activityLevel === opt.value
-                  ? { background: 'rgba(124,58,237,0.12)', border: '1px solid rgba(124,58,237,0.35)' }
-                  : { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
+                  ? { background: 'var(--raised)', border: '1px solid #3C4650' }
+                  : { background: 'var(--raised)', border: '1px solid var(--rule)' }}
               >
                 <div>
-                  <span className={`text-sm font-medium ${activityLevel === opt.value ? 'text-violet-300' : 'text-zinc-300'}`}>{opt.label}</span>
-                  <span className="text-xs text-zinc-500 ml-2">{opt.desc}</span>
+                  <span className={`text-sm font-medium ${activityLevel === opt.value ? 'text-ink' : 'text-ink'}`}>{opt.label}</span>
+                  <span className="text-xs text-muted ml-2">{opt.desc}</span>
                 </div>
-                {activityLevel === opt.value && <span className="text-violet-400 text-xs">●</span>}
+                {activityLevel === opt.value && <span className="text-ink text-xs">●</span>}
               </button>
             ))}
           </div>
@@ -156,18 +157,18 @@ export default function ProfilePage() {
 
         {/* Derived stats */}
         <div className="grid grid-cols-3 gap-3">
-          <div className="rounded-xl px-3 py-3" style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.18)' }}>
-            <div className="text-[10px] text-zinc-500 mb-0.5">Protein Goal</div>
-            <div className="text-xl font-black text-amber-400">{previewProtein ?? '—'}<span className="text-xs font-normal text-zinc-400">g</span></div>
+          <div className="rounded-xl px-3 py-3" style={{ background: 'var(--raised)', border: '1px solid var(--raised)' }}>
+            <div className="text-micro text-muted mb-0.5">Protein Goal</div>
+            <div className="text-xl font-semibold text-ink">{previewProtein ?? '—'}<span className="text-xs font-normal text-muted">g</span></div>
           </div>
-          <div className="rounded-xl px-3 py-3" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
-            <div className="text-[10px] text-zinc-500 mb-0.5">BMI</div>
-            <div className="text-xl font-black text-zinc-300">{bmi ?? '—'}</div>
+          <div className="rounded-xl px-3 py-3" style={{ background: 'var(--raised)', border: '1px solid var(--rule)' }}>
+            <div className="text-micro text-muted mb-0.5">BMI</div>
+            <div className="text-xl font-semibold text-ink">{bmi ?? '—'}</div>
           </div>
-          <div className="rounded-xl px-3 py-3" style={{ background: 'rgba(249,115,22,0.08)', border: '1px solid rgba(249,115,22,0.18)' }}>
-            <div className="text-[10px] text-zinc-500 mb-0.5">Calorie Target</div>
-            <div className="text-xl font-black text-orange-400">{calorieGoal}<span className="text-[10px] font-normal text-zinc-400"> kcal</span></div>
-            <div className="text-[10px] text-zinc-500 mt-0.5">
+          <div className="rounded-xl px-3 py-3" style={{ background: 'var(--raised)', border: '1px solid var(--raised)' }}>
+            <div className="text-micro text-muted mb-0.5">Calorie Target</div>
+            <div className="text-xl font-semibold text-ink">{calorieGoal}<span className="text-micro font-normal text-muted"> kcal</span></div>
+            <div className="text-micro text-muted mt-0.5">
               {activeSession?.goal === 'fat_loss' ? '−400 deficit' : activeSession?.goal === 'muscle_gain' ? '+300 surplus' : 'Maintenance'}
             </div>
           </div>
@@ -177,36 +178,36 @@ export default function ProfilePage() {
       {/* Notifications */}
       {notifSupported && (
         <div className="card space-y-4">
-          <h2 className="text-xs font-semibold text-zinc-500 uppercase tracking-widest">Notifications</h2>
+          <h2 className="text-xs font-semibold text-muted uppercase tracking-widest">Notifications</h2>
 
           {notifPermission === 'denied' ? (
-            <p className="text-xs text-zinc-400">Notifications are blocked. Enable them in your browser settings to use workout reminders.</p>
+            <p className="text-xs text-muted">Notifications are blocked. Enable them in your browser settings to use workout reminders.</p>
           ) : (
             <>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-white">Workout reminders</p>
-                  <p className="text-xs text-zinc-500 mt-0.5">Daily nudge to log your workout</p>
+                  <p className="text-sm text-ink">Workout reminders</p>
+                  <p className="text-xs text-muted mt-0.5">Daily nudge to log your workout</p>
                 </div>
                 <button
                   onClick={handleToggleNotifications}
-                  className={`relative w-10 h-6 rounded-full transition-colors flex-shrink-0 ${notifPrefs.enabled ? 'bg-amber-500' : 'bg-zinc-700'}`}
+                  className={`relative w-10 h-6 rounded-full transition-colors flex-shrink-0 ${notifPrefs.enabled ? 'bg-ink' : 'bg-rule'}`}
                   aria-label="Toggle notifications"
                 >
-                  <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${notifPrefs.enabled ? 'translate-x-5' : 'translate-x-1'}`} />
+                  <div className={`absolute top-1 w-4 h-4 rounded-full transition-transform ${notifPrefs.enabled ? 'translate-x-5 bg-ground' : 'translate-x-1 bg-muted'}`} />
                 </button>
               </div>
 
               {notifPrefs.enabled && (
                 <div>
-                  <label className="text-xs text-zinc-400 block mb-1">Reminder time</label>
+                  <label className="text-xs text-muted block mb-1">Reminder time</label>
                   <input
                     type="time"
                     value={`${String(notifPrefs.hour).padStart(2, '0')}:${String(notifPrefs.minute).padStart(2, '0')}`}
                     onChange={handleTimeChange}
                     className="input-field"
                   />
-                  <p className="text-xs text-zinc-500 mt-1.5">You'll get a streak-at-risk alert at 9 PM if you haven't logged a workout.</p>
+                  <p className="text-xs text-muted mt-1.5">You'll get a streak-at-risk alert at 9 PM if you haven't logged a workout.</p>
                 </div>
               )}
             </>
@@ -220,12 +221,25 @@ export default function ProfilePage() {
         disabled={status === 'saving'}
         className="w-full btn-primary py-3 disabled:opacity-50"
       >
-        {status === 'saving' ? 'Saving…' : status === 'saved' ? 'Saved ✓' : 'Save Changes'}
+        {status === 'saving' ? 'Saving…' : status === 'saved' ? 'Saved' : 'Save changes'}
       </button>
 
       {status === 'error' && (
-        <p className="text-xs text-red-400 text-center">Failed to save. Please try again.</p>
+        <p className="text-xs text-center" style={{ color: 'var(--warn)' }}>
+          That didn't save. Check your connection and try again.
+        </p>
       )}
+
+      {/* Sign out lives here rather than floating over every screen, where it
+          was a one-tap action with no confirmation. */}
+      <div className="rule-top pt-4">
+        <button
+          onClick={() => supabase.auth.signOut()}
+          className="w-full btn-ghost text-sm"
+        >
+          Sign out
+        </button>
+      </div>
     </div>
   )
 }

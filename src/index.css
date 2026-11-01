@@ -1,137 +1,198 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+/* Archivo as one variable family: the width axis does the work a second
+   typeface would normally do, so the numerals can be set wide and the
+   interface text normal without loading two fonts. */
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --ground: #0B0D10;
+    --raised: #14181D;
+    --rule: #313B45;
+    --ink: #E8EBED;
+    --muted: #8B949E;
+    --signal: #D7FF3E;
+    --warn: #FF6B5B;
+  }
+
   body {
-    background: #07070f;
-    background-image: radial-gradient(ellipse at 50% 0%, rgba(124, 58, 237, 0.07) 0%, transparent 55%);
-    background-attachment: fixed;
-    color: white;
+    background: var(--ground);
+    color: var(--ink);
     min-height: 100vh;
     min-height: 100dvh;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Archivo', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    font-size: 14px;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    /* Respect iOS safe areas */
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
   }
 
   ::-webkit-scrollbar { width: 3px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { @apply bg-zinc-700 rounded-full; }
+  ::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 999px; }
 
   input[type='number']::-webkit-inner-spin-button,
   input[type='number']::-webkit-outer-spin-button { -webkit-appearance: none; }
-  input[type='date']::-webkit-calendar-picker-indicator { filter: invert(0.5); }
+  input[type='date']::-webkit-calendar-picker-indicator { filter: invert(0.6); }
+
+  /* Keyboard focus is always visible, and uses a neutral ring — `signal` is
+     reserved for achievement and must not leak into interaction states. */
+  :focus-visible {
+    outline: 2px solid rgba(232, 235, 237, 0.55);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 }
 
 @layer components {
-  /* ── Cards ─────────────────────────────────── */
+  /* ── Numerals ──────────────────────────────────────────────────
+     The content of this app is numbers, so they get the emphasis.
+     Tabular figures keep columns of weights and reps aligned. */
+  .num {
+    font-stretch: 112%;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+  .num-lg {
+    font-stretch: 118%;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+
+  /* ── Surfaces ──────────────────────────────────────────────────
+     Three levels, no more. Hairline rules group things; only the
+     thing being actively edited is lifted off the ground. */
+  .panel {
+    @apply rounded-xl;
+    border: 1px solid var(--rule);
+  }
+
+  /* Kept under its old name so every page gains the new look without
+     being rewritten. No glass, no blur, no shadow. */
   .card {
-    @apply rounded-2xl p-4;
-    background: rgba(255, 255, 255, 0.035);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    @apply rounded-xl p-4;
+    border: 1px solid var(--rule);
   }
 
   .card-raised {
-    @apply rounded-2xl p-4;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    @apply rounded-xl p-4;
+    background: var(--raised);
+    border: 1px solid #3C4650;
   }
 
-  /* ── Buttons ────────────────────────────────── */
+  /* A list whose items are divided by hairlines rather than boxed
+     into separate cards. This is the main structural device. */
+  .rule-group > * + * {
+    border-top: 1px solid var(--rule);
+  }
+
+  .rule-top { border-top: 1px solid var(--rule); }
+
+  /* ── Buttons ───────────────────────────────────────────────────
+     `ink` fill is the primary action. Quiet actions are hairline only. */
   .btn-primary {
-    @apply text-white font-semibold px-4 py-2 rounded-xl transition-all duration-200;
-    background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
-    box-shadow: 0 4px 16px rgba(124, 58, 237, 0.3);
+    @apply font-semibold px-4 py-2 rounded-lg transition-colors duration-150;
+    background: var(--ink);
+    color: var(--ground);
+    min-height: 44px;
   }
-  .btn-primary:hover:not(:disabled) {
-    filter: brightness(1.12);
-    box-shadow: 0 4px 24px rgba(124, 58, 237, 0.5);
-  }
-  .btn-primary:active:not(:disabled) {
-    transform: scale(0.97);
-  }
+  .btn-primary:hover:not(:disabled) { background: #FFFFFF; }
+  .btn-primary:disabled { opacity: 0.35; }
 
   .btn-ghost {
-    @apply font-medium px-4 py-2 rounded-xl transition-all duration-150;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    color: #a1a1aa;
+    @apply font-medium px-4 py-2 rounded-lg transition-colors duration-150;
+    background: transparent;
+    border: 1px solid var(--rule);
+    color: var(--muted);
+    min-height: 44px;
   }
-  .btn-ghost:hover {
-    background: rgba(255, 255, 255, 0.09);
-    color: #e4e4e7;
-  }
-  .btn-ghost:active {
-    transform: scale(0.97);
-  }
+  .btn-ghost:hover { color: var(--ink); border-color: #2C353E; }
 
-  /* ── Inputs ─────────────────────────────────── */
+  /* ── Inputs ────────────────────────────────────────────────────*/
   .input-field {
-    @apply w-full rounded-xl px-3 py-2.5 text-white text-sm transition-all duration-200 focus:outline-none;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.09);
+    @apply w-full rounded-lg px-3 text-sm transition-colors duration-150 focus:outline-none;
+    background: var(--raised);
+    border: 1px solid var(--rule);
+    color: var(--ink);
+    min-height: 44px;
   }
   .input-field:focus {
-    border-color: rgba(139, 92, 246, 0.5);
-    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12);
-    background: rgba(255, 255, 255, 0.06);
+    border-color: #51606E;
+    background: #171C22;
   }
-  .input-field::placeholder {
-    color: rgba(161, 161, 170, 0.5);
-  }
+  .input-field::placeholder { color: #5C6672; }
 
-  /* ── Progress ───────────────────────────────── */
+  /* ── Progress ──────────────────────────────────────────────────*/
   .progress-bar {
-    @apply h-1.5 rounded-full overflow-hidden;
-    background: rgba(255, 255, 255, 0.06);
+    @apply rounded-full overflow-hidden;
+    height: 3px;
+    background: var(--rule);
   }
-
   .progress-fill {
-    @apply h-full rounded-full transition-all duration-700 ease-out;
+    @apply h-full rounded-full transition-all duration-500 ease-out;
+    background: var(--ink);
   }
+  .progress-fill[data-met='true'] { background: var(--signal); }
 
-  /* ── Gradient text ──────────────────────────── */
-  .gradient-text {
-    @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
-  }
-
-  /* ── Range sliders ───────────────────────────── */
+  /* ── Range sliders ─────────────────────────────────────────────
+     Sliders stay the primary input for water, steps and sleep. The
+     control is 44px tall for the thumb to be catchable one-handed,
+     while the track itself stays a 3px hairline. */
   input[type='range'] {
-    @apply w-full rounded-full appearance-none cursor-pointer outline-none;
-    height: 4px;
-    background: rgba(255, 255, 255, 0.08);
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 44px;
+    background: transparent;
+    cursor: pointer;
+  }
+  input[type='range']::-webkit-slider-runnable-track {
+    height: 3px;
+    border-radius: 999px;
+    background: var(--rule);
   }
   input[type='range']::-webkit-slider-thumb {
     -webkit-appearance: none;
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background: #8b5cf6;
-    box-shadow: 0 0 6px rgba(139, 92, 246, 0.6);
-    transition: transform 0.15s, box-shadow 0.15s;
-  }
-  input[type='range']:active::-webkit-slider-thumb {
-    transform: scale(1.2);
-    box-shadow: 0 0 10px rgba(139, 92, 246, 0.8);
-  }
-  input[type='range']::-moz-range-thumb {
-    width: 14px;
-    height: 14px;
+    width: 18px;
+    height: 18px;
+    margin-top: -7.5px;
     border: none;
     border-radius: 50%;
-    background: #8b5cf6;
-    box-shadow: 0 0 6px rgba(139, 92, 246, 0.6);
+    background: var(--ink);
   }
+  input[type='range']:active::-webkit-slider-thumb { background: #FFFFFF; }
+  input[type='range']::-moz-range-track {
+    height: 3px;
+    border-radius: 999px;
+    background: var(--rule);
+  }
+  input[type='range']::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border: none;
+    border-radius: 50%;
+    background: var(--ink);
+  }
+
+  /* ── Set completion ────────────────────────────────────────────
+     The one piece of non-user-triggered motion in the app: the
+     confirmation that a set is logged. Everything else is static. */
+  @keyframes set-logged {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.18); }
+    100% { transform: scale(1); }
+  }
+  .set-logged { animation: set-logged 260ms ease-out; }
 }

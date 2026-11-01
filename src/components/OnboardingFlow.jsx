@@ -8,7 +8,7 @@ const today = format(new Date(), 'yyyy-MM-dd')
 
 const STEPS = ['Name', 'Plan', 'Schedule', 'Stats']
 
-const glassBg = { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }
+const glassBg = { background: 'var(--raised)', border: '1px solid var(--rule)' }
 
 function calcProtein(weightKg, goal) {
   if (!weightKg || weightKg <= 0) return null
@@ -86,26 +86,26 @@ export default function OnboardingFlow() {
 
         {/* Header */}
         <div className="text-center space-y-1">
-          <div className="text-4xl font-black bg-gradient-to-r from-violet-400 to-violet-600 bg-clip-text text-transparent">
+          <div className="text-3xl font-semibold tracking-tight">
             Let's get started
           </div>
-          <p className="text-zinc-400 text-sm">Set up your first training cycle</p>
+          <p className="text-muted text-sm">Set up your first training cycle</p>
         </div>
 
         {/* Step indicator */}
         <div className="flex items-center gap-1">
           {STEPS.map((label, i) => (
             <div key={label} className="flex items-center gap-1 flex-1">
-              <div className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold flex-shrink-0 transition-colors ${
-                i < step ? 'bg-violet-500 text-white' :
-                i === step ? 'text-violet-400 ring-1 ring-violet-500' :
-                'text-zinc-500'
+              <div className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-semibold flex-shrink-0 transition-colors ${
+                i < step ? 'bg-ink text-ink' :
+                i === step ? 'text-ink ring-1 ring-rule' :
+                'text-muted'
               }`}
-                style={i === step ? { background: 'rgba(124,58,237,0.2)' } : i > step ? { background: 'rgba(255,255,255,0.05)' } : {}}>
+                style={i === step ? { background: 'var(--raised)' } : i > step ? { background: 'var(--raised)' } : {}}>
                 {i < step ? '✓' : i + 1}
               </div>
-              <span className={`text-xs hidden sm:inline ${i === step ? 'text-zinc-300' : 'text-zinc-500'}`}>{label}</span>
-              {i < STEPS.length - 1 && <div className="flex-1 h-px" style={{ background: i < step ? '#7c3aed' : 'rgba(255,255,255,0.08)' }} />}
+              <span className={`text-xs hidden sm:inline ${i === step ? 'text-ink' : 'text-muted'}`}>{label}</span>
+              {i < STEPS.length - 1 && <div className="flex-1 h-px" style={{ background: i < step ? 'var(--ink)' : 'var(--rule)' }} />}
             </div>
           ))}
         </div>
@@ -115,11 +115,11 @@ export default function OnboardingFlow() {
           <div className="space-y-4">
             <div className="card space-y-4">
               <div>
-                <h2 className="font-semibold text-lg text-white mb-1">Name your cycle</h2>
-                <p className="text-xs text-zinc-400">Give this training cycle a name you'll remember.</p>
+                <h2 className="font-semibold text-lg text-ink mb-1">Name your cycle</h2>
+                <p className="text-xs text-muted">Give this training cycle a name you'll remember.</p>
               </div>
               <div>
-                <label className="text-xs text-zinc-400 block mb-1">Cycle Name</label>
+                <label className="text-xs text-muted block mb-1">Cycle Name</label>
                 <input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -131,7 +131,7 @@ export default function OnboardingFlow() {
               </div>
             </div>
             <button onClick={() => setStep(1)} disabled={!name.trim()} className="w-full btn-primary py-3 disabled:opacity-40">
-              Next →
+              Next
             </button>
           </div>
         )}
@@ -140,8 +140,8 @@ export default function OnboardingFlow() {
         {step === 1 && (
           <div className="space-y-4">
             <div className="space-y-1">
-              <h2 className="font-semibold text-lg text-white">Choose your goal & plan</h2>
-              <p className="text-xs text-zinc-400">What are you training for? This sets your calorie and protein targets.</p>
+              <h2 className="font-semibold text-lg text-ink">Choose your goal & plan</h2>
+              <p className="text-xs text-muted">What are you training for? This sets your calorie and protein targets.</p>
             </div>
             <div className="grid grid-cols-3 gap-2">
               {[
@@ -152,42 +152,42 @@ export default function OnboardingFlow() {
                 <button
                   key={g.value}
                   onClick={() => setGoal(g.value)}
-                  className="flex flex-col items-center py-3 px-2 rounded-2xl transition-all"
+                  className="flex flex-col items-center py-3 px-2 rounded-xl transition-all"
                   style={goal === g.value
-                    ? { border: '1px solid rgba(124,58,237,0.6)', background: 'rgba(124,58,237,0.15)' }
-                    : { border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.04)' }}
+                    ? { border: '1px solid #3C4650', background: 'var(--raised)' }
+                    : { border: '1px solid var(--rule)', background: 'var(--raised)' }}
                 >
-                  <span className={`text-xs font-bold ${goal === g.value ? 'text-violet-300' : 'text-zinc-300'}`}>{g.label}</span>
-                  <span className="text-[10px] text-zinc-500 mt-0.5">{g.desc}</span>
+                  <span className={`text-xs font-semibold ${goal === g.value ? 'text-ink' : 'text-ink'}`}>{g.label}</span>
+                  <span className="text-micro text-muted mt-0.5">{g.desc}</span>
                 </button>
               ))}
             </div>
-            <p className="text-xs text-zinc-500">Pick the split that fits your schedule.</p>
+            <p className="text-xs text-muted">Pick the split that fits your schedule.</p>
             <div className="space-y-2">
               {PLAN_LIST.map((plan) => (
                 <button
                   key={plan.id}
                   onClick={() => setPlanId(plan.id)}
-                  className="w-full text-left p-4 rounded-2xl transition-all"
+                  className="w-full text-left p-4 rounded-xl transition-all"
                   style={planId === plan.id
-                    ? { border: '1px solid rgba(124,58,237,0.6)', background: 'rgba(124,58,237,0.1)' }
+                    ? { border: '1px solid #3C4650', background: 'var(--raised)' }
                     : glassBg}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold text-sm text-zinc-200">{plan.name}</span>
+                    <span className="font-semibold text-sm text-ink">{plan.name}</span>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs text-zinc-400 rounded-full px-2 py-0.5" style={{ background: 'rgba(255,255,255,0.06)' }}>{plan.daysPerWeek}d/wk</span>
-                      {planId === plan.id && <span className="text-violet-400">●</span>}
+                      <span className="text-xs text-muted rounded-full px-2 py-0.5" style={{ background: 'var(--raised)' }}>{plan.daysPerWeek}d/wk</span>
+                      {planId === plan.id && <span className="text-ink">●</span>}
                     </div>
                   </div>
-                  <p className="text-xs text-zinc-400 mt-1">{plan.description}</p>
+                  <p className="text-xs text-muted mt-1">{plan.description}</p>
                 </button>
               ))}
             </div>
             <div className="flex gap-2">
               <button onClick={() => setStep(0)} className="btn-ghost px-4 py-3">← Back</button>
               <button onClick={() => setStep(2)} disabled={!planId} className="flex-1 btn-primary py-3 disabled:opacity-40">
-                Next →
+                Next
               </button>
             </div>
           </div>
@@ -197,16 +197,16 @@ export default function OnboardingFlow() {
         {step === 2 && (
           <div className="space-y-4">
             <div className="space-y-1">
-              <h2 className="font-semibold text-lg text-white">Set your schedule</h2>
-              <p className="text-xs text-zinc-400">When does your cycle start and how long should it run?</p>
+              <h2 className="font-semibold text-lg text-ink">Set your schedule</h2>
+              <p className="text-xs text-muted">When does your cycle start and how long should it run?</p>
             </div>
             <div className="card space-y-4">
               <div>
-                <label className="text-xs text-zinc-400 block mb-1">Start Date (Day 1)</label>
+                <label className="text-xs text-muted block mb-1">Start Date (Day 1)</label>
                 <input type="date" value={startDate} min={today} onChange={(e) => setStartDate(e.target.value)} className="input-field" />
               </div>
               <div>
-                <label className="text-xs text-zinc-400 block mb-2">Duration</label>
+                <label className="text-xs text-muted block mb-2">Duration</label>
                 <div className="flex gap-2 mb-2">
                   {[30, 60, 90, 120].map((d) => (
                     <button
@@ -214,8 +214,8 @@ export default function OnboardingFlow() {
                       onClick={() => setTotalDays(d)}
                       className="flex-1 py-1.5 rounded-lg text-xs font-medium transition-all"
                       style={Number(totalDays) === d
-                        ? { background: '#7c3aed', color: 'white' }
-                        : { background: 'rgba(255,255,255,0.06)', color: '#a1a1aa' }}
+                        ? { background: 'var(--ink)', color: 'white' }
+                        : { background: 'var(--raised)', color: '#8B949E' }}
                     >
                       {d}d
                     </button>
@@ -234,7 +234,7 @@ export default function OnboardingFlow() {
             </div>
             <div className="flex gap-2">
               <button onClick={() => setStep(1)} className="btn-ghost px-4 py-3">← Back</button>
-              <button onClick={() => setStep(3)} className="flex-1 btn-primary py-3">Next →</button>
+              <button onClick={() => setStep(3)} className="flex-1 btn-primary py-3">Next</button>
             </div>
           </div>
         )}
@@ -243,12 +243,12 @@ export default function OnboardingFlow() {
         {step === 3 && (
           <div className="space-y-4">
             <div className="space-y-1">
-              <h2 className="font-semibold text-lg text-white">Your stats</h2>
-              <p className="text-xs text-zinc-400">Used to calculate your personalised calorie and protein targets.</p>
+              <h2 className="font-semibold text-lg text-ink">Your stats</h2>
+              <p className="text-xs text-muted">Used to calculate your personalised calorie and protein targets.</p>
             </div>
             <div className="card space-y-4">
               <div>
-                <label className="text-xs text-zinc-400 block mb-1">First Name</label>
+                <label className="text-xs text-muted block mb-1">First Name</label>
                 <input
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
@@ -259,7 +259,7 @@ export default function OnboardingFlow() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs text-zinc-400 block mb-1">Weight (kg)</label>
+                  <label className="text-xs text-muted block mb-1">Weight (kg)</label>
                   <input
                     type="number"
                     value={weightKg}
@@ -272,7 +272,7 @@ export default function OnboardingFlow() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-zinc-400 block mb-1">Height (cm)</label>
+                  <label className="text-xs text-muted block mb-1">Height (cm)</label>
                   <input
                     type="number"
                     value={heightCm}
@@ -284,7 +284,7 @@ export default function OnboardingFlow() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-zinc-400 block mb-1">Age</label>
+                  <label className="text-xs text-muted block mb-1">Age</label>
                   <input
                     type="number"
                     value={age}
@@ -296,7 +296,7 @@ export default function OnboardingFlow() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs text-zinc-400 block mb-1">Sex</label>
+                  <label className="text-xs text-muted block mb-1">Sex</label>
                   <select value={sex} onChange={(e) => setSex(e.target.value)} className="input-field">
                     <option value="">Select…</option>
                     <option value="male">Male</option>
@@ -306,7 +306,7 @@ export default function OnboardingFlow() {
               </div>
 
               <div>
-                <label className="text-xs text-zinc-400 block mb-2">Activity Level</label>
+                <label className="text-xs text-muted block mb-2">Activity Level</label>
                 <div className="space-y-1.5">
                   {[
                     { value: 'sedentary',   label: 'Sedentary',      desc: 'Desk job, little/no exercise' },
@@ -321,58 +321,58 @@ export default function OnboardingFlow() {
                       onClick={() => setActivityLevel(opt.value)}
                       className="w-full flex items-center justify-between px-3 py-2 rounded-xl border text-left transition-colors"
                       style={activityLevel === opt.value
-                        ? { background: 'rgba(124,58,237,0.12)', border: '1px solid rgba(124,58,237,0.35)' }
-                        : { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
+                        ? { background: 'var(--raised)', border: '1px solid #3C4650' }
+                        : { background: 'var(--raised)', border: '1px solid var(--rule)' }}
                     >
                       <div>
-                        <span className={`text-xs font-semibold ${activityLevel === opt.value ? 'text-violet-300' : 'text-zinc-300'}`}>{opt.label}</span>
-                        <span className="text-xs text-zinc-500 ml-1.5">{opt.desc}</span>
+                        <span className={`text-xs font-semibold ${activityLevel === opt.value ? 'text-ink' : 'text-ink'}`}>{opt.label}</span>
+                        <span className="text-xs text-muted ml-1.5">{opt.desc}</span>
                       </div>
-                      {activityLevel === opt.value && <span className="text-violet-400 text-xs">●</span>}
+                      {activityLevel === opt.value && <span className="text-ink text-xs">●</span>}
                     </button>
                   ))}
                 </div>
               </div>
 
               {protein && (
-                <div className="rounded-xl px-4 py-3 space-y-2" style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)' }}>
+                <div className="rounded-xl px-4 py-3 space-y-2" style={{ background: 'var(--raised)', border: '1px solid #3C4650' }}>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-amber-400 font-semibold">Daily Protein Target</span>
-                    <span className="text-xl font-black text-amber-400">{protein}g</span>
+                    <span className="text-xs text-ink font-semibold">Daily Protein Target</span>
+                    <span className="text-xl font-semibold text-ink">{protein}g</span>
                   </div>
                   {calories && (
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-orange-400 font-semibold">Daily Calorie Target</span>
-                      <span className="text-xl font-black text-orange-400">{calories} kcal</span>
+                      <span className="text-xs text-ink font-semibold">Daily Calorie Target</span>
+                      <span className="text-xl font-semibold text-ink">{calories} kcal</span>
                     </div>
                   )}
-                  {bmi && <p className="text-xs text-zinc-400">BMI: {bmi}</p>}
+                  {bmi && <p className="text-xs text-muted">BMI: {bmi}</p>}
                 </div>
               )}
             </div>
 
             {/* Summary */}
-            <div className="card space-y-2" style={{ borderColor: 'rgba(124,58,237,0.2)', background: 'rgba(124,58,237,0.05)' }}>
-              <div className="text-xs font-semibold text-violet-400 mb-1">Your cycle</div>
+            <div className="card space-y-2" style={{ borderColor: 'var(--raised)', background: 'var(--raised)' }}>
+              <div className="text-xs font-semibold text-ink mb-1">Your cycle</div>
               {[
                 { label: 'Name', value: name },
                 { label: 'Goal', value: goal === 'fat_loss' ? 'Fat Loss' : goal === 'muscle_gain' ? 'Muscle Gain' : 'Recomp' },
                 { label: 'Plan', value: selectedPlan?.name },
                 { label: 'Start', value: format(new Date(startDate + 'T00:00:00'), 'MMM d, yyyy') },
                 { label: 'Duration', value: `${totalDays} days` },
-                protein ? { label: 'Protein goal', value: `${protein}g / day`, valueClass: 'text-amber-400' } : null,
-                calories ? { label: 'Calorie target', value: `${calories} kcal / day`, valueClass: 'text-orange-400' } : null,
+                protein ? { label: 'Protein goal', value: `${protein}g / day`, valueClass: 'text-ink' } : null,
+                calories ? { label: 'Calorie target', value: `${calories} kcal / day`, valueClass: 'text-ink' } : null,
               ].filter(Boolean).map(({ label, value, valueClass }) => (
                 <div key={label} className="flex justify-between text-xs">
-                  <span className="text-zinc-400">{label}</span>
-                  <span className={`font-medium ${valueClass ?? 'text-zinc-200'}`}>{value}</span>
+                  <span className="text-muted">{label}</span>
+                  <span className={`font-medium ${valueClass ?? 'text-ink'}`}>{value}</span>
                 </div>
               ))}
             </div>
 
             {error && (
-              <div className="text-xs text-red-400 rounded-xl px-3 py-2.5"
-                style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }}>
+              <div className="text-xs text-warn rounded-xl px-3 py-2.5"
+                style={{ background: 'rgba(255,107,91,0.1)', border: '1px solid rgba(255,107,91,0.3)' }}>
                 {error}
               </div>
             )}
@@ -380,10 +380,10 @@ export default function OnboardingFlow() {
             <div className="flex gap-2">
               <button onClick={() => setStep(2)} className="btn-ghost px-4 py-3">← Back</button>
               <button onClick={handleFinish} disabled={loading} className="flex-1 btn-primary py-3 disabled:opacity-50">
-                {loading ? 'Creating…' : "Let's go →"}
+                {loading ? 'Creating…' : 'Create my cycle'}
               </button>
             </div>
-            <button onClick={handleFinish} disabled={loading} className="w-full text-xs text-zinc-500 hover:text-zinc-300 transition-colors py-1">
+            <button onClick={handleFinish} disabled={loading} className="w-full text-xs text-muted hover:text-ink transition-colors py-1">
               Skip stats for now
             </button>
           </div>

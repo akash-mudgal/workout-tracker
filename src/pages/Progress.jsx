@@ -44,25 +44,25 @@ export default function Progress() {
   const heatmapDays = getHeatmapDays(startDate, today, workoutHistory, totalDays)
 
   const tooltipStyle = {
-    contentStyle: { background: 'rgba(10,10,18,0.95)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, backdropFilter: 'blur(16px)' },
-    labelStyle: { color: '#a1a1aa' },
+    contentStyle: { background: '#14181D', border: '1px solid var(--rule)', borderRadius: 12 },
+    labelStyle: { color: '#8B949E' },
   }
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Progress</h1>
+      <h1 className="text-2xl font-semibold">Progress</h1>
 
       {/* Week Summary */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-        <SummaryCard value={workoutsThisWeek} label="Workouts" sub="this week" color="text-violet-400" />
-        <SummaryCard value={completedWorkouts.length} label="Total" sub="sessions" color="text-violet-400" />
-        <SummaryCard value={`${Math.round(avgSteps / 1000)}k`} label="Avg Steps" sub="per day" color="text-emerald-400" />
-        <SummaryCard value={`${Math.round(avgProtein)}g`} label="Avg Protein" sub="per day" color="text-amber-400" />
+        <SummaryCard value={workoutsThisWeek} label="Workouts" sub="this week" color="text-ink" />
+        <SummaryCard value={completedWorkouts.length} label="Total" sub="sessions" color="text-ink" />
+        <SummaryCard value={`${Math.round(avgSteps / 1000)}k`} label="Avg Steps" sub="per day" color="text-ink" />
+        <SummaryCard value={`${Math.round(avgProtein)}g`} label="Avg Protein" sub="per day" color="text-ink" />
       </div>
 
       {/* 90 Day Heatmap */}
       <div className="card">
-        <h3 className="text-sm font-semibold mb-3 text-white">
+        <h3 className="text-sm font-semibold mb-3 text-ink">
           {totalDays}-Day Journey · Day {dayNumber}
         </h3>
         <div className="flex flex-wrap gap-1">
@@ -72,27 +72,27 @@ export default function Progress() {
               title={date}
               className={`w-4 h-4 rounded-sm ${
                 isFuture
-                  ? 'bg-white/[0.04]'
+                  ? 'bg-raised'
                   : hasWorkout
-                  ? 'bg-violet-500'
+                  ? 'bg-ink'
                   : isToday
-                  ? 'ring-1 ring-violet-500'
-                  : 'bg-white/[0.07]'
+                  ? 'ring-1 ring-rule'
+                  : 'bg-rule'
               }`}
-              style={isToday && !hasWorkout ? { background: 'rgba(255,255,255,0.08)' } : {}}
+              style={isToday && !hasWorkout ? { background: 'var(--rule)' } : {}}
             />
           ))}
         </div>
-        <div className="flex gap-3 mt-2 text-xs text-zinc-400">
-          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-violet-500 inline-block" /> Workout done</span>
-          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-white/[0.07] inline-block" /> Rest / missed</span>
+        <div className="flex gap-3 mt-2 text-xs text-muted">
+          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-ink inline-block" /> Workout done</span>
+          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-rule inline-block" /> Rest / missed</span>
         </div>
       </div>
 
       {/* Strength Chart */}
       <div className="card">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold text-white">Strength Progress</h3>
+          <h3 className="text-sm font-semibold text-ink">Strength Progress</h3>
         </div>
         <select
           value={selectedExercise}
@@ -106,15 +106,15 @@ export default function Progress() {
         {strengthData.length >= 2 ? (
           <ResponsiveContainer width="100%" height={160}>
             <LineChart data={strengthData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-              <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#71717a' }} />
-              <YAxis tick={{ fontSize: 10, fill: '#71717a' }} width={35} />
-              <Tooltip {...tooltipStyle} formatter={(v, n) => [`${v}${n === 'weight' ? 'kg' : ''}`, n]} itemStyle={{ color: '#8b5cf6' }} />
-              <Line type="monotone" dataKey="weight" name="weight" stroke="#8b5cf6" strokeWidth={2} dot={{ r: 3, fill: '#8b5cf6' }} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--raised)" />
+              <XAxis dataKey="date" tick={{ fontSize: 12, fill: '#8B949E' }} />
+              <YAxis tick={{ fontSize: 12, fill: '#8B949E' }} width={42} />
+              <Tooltip {...tooltipStyle} formatter={(v, n) => [`${v}${n === 'weight' ? 'kg' : ''}`, n]} itemStyle={{ color: '#E8EBED' }} />
+              <Line type="monotone" dataKey="weight" name="weight" stroke="#E8EBED" strokeWidth={2} dot={{ r: 3, fill: '#E8EBED' }} />
             </LineChart>
           </ResponsiveContainer>
         ) : (
-          <div className="h-32 flex items-center justify-center text-zinc-400 text-sm">
+          <div className="h-32 flex items-center justify-center text-muted text-sm">
             Log at least 2 {selectedExercise} sessions to see trend
           </div>
         )}
@@ -122,21 +122,21 @@ export default function Progress() {
 
       {/* Steps Chart */}
       <div className="card">
-        <h3 className="text-sm font-semibold mb-3 text-white">Daily Steps (14 days)</h3>
+        <h3 className="text-sm font-semibold mb-3 text-ink">Daily Steps (14 days)</h3>
         <ResponsiveContainer width="100%" height={140}>
           <BarChart data={stepsData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-            <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#71717a' }} />
-            <YAxis tick={{ fontSize: 10, fill: '#71717a' }} width={35} />
-            <Tooltip {...tooltipStyle} itemStyle={{ color: '#10b981' }} />
-            <Bar dataKey="steps" fill="#10b981" radius={[3, 3, 0, 0]} />
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--raised)" vertical={false} />
+            <XAxis dataKey="date" tick={{ fontSize: 12, fill: '#8B949E' }} />
+            <YAxis tick={{ fontSize: 12, fill: '#8B949E' }} width={42} />
+            <Tooltip {...tooltipStyle} itemStyle={{ color: '#8B949E' }} />
+            <Bar dataKey="steps" fill="#8B949E" radius={[3, 3, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>
 
       {/* Weekly breakdown */}
       <div className="card">
-        <h3 className="text-sm font-semibold mb-3 text-white">This Week</h3>
+        <h3 className="text-sm font-semibold mb-3 text-ink">This Week</h3>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
           <StatRow label="Workouts" value={`${workoutsThisWeek} / 7`} />
           <StatRow label="Avg Steps" value={`${Math.round(avgSteps).toLocaleString()}`} />
@@ -148,7 +148,7 @@ export default function Progress() {
       {/* Workout type breakdown */}
       {completedWorkouts.length > 0 && (
         <div className="card">
-          <h3 className="text-sm font-semibold mb-3 text-white">Workout Breakdown</h3>
+          <h3 className="text-sm font-semibold mb-3 text-ink">Workout Breakdown</h3>
           <div className="space-y-2">
             {['push', 'pull', 'legs'].map((type) => {
               const count = completedWorkouts.filter((w) => {
@@ -159,12 +159,12 @@ export default function Progress() {
               return (
                 <div key={type}>
                   <div className="flex justify-between text-xs mb-1">
-                    <span className="capitalize text-zinc-400">{type}</span>
-                    <span className="text-zinc-400">{count} sessions</span>
+                    <span className="capitalize text-muted">{type}</span>
+                    <span className="text-muted">{count} sessions</span>
                   </div>
                   <div className="progress-bar">
                     <div
-                      className={`progress-fill ${type === 'push' ? 'bg-red-500' : type === 'pull' ? 'bg-blue-500' : 'bg-emerald-500'}`}
+                      className={`progress-fill ${type === 'push' ? 'bg-ink' : type === 'pull' ? 'bg-ink/60' : 'bg-ink/30'}`}
                       style={{ width: total > 0 ? `${(count / total) * 100}%` : '0%' }}
                     />
                   </div>
@@ -181,18 +181,18 @@ export default function Progress() {
 function SummaryCard({ value, label, sub, color }) {
   return (
     <div className="card text-center p-3">
-      <div className={`text-xl font-bold ${color}`}>{value}</div>
-      <div className="text-xs text-zinc-300 font-medium">{label}</div>
-      <div className="text-xs text-zinc-400">{sub}</div>
+      <div className={`text-xl font-semibold ${color}`}>{value}</div>
+      <div className="text-xs text-ink font-medium">{label}</div>
+      <div className="text-xs text-muted">{sub}</div>
     </div>
   )
 }
 
 function StatRow({ label, value }) {
   return (
-    <div className="flex justify-between py-1.5" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-      <span className="text-zinc-400">{label}</span>
-      <span className="text-zinc-200 font-medium">{value}</span>
+    <div className="flex justify-between py-1.5" style={{ borderBottom: '1px solid var(--raised)' }}>
+      <span className="text-muted">{label}</span>
+      <span className="text-ink font-medium">{value}</span>
     </div>
   )
 }

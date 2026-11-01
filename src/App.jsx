@@ -1,7 +1,6 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { StoreProvider, useStore } from './store.jsx'
 import { useEffect } from 'react'
-import { supabase } from './lib/supabase'
 import AuthGate from './components/AuthGate'
 import OnboardingFlow from './components/OnboardingFlow'
 import NavBar from './components/NavBar'
@@ -40,32 +39,24 @@ function AppInner() {
           {/* Main content — offset by sidebar on md+ */}
           <div className="flex-1 flex flex-col min-w-0 md:pl-56">
             {syncing && (
-              <div className="fixed top-2 right-3 z-50 text-xs text-violet-400 animate-pulse">
+              <div className="fixed top-3 right-4 z-50 text-micro text-muted">
                 syncing…
               </div>
             )}
-
-            {/* Mobile sign-out (desktop version lives in sidebar) */}
-            <button
-              onClick={() => supabase.auth.signOut()}
-              className="md:hidden fixed top-3 right-3 text-xs text-zinc-500 hover:text-zinc-300 transition-colors z-50"
-            >
-              Sign out
-            </button>
 
             {/* Writes are optimistic, so without this a failed cloud save looked
                 identical to a successful one. */}
             {syncError && (
               <div
                 className="sticky top-0 z-40 flex items-center justify-between gap-3 px-4 py-2.5"
-                style={{ background: 'rgba(239,68,68,0.12)', borderBottom: '1px solid rgba(239,68,68,0.25)' }}
+                style={{ background: 'rgba(255,107,91,0.1)', borderBottom: '1px solid rgba(255,107,91,0.3)' }}
               >
-                <p className="text-xs text-red-300">
-                  {syncError} It's saved on this device — it will sync when you're back online.
+                <p className="text-xs" style={{ color: 'var(--warn)' }}>
+                  {syncError} It's saved on this device and will sync when you're back online.
                 </p>
                 <button
                   onClick={clearSyncError}
-                  className="text-xs text-red-300/70 hover:text-red-200 flex-shrink-0 px-2 py-1"
+                  className="text-xs text-muted hover:text-ink flex-shrink-0 px-2 py-1"
                 >
                   Dismiss
                 </button>

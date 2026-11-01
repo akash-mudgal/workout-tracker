@@ -200,54 +200,47 @@ export default function WorkoutLogger() {
   }
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h1 className="text-2xl font-bold">Log Workout</h1>
-        <p className="text-zinc-400 text-sm mt-1">{format(new Date(today + 'T00:00:00'), 'EEEE, MMMM d')}</p>
-      </div>
+    <div className="space-y-6">
+      <header>
+        <p className="text-micro text-muted">{format(new Date(today + 'T00:00:00'), 'EEE d MMM')}</p>
+        <h1 className="text-2xl font-semibold mt-1.5">Log a workout</h1>
+        <p className="text-xs text-muted mt-1">{plan.name}, {plan.daysPerWeek} days a week</p>
+      </header>
 
-      <div className={`card ${recommended.colorClasses.bg} ${recommended.colorClasses.border}`}>
-        <div className="text-xs text-zinc-400 mb-1">Recommended today</div>
-        <div className={`text-lg font-bold ${recommended.colorClasses.text}`}>{recommended.name}</div>
-        <div className="text-sm text-zinc-400">{recommended.subtitle}</div>
-      </div>
-
-      <div className="text-xs text-zinc-400 px-1">{plan.name} · {plan.daysPerWeek} days/week</div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        {getWorkoutDays(planId).map((w, i) => (
-          <button
-            key={`${w.id}-${i}`}
-            onClick={() => setSelectedId(w.id)}
-            className={`w-full card flex items-center justify-between transition-all ${
-              selectedId === w.id
-                ? `${w.colorClasses.bg} ${w.colorClasses.border}`
-                : 'hover:border-white/20'
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <div className={`w-3 h-3 rounded-full ${w.colorClasses.dot}`} />
-              <div className="text-left">
-                <div className="font-semibold">{w.name}</div>
-                <div className="text-xs text-zinc-400">{w.subtitle}</div>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              {w.id === recommended.id && (
-                <span className="text-xs text-violet-400 font-medium">Recommended</span>
-              )}
-              {selectedId === w.id && <span className="text-violet-400">●</span>}
-            </div>
-          </button>
-        ))}
-      </div>
+      <section>
+        <div className="flex items-baseline justify-between gap-3 mb-2 px-1">
+          <h3 className="text-xs font-medium text-muted">Choose a day</h3>
+        </div>
+        <div className="panel rule-group">
+          {getWorkoutDays(planId).map((w, i) => {
+            const isSelected = selectedId === w.id
+            return (
+              <button
+                key={`${w.id}-${i}`}
+                onClick={() => setSelectedId(w.id)}
+                className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left min-h-[56px] transition-colors"
+                style={isSelected ? { background: 'var(--raised)' } : undefined}
+                aria-pressed={isSelected}
+              >
+                <span className="min-w-0">
+                  <span className={`block text-sm ${isSelected ? 'text-ink font-medium' : 'text-muted'}`}>{w.name}</span>
+                  <span className="block text-micro text-muted mt-0.5 truncate">{w.subtitle}</span>
+                </span>
+                {w.id === recommended.id && (
+                  <span className="text-micro text-muted flex-shrink-0">up next</span>
+                )}
+              </button>
+            )
+          })}
+        </div>
+      </section>
 
       <button
         onClick={initSession}
-        className="w-full btn-primary py-3 text-base"
+        className="w-full btn-primary text-sm"
         disabled={workout?.type === 'rest'}
       >
-        {workout?.type === 'rest' ? 'Rest Day — Log steps & sleep instead' : `Start ${workout?.name} →`}
+        {workout?.type === 'rest' ? 'Rest day — log steps and sleep instead' : 'Start training'}
       </button>
     </div>
   )
@@ -259,23 +252,25 @@ function LoggingView({ workout, sessionSets, workoutHistory, selectedId, resumed
   const doneSets = Object.values(sessionSets).flat().filter((s) => s.done).length
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className={`text-xl font-bold ${workout.colorClasses.text}`}>{workout.name}</h1>
-          <p className="text-xs text-zinc-400">{workout.subtitle}</p>
+    <div className="space-y-5">
+      <div className="flex items-end justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="text-xl font-semibold truncate">{workout.name}</h1>
+          <p className="text-xs text-muted mt-0.5">{workout.subtitle}</p>
         </div>
-        <div className="text-right">
-          <div className="text-xs text-zinc-400">Sets</div>
-          <div className="text-lg font-bold text-white">{doneSets}/{totalSets}</div>
+        <div className="text-right flex-shrink-0">
+          <div className="num-lg text-[22px]">
+            <span className={doneSets === totalSets && totalSets > 0 ? 'text-signal' : 'text-ink'}>{doneSets}</span>
+            <span className="text-muted"> / {totalSets}</span>
+          </div>
+          <div className="text-micro text-muted mt-0.5">sets</div>
         </div>
       </div>
 
       {resumed && (
-        <div className="flex items-center justify-between gap-3 rounded-xl px-3 py-2.5"
-          style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)' }}>
-          <p className="text-xs text-emerald-300">Picked up where you left off.</p>
-          <button onClick={onDiscard} className="text-xs text-zinc-400 hover:text-zinc-200 flex-shrink-0 px-2 py-1">
+        <div className="panel flex items-center justify-between gap-3 px-3 py-2.5">
+          <p className="text-xs text-muted">Picked up where you left off.</p>
+          <button onClick={onDiscard} className="text-xs text-muted hover:text-ink flex-shrink-0 px-2 py-1">
             Start over
           </button>
         </div>
@@ -283,96 +278,117 @@ function LoggingView({ workout, sessionSets, workoutHistory, selectedId, resumed
 
       <div className="progress-bar">
         <div
-          className={`progress-fill ${workout.colorClasses.dot}`}
+          className="progress-fill"
+          data-met={totalSets > 0 && doneSets === totalSets}
           style={{ width: `${totalSets > 0 ? (doneSets / totalSets) * 100 : 0}%` }}
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+      <div className="panel rule-group">
         {workout.exercises.map((ex) => {
           const sets = sessionSets[ex.name] || []
           const prevWorkouts = Object.values(workoutHistory)
             .filter((w) => w.workoutId === selectedId)
             .sort((a, b) => b.date.localeCompare(a.date))
           const prev = prevWorkouts[0]?.exercises?.find((e) => e.name === ex.name)
-          const exDone = sets.every((s) => s.done)
+          const exDone = sets.length > 0 && sets.every((s) => s.done)
           const isExpanded = expandedEx === ex.name
 
           return (
-            <div key={ex.name} className={`card border ${exDone ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-white/[0.08]'}`}>
+            <div key={ex.name}>
               <button
-                className="w-full flex items-center justify-between"
+                className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left min-h-[56px]"
                 onClick={() => setExpandedEx(isExpanded ? null : ex.name)}
+                aria-expanded={isExpanded}
               >
-                <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${exDone ? 'bg-emerald-500' : 'bg-zinc-500'}`} />
-                  <span className="font-medium text-sm">{ex.name}</span>
-                </div>
-                <div className="flex items-center gap-3 text-xs text-zinc-400">
-                  <span>{ex.sets}×{ex.repRange} · RPE {ex.rpe}</span>
-                  <span>{isExpanded ? '▲' : '▼'}</span>
-                </div>
+                <span className="min-w-0">
+                  <span className={`block text-sm ${exDone ? 'text-signal' : 'text-ink'}`}>{ex.name}</span>
+                  <span className="block text-micro text-muted mt-0.5 num">
+                    {ex.sets} × {ex.repRange}, RPE {ex.rpe}
+                  </span>
+                </span>
+                <span className="text-micro text-muted flex-shrink-0">
+                  {exDone ? 'done' : isExpanded ? 'close' : 'open'}
+                </span>
               </button>
 
+              {/* The one raised surface in the app: the exercise being logged. */}
               {isExpanded && (
-                <div className="mt-3 space-y-2">
-                  {ex.tip && (
-                    <div className="flex gap-2 rounded-xl px-3 py-2" style={{ background: 'rgba(124,58,237,0.1)', border: '1px solid rgba(124,58,237,0.2)' }}>
-                      <span className="text-violet-400 flex-shrink-0">💡</span>
-                      <span className="text-xs text-violet-300">{ex.tip}</span>
-                    </div>
-                  )}
+                <div className="px-3 pb-4 pt-1 space-y-3" style={{ background: 'var(--raised)' }}>
                   {prev && (
-                    <div className="text-xs text-zinc-400 rounded-xl px-3 py-1.5" style={{ background: 'rgba(255,255,255,0.04)' }}>
-                      Last: {prev.sets.map((s) => `${s.weight}kg×${s.reps}`).join(', ')}
-                    </div>
+                    <p className="text-micro text-muted num">
+                      Last time: {prev.sets.map((s) => `${s.weight}kg × ${s.reps}`).join(', ')}
+                    </p>
                   )}
-                  <div className="grid grid-cols-12 gap-1 text-xs text-zinc-400 px-1">
-                    <div className="col-span-1">Set</div>
-                    <div className="col-span-4 text-center">Weight (kg)</div>
-                    <div className="col-span-4 text-center">Reps</div>
+
+                  <div className="grid grid-cols-12 gap-2 text-micro text-muted px-1">
+                    <div className="col-span-2">Set</div>
+                    <div className="col-span-4 text-center">kg</div>
+                    <div className="col-span-3 text-center">Reps</div>
                     <div className="col-span-3 text-center">Done</div>
                   </div>
+
                   {sets.map((set, i) => {
                     const prevSet = prev?.sets?.[i]
                     const improved = prevSet && (set.reps > prevSet.reps || set.weight > prevSet.weight)
                     return (
-                      <div key={i} className={`grid grid-cols-12 gap-1 items-center ${set.done ? 'opacity-60' : ''}`}>
-                        <div className="col-span-1 text-xs text-zinc-400">{i + 1}</div>
-                        <div className="col-span-4">
-                          <NumericInput
-                            value={set.weight}
-                            onCommit={(v) => onUpdateSet(ex.name, i, 'weight', v)}
-                            inputMode="decimal"
-                            className="input-field text-center text-sm py-1"
-                          />
-                        </div>
-                        <div className="col-span-4">
-                          <NumericInput
-                            value={set.reps}
-                            onCommit={(v) => onUpdateSet(ex.name, i, 'reps', v)}
-                            inputMode="numeric"
-                            className="input-field text-center text-sm py-1"
-                          />
-                        </div>
-                        <div className="col-span-3 flex justify-center">
-                          <button
-                            onClick={() => onToggleDone(ex.name, i)}
-                            className={`w-8 h-8 rounded-full border-2 flex items-center justify-center transition-colors ${
-                              set.done ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-zinc-500'
-                            }`}
-                          >
-                            {set.done && '✓'}
-                          </button>
-                        </div>
-                        {improved && !set.done && (
-                          <div className="col-span-12 text-xs text-emerald-400 text-center">
-                            ↑ Better than last time
+                      <div key={i} className="space-y-1">
+                        <div className="grid grid-cols-12 gap-2 items-center">
+                          <div className="col-span-2 text-xs text-muted num">{i + 1}</div>
+                          <div className="col-span-4">
+                            <NumericInput
+                              value={set.weight}
+                              onCommit={(v) => onUpdateSet(ex.name, i, 'weight', v)}
+                              inputMode="decimal"
+                              className="input-field num text-center"
+                            />
                           </div>
+                          <div className="col-span-3">
+                            <NumericInput
+                              value={set.reps}
+                              onCommit={(v) => onUpdateSet(ex.name, i, 'reps', v)}
+                              inputMode="numeric"
+                              className="input-field num text-center"
+                            />
+                          </div>
+                          <div className="col-span-3 flex justify-center">
+                            <button
+                              onClick={() => onToggleDone(ex.name, i)}
+                              aria-label={`Mark set ${i + 1} done`}
+                              aria-pressed={!!set.done}
+                              className="w-11 h-11 rounded-full flex items-center justify-center"
+                            >
+                              <span
+                                className={`w-6 h-6 rounded-full flex items-center justify-center ${set.done ? 'set-logged' : ''}`}
+                                style={{
+                                  border: `1.5px solid ${set.done ? 'var(--signal)' : 'var(--rule)'}`,
+                                  background: set.done ? 'var(--signal)' : 'transparent',
+                                }}
+                              >
+                                {set.done && (
+                                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                                    <path d="M2.5 6.5L4.8 8.8L9.5 3.5" stroke="#0B0D10" strokeWidth="1.9"
+                                      strokeLinecap="round" strokeLinejoin="round" />
+                                  </svg>
+                                )}
+                              </span>
+                            </button>
+                          </div>
+                        </div>
+                        {/* Shown whether or not the set is ticked — it used to
+                            vanish the instant you marked it done. */}
+                        {improved && (
+                          <p className="text-micro text-signal text-center">Up on last time</p>
                         )}
                       </div>
                     )
                   })}
+
+                  {/* Coaching note sits below the inputs rather than above them,
+                      so a long paragraph doesn't push the numbers off screen. */}
+                  {ex.tip && (
+                    <p className="text-micro text-muted leading-relaxed rule-top pt-3">{ex.tip}</p>
+                  )}
                 </div>
               )}
             </div>
@@ -380,8 +396,8 @@ function LoggingView({ workout, sessionSets, workoutHistory, selectedId, resumed
         })}
       </div>
 
-      <button onClick={onFinish} className="w-full btn-primary py-3 text-base">
-        Finish Workout ✓
+      <button onClick={onFinish} className="w-full btn-primary text-sm">
+        Finish workout
       </button>
     </div>
   )
@@ -396,8 +412,8 @@ function OverwriteConfirm({ existing, onMerge, onReplace, onCancel }) {
     >
       <div className="card-raised w-full max-w-sm space-y-4" onClick={(e) => e.stopPropagation()}>
         <div>
-          <h3 className="font-bold text-base text-white">You already logged a workout today</h3>
-          <p className="text-sm text-zinc-400 mt-1">
+          <h3 className="font-semibold text-base text-ink">You already logged a workout today</h3>
+          <p className="text-sm text-muted mt-1">
             {existing?.workoutName} is saved for today with {existing?.exercises?.length ?? 0} exercises.
           </p>
         </div>
@@ -408,7 +424,7 @@ function OverwriteConfirm({ existing, onMerge, onReplace, onCancel }) {
           <button onClick={onReplace} className="w-full btn-ghost py-2.5 text-sm">
             Replace it
           </button>
-          <button onClick={onCancel} className="w-full text-xs text-zinc-500 py-2">
+          <button onClick={onCancel} className="w-full text-xs text-muted py-2">
             Keep logging
           </button>
         </div>
@@ -421,58 +437,58 @@ function WorkoutComplete({ workout }) {
   const totalSets = workout.exercises.reduce((sum, ex) => sum + ex.sets.length, 0)
   const doneSets = workout.exercises.reduce((sum, ex) => sum + ex.sets.filter((s) => s.done).length, 0)
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6 text-center">
-      <div className="text-6xl">🏆</div>
+    <div className="flex flex-col justify-center min-h-[60vh] space-y-8">
       <div>
-        <h2 className="text-2xl font-bold text-emerald-400">Workout Complete!</h2>
-        <p className="text-zinc-400 mt-1">{workout.workoutName}</p>
+        <p className="text-micro text-signal font-semibold">Logged</p>
+        <h2 className="text-2xl font-semibold mt-1.5">{workout.workoutName}</h2>
+        <p className="text-xs text-muted mt-1">Rest well. Come back stronger.</p>
       </div>
-      <div className="card w-full">
-        <div className="grid grid-cols-3 gap-4">
-          <div>
-            <div className="text-2xl font-bold text-white">{doneSets}/{totalSets}</div>
-            <div className="text-xs text-zinc-400">Sets Done</div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-white">{workout.durationMin}m</div>
-            <div className="text-xs text-zinc-400">Duration</div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-white">{workout.exercises.length}</div>
-            <div className="text-xs text-zinc-400">Exercises</div>
-          </div>
-        </div>
+
+      <div className="panel rule-group">
+        <SummaryStat label="Sets completed" value={`${doneSets} of ${totalSets}`} />
+        <SummaryStat label="Duration" value={`${workout.durationMin} min`} />
+        <SummaryStat label="Exercises" value={workout.exercises.length} />
       </div>
-      <p className="text-zinc-400 text-sm">Rest well. Come back stronger tomorrow.</p>
+    </div>
+  )
+}
+
+function SummaryStat({ label, value }) {
+  return (
+    <div className="flex items-baseline justify-between gap-3 px-4 py-3.5">
+      <span className="text-xs text-muted">{label}</span>
+      <span className="num text-base">{value}</span>
     </div>
   )
 }
 
 function WorkoutSummary({ workout, onRedo }) {
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Today's Workout</h1>
-        <span className="text-xs bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full">Done ✓</span>
-      </div>
-      <div className="card">
-        <div className="font-bold text-lg">{workout.workoutName}</div>
-        <div className="text-sm text-zinc-400 mt-1">{workout.durationMin} min · {workout.exercises.length} exercises</div>
-      </div>
-      {workout.exercises.map((ex) => (
-        <div key={ex.name} className="card">
-          <div className="font-medium text-sm mb-2">{ex.name}</div>
-          <div className="flex flex-wrap gap-1">
-            {ex.sets.map((s, i) => (
-              <span key={i} className={`text-xs px-2 py-0.5 rounded-full ${s.done ? 'bg-emerald-500/20 text-emerald-300' : 'text-zinc-400'}`}
-                style={!s.done ? { background: 'rgba(255,255,255,0.05)' } : {}}>
-                {s.weight}kg × {s.reps}
-              </span>
-            ))}
+    <div className="space-y-6">
+      <header>
+        <p className="text-micro text-signal font-semibold">Logged</p>
+        <h1 className="text-2xl font-semibold mt-1.5">{workout.workoutName}</h1>
+        <p className="text-xs text-muted mt-1 num">
+          {workout.durationMin} min, {workout.exercises.length} exercises
+        </p>
+      </header>
+
+      <div className="panel rule-group">
+        {workout.exercises.map((ex) => (
+          <div key={ex.name} className="px-4 py-3">
+            <div className="text-sm">{ex.name}</div>
+            <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1.5">
+              {ex.sets.map((s, i) => (
+                <span key={i} className={`text-micro num ${s.done ? 'text-ink' : 'text-muted'}`}>
+                  {s.weight}kg × {s.reps}
+                </span>
+              ))}
+            </div>
           </div>
-        </div>
-      ))}
-      <button onClick={onRedo} className="w-full btn-ghost py-2 text-sm">
+        ))}
+      </div>
+
+      <button onClick={onRedo} className="w-full btn-ghost text-sm">
         Log another workout today
       </button>
     </div>

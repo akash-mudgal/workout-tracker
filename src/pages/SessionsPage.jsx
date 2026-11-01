@@ -5,9 +5,9 @@ import { PLANS } from '../data/workoutPlans'
 
 const PLAN_LIST = Object.values(PLANS)
 
-const glassBorder = { border: '1px solid rgba(255,255,255,0.08)' }
-const glassBg = { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }
-const divider = { borderTop: '1px solid rgba(255,255,255,0.07)' }
+const glassBorder = { border: '1px solid var(--rule)' }
+const glassBg = { background: 'var(--raised)', border: '1px solid var(--rule)' }
+const divider = { borderTop: '1px solid var(--rule)' }
 
 export default function SessionsPage() {
   const {
@@ -98,22 +98,22 @@ export default function SessionsPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Sessions</h1>
+        <h1 className="text-2xl font-semibold">Sessions</h1>
         <button onClick={() => setCreating(true)} className="btn-primary text-sm px-4 py-2">
           + New
         </button>
       </div>
 
-      <p className="text-xs text-zinc-400">
+      <p className="text-xs text-muted">
         Each session is an independent cycle with its own workouts, logs, and metrics.
       </p>
 
       {/* New session form */}
       {creating && (
-        <div className="card space-y-3" style={{ borderColor: 'rgba(124,58,237,0.3)', background: 'rgba(124,58,237,0.05)' }}>
-          <h3 className="text-sm font-semibold text-violet-400">New Session</h3>
+        <div className="card space-y-3" style={{ borderColor: '#3C4650', background: 'var(--raised)' }}>
+          <h3 className="text-sm font-semibold text-ink">New Session</h3>
           <div>
-            <label className="text-xs text-zinc-400 block mb-1">Session Name</label>
+            <label className="text-xs text-muted block mb-1">Session Name</label>
             <input
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
@@ -124,16 +124,16 @@ export default function SessionsPage() {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs text-zinc-400 block mb-1">Start Date (Day 1)</label>
+              <label className="text-xs text-muted block mb-1">Start Date (Day 1)</label>
               <input type="date" value={newStart} max={today} onChange={(e) => setNewStart(e.target.value)} className="input-field" />
             </div>
             <div>
-              <label className="text-xs text-zinc-400 block mb-1">Duration (days)</label>
+              <label className="text-xs text-muted block mb-1">Duration (days)</label>
               <input type="number" value={newTotalDays} min={7} max={365} onChange={(e) => setNewTotalDays(e.target.value)} className="input-field" />
             </div>
           </div>
           <div>
-            <label className="text-xs text-zinc-400 block mb-2">Goal</label>
+            <label className="text-xs text-muted block mb-2">Goal</label>
             <div className="grid grid-cols-3 gap-2">
               {[
                 { value: 'fat_loss', label: 'Fat Loss' },
@@ -145,7 +145,7 @@ export default function SessionsPage() {
                   onClick={() => setNewGoal(g.value)}
                   className="py-2 rounded-xl text-xs font-semibold border transition-colors"
                   style={newGoal === g.value
-                    ? { background: 'rgba(124,58,237,0.2)', border: '1px solid rgba(124,58,237,0.4)', color: '#c4b5fd' }
+                    ? { background: 'var(--raised)', border: '1px solid #3C4650', color: 'var(--ink)' }
                     : glassBg}
                 >
                   {g.label}
@@ -154,25 +154,25 @@ export default function SessionsPage() {
             </div>
           </div>
           <div>
-            <label className="text-xs text-zinc-400 block mb-2">Workout Plan</label>
+            <label className="text-xs text-muted block mb-2">Workout Plan</label>
             <div className="space-y-2">
               {PLAN_LIST.map((plan) => (
                 <button
                   key={plan.id}
                   onClick={() => setNewPlanId(plan.id)}
                   className={`w-full text-left p-3 rounded-xl transition-all ${
-                    newPlanId === plan.id ? 'border-violet-500/50 bg-violet-500/10' : 'hover:border-white/20'
+                    newPlanId === plan.id ? 'border-rule bg-raised' : 'hover:border-rule'
                   }`}
-                  style={newPlanId === plan.id ? { border: '1px solid rgba(124,58,237,0.5)', background: 'rgba(124,58,237,0.1)' } : glassBg}
+                  style={newPlanId === plan.id ? { border: '1px solid #3C4650', background: 'var(--raised)' } : glassBg}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-medium text-sm text-zinc-200">{plan.name}</span>
+                    <span className="font-medium text-sm text-ink">{plan.name}</span>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs text-zinc-400 rounded-full px-2 py-0.5" style={{ background: 'rgba(255,255,255,0.06)' }}>{plan.daysPerWeek}d/wk</span>
-                      {newPlanId === plan.id && <span className="text-violet-400 text-xs">●</span>}
+                      <span className="text-xs text-muted rounded-full px-2 py-0.5" style={{ background: 'var(--raised)' }}>{plan.daysPerWeek}d/wk</span>
+                      {newPlanId === plan.id && <span className="text-ink text-xs">●</span>}
                     </div>
                   </div>
-                  <p className="text-xs text-zinc-400 mt-0.5">{plan.description}</p>
+                  <p className="text-xs text-muted mt-0.5">{plan.description}</p>
                 </button>
               ))}
             </div>
@@ -202,33 +202,33 @@ export default function SessionsPage() {
               key={session.id}
               className="card transition-all"
               style={isActive
-                ? { borderColor: 'rgba(124,58,237,0.4)', background: 'rgba(124,58,237,0.05)' }
+                ? { borderColor: '#3C4650', background: 'var(--raised)' }
                 : {}}
             >
               {/* Header row */}
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="font-semibold truncate text-white">{session.name}</span>
+                    <span className="font-semibold truncate text-ink">{session.name}</span>
                     {isActive && (
-                      <span className="text-xs px-2 py-0.5 rounded-full flex-shrink-0" style={{ background: 'rgba(124,58,237,0.2)', color: '#c4b5fd' }}>
+                      <span className="text-xs px-2 py-0.5 rounded-full flex-shrink-0" style={{ background: 'var(--raised)', color: 'var(--ink)' }}>
                         Active
                       </span>
                     )}
                   </div>
-                  <div className="text-xs text-zinc-400 mt-0.5">
+                  <div className="text-xs text-muted mt-0.5">
                     {PLANS[session.planId ?? 'ppl']?.name ?? 'PPL'} · {totalDays} days · Started {format(new Date(session.startDate + 'T00:00:00'), 'MMM d, yyyy')}
                     {' · '}{getWorkoutCount(session.id)} workouts
                     {session.goal && session.goal !== 'recomp' && (
-                      <span className="ml-1 text-zinc-500">
+                      <span className="ml-1 text-muted">
                         · {session.goal === 'fat_loss' ? 'Fat Loss' : 'Muscle Gain'}
                       </span>
                     )}
                   </div>
                 </div>
                 <div className="text-right flex-shrink-0">
-                  <div className={`text-2xl font-black ${isActive ? 'text-violet-400' : 'text-zinc-400'}`}>{dayNum}</div>
-                  <div className="text-xs text-zinc-400">/ {totalDays}</div>
+                  <div className={`text-2xl font-semibold ${isActive ? 'text-ink' : 'text-muted'}`}>{dayNum}</div>
+                  <div className="text-xs text-muted">/ {totalDays}</div>
                 </div>
               </div>
 
@@ -236,16 +236,16 @@ export default function SessionsPage() {
               <div className="progress-bar mt-3">
                 <div
                   className="progress-fill"
-                  style={{ width: `${pct}%`, background: isActive ? 'linear-gradient(90deg, #7c3aed, #a78bfa)' : 'rgba(255,255,255,0.15)' }}
+                  style={{ width: `${pct}%`, background: isActive ? 'linear-gradient(90deg, var(--ink), var(--ink))' : 'var(--rule)' }}
                 />
               </div>
 
               {/* Inline edit form */}
               {isEditingThis && (
                 <div className="mt-3 pt-3 space-y-3" style={divider}>
-                  <h4 className="text-xs font-semibold text-zinc-400">Edit Session</h4>
+                  <h4 className="text-xs font-semibold text-muted">Edit Session</h4>
                   <div>
-                    <label className="text-xs text-zinc-400 block mb-1">Name</label>
+                    <label className="text-xs text-muted block mb-1">Name</label>
                     <input
                       value={editName}
                       onChange={(e) => setEditName(e.target.value)}
@@ -256,16 +256,16 @@ export default function SessionsPage() {
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="text-xs text-zinc-400 block mb-1">Start Date</label>
+                      <label className="text-xs text-muted block mb-1">Start Date</label>
                       <input type="date" value={editStart} max={today} onChange={(e) => setEditStart(e.target.value)} className="input-field text-sm py-1" />
                     </div>
                     <div>
-                      <label className="text-xs text-zinc-400 block mb-1">Duration (days)</label>
+                      <label className="text-xs text-muted block mb-1">Duration (days)</label>
                       <input type="number" value={editTotalDays} min={7} max={365} onChange={(e) => setEditTotalDays(e.target.value)} className="input-field text-sm py-1" />
                     </div>
                   </div>
                   <div>
-                    <label className="text-xs text-zinc-400 block mb-2">Goal</label>
+                    <label className="text-xs text-muted block mb-2">Goal</label>
                     <div className="grid grid-cols-3 gap-2">
                       {[
                         { value: 'fat_loss', label: 'Fat Loss' },
@@ -277,7 +277,7 @@ export default function SessionsPage() {
                           onClick={() => setEditGoal(g.value)}
                           className="py-1.5 rounded-xl text-xs font-semibold border transition-colors"
                           style={editGoal === g.value
-                            ? { background: 'rgba(124,58,237,0.2)', border: '1px solid rgba(124,58,237,0.4)', color: '#c4b5fd' }
+                            ? { background: 'var(--raised)', border: '1px solid #3C4650', color: 'var(--ink)' }
                             : glassBg}
                         >
                           {g.label}
@@ -286,7 +286,7 @@ export default function SessionsPage() {
                     </div>
                   </div>
                   <div>
-                    <label className="text-xs text-zinc-400 block mb-2">Workout Plan</label>
+                    <label className="text-xs text-muted block mb-2">Workout Plan</label>
                     <div className="space-y-1.5">
                       {PLAN_LIST.map((plan) => (
                         <button
@@ -294,17 +294,17 @@ export default function SessionsPage() {
                           onClick={() => setEditPlanId(plan.id)}
                           className="w-full text-left p-2.5 rounded-xl transition-all"
                           style={editPlanId === plan.id
-                            ? { border: '1px solid rgba(124,58,237,0.5)', background: 'rgba(124,58,237,0.1)' }
+                            ? { border: '1px solid #3C4650', background: 'var(--raised)' }
                             : glassBg}
                         >
                           <div className="flex items-center justify-between">
-                            <span className="font-medium text-xs text-zinc-200">{plan.name}</span>
+                            <span className="font-medium text-xs text-ink">{plan.name}</span>
                             <div className="flex items-center gap-2">
-                              <span className="text-xs text-zinc-400">{plan.daysPerWeek}d/wk</span>
-                              {editPlanId === plan.id && <span className="text-violet-400 text-xs">●</span>}
+                              <span className="text-xs text-muted">{plan.daysPerWeek}d/wk</span>
+                              {editPlanId === plan.id && <span className="text-ink text-xs">●</span>}
                             </div>
                           </div>
-                          <p className="text-xs text-zinc-400 mt-0.5">{plan.description}</p>
+                          <p className="text-xs text-muted mt-0.5">{plan.description}</p>
                         </button>
                       ))}
                     </div>
@@ -318,16 +318,16 @@ export default function SessionsPage() {
 
               {/* Reset progress confirm */}
               {isResettingThis && (
-                <div className="mt-3 pt-3 space-y-2" style={{ borderTop: '1px solid rgba(249,115,22,0.2)' }}>
-                  <div className="text-xs text-orange-400 font-medium">Reset all progress for "{session.name}"?</div>
-                  <div className="text-xs text-zinc-400">
+                <div className="mt-3 pt-3 space-y-2" style={{ borderTop: '1px solid var(--rule)' }}>
+                  <div className="text-xs text-ink font-medium">Reset all progress for "{session.name}"?</div>
+                  <div className="text-xs text-muted">
                     This clears all workouts, daily logs, and body metrics and restarts from today. Cannot be undone.
                   </div>
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleResetProgress(session.id)}
                       disabled={loading}
-                      className="bg-orange-600 hover:bg-orange-500 text-white text-xs px-4 py-1.5 rounded-lg disabled:opacity-50 font-medium"
+                      className="bg-warn text-ink text-xs px-4 py-1.5 rounded-lg disabled:opacity-50 font-medium"
                     >
                       {loading ? 'Resetting…' : 'Yes, reset everything'}
                     </button>
@@ -338,15 +338,15 @@ export default function SessionsPage() {
 
               {/* Delete confirm */}
               {isDeletingThis && (
-                <div className="mt-3 pt-3 space-y-2" style={{ borderTop: '1px solid rgba(239,68,68,0.2)' }}>
-                  <div className="text-xs text-red-400">
+                <div className="mt-3 pt-3 space-y-2" style={{ borderTop: '1px solid rgba(255,107,91,0.3)' }}>
+                  <div className="text-xs text-warn">
                     Delete "{session.name}"? This removes all workouts, logs and metrics permanently.
                   </div>
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleDelete(session.id)}
                       disabled={loading}
-                      className="bg-red-600 hover:bg-red-500 text-white text-xs px-4 py-1.5 rounded-lg disabled:opacity-50"
+                      className="bg-warn text-ink text-xs px-4 py-1.5 rounded-lg disabled:opacity-50"
                     >
                       {loading ? 'Deleting…' : 'Yes, delete'}
                     </button>
@@ -366,7 +366,7 @@ export default function SessionsPage() {
                   <button onClick={() => openEdit(session)} className="btn-ghost text-xs px-3 py-1.5">Edit</button>
                   <button onClick={() => setResetConfirmId(session.id)} className="btn-ghost text-xs px-3 py-1.5">Reset Progress</button>
                   {sessions.length > 1 && (
-                    <button onClick={() => setDeleteConfirmId(session.id)} className="ml-auto text-xs text-zinc-500 hover:text-red-400 transition-colors px-2 py-1.5">
+                    <button onClick={() => setDeleteConfirmId(session.id)} className="ml-auto text-xs text-muted hover:text-warn transition-colors px-2 py-1.5">
                       Delete
                     </button>
                   )}

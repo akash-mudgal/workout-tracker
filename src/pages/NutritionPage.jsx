@@ -46,7 +46,7 @@ export default function NutritionPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Nutrition</h1>
+      <h1 className="text-2xl font-semibold">Nutrition</h1>
 
       {/* Macro totals */}
       <div className="grid grid-cols-2 gap-3">
@@ -70,13 +70,13 @@ export default function NutritionPage() {
       {quickProtein > 0 && (
         <div className="card flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <span className="font-semibold text-sm text-white">{QUICK_ADD_SLOT}</span>
-            <span className="text-xs text-zinc-500 ml-2">{quickProtein}g protein, set on the Dashboard</span>
+            <span className="font-semibold text-sm text-ink">{QUICK_ADD_SLOT}</span>
+            <span className="text-xs text-muted ml-2">{quickProtein}g protein, set on the Dashboard</span>
           </div>
           <button
             onClick={() => updateTodayMeals({ ...meals, [QUICK_ADD_SLOT]: [] })}
             className="text-xs font-semibold px-3 py-1.5 rounded-lg flex-shrink-0"
-            style={{ background: 'rgba(255,255,255,0.06)', color: '#a1a1aa', border: '1px solid rgba(255,255,255,0.08)' }}
+            style={{ background: 'var(--raised)', color: '#8B949E', border: '1px solid var(--rule)' }}
           >
             Clear
           </button>
@@ -119,9 +119,9 @@ function MealSection({ slot, foods, onAdd, onRemove }) {
       {/* Meal header */}
       <div className="flex items-center justify-between">
         <div>
-          <span className="font-semibold text-sm text-white">{slot}</span>
+          <span className="font-semibold text-sm text-ink">{slot}</span>
           {foods.length > 0 && (
-            <span className="text-xs text-zinc-500 ml-2">
+            <span className="text-xs text-muted ml-2">
               {mealProtein}g protein · {mealCal} kcal
             </span>
           )}
@@ -130,9 +130,9 @@ function MealSection({ slot, foods, onAdd, onRemove }) {
           onClick={() => setAdding((v) => !v)}
           className="text-xs font-semibold px-3 py-1 rounded-lg transition-colors"
           style={{
-            background: adding ? 'rgba(124,58,237,0.15)' : 'rgba(255,255,255,0.06)',
-            color: adding ? '#a78bfa' : '#a1a1aa',
-            border: `1px solid ${adding ? 'rgba(124,58,237,0.3)' : 'rgba(255,255,255,0.08)'}`,
+            background: adding ? 'var(--raised)' : 'var(--raised)',
+            color: adding ? 'var(--ink)' : '#8B949E',
+            border: `1px solid ${adding ? '#3C4650' : 'var(--rule)'}`,
           }}
         >
           {adding ? 'Done' : '+ Add'}
@@ -146,17 +146,17 @@ function MealSection({ slot, foods, onAdd, onRemove }) {
             <div
               key={i}
               className="flex items-center justify-between rounded-xl px-3 py-2"
-              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}
+              style={{ background: 'var(--raised)', border: '1px solid var(--raised)' }}
             >
               <div className="min-w-0 flex-1">
-                <div className="text-sm text-white font-medium truncate">{food.name}</div>
-                <div className="text-xs text-zinc-500 mt-0.5">
+                <div className="text-sm text-ink font-medium truncate">{food.name}</div>
+                <div className="text-xs text-muted mt-0.5">
                   {food.protein}g protein · {food.cal} kcal
                 </div>
               </div>
               <button
                 onClick={() => onRemove(i)}
-                className="ml-3 text-zinc-600 hover:text-red-400 transition-colors text-lg leading-none flex-shrink-0"
+                className="ml-3 text-muted hover:text-warn transition-colors text-lg leading-none flex-shrink-0"
               >
                 ×
               </button>
@@ -166,22 +166,22 @@ function MealSection({ slot, foods, onAdd, onRemove }) {
       )}
 
       {foods.length === 0 && !adding && (
-        <p className="text-xs text-zinc-600 italic">Nothing logged yet</p>
+        <p className="text-xs text-muted italic">Nothing logged yet</p>
       )}
 
       {/* Add food panel */}
       {adding && (
-        <div className="space-y-3 pt-2" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+        <div className="space-y-3 pt-2" style={{ borderTop: '1px solid var(--rule)' }}>
           {/* Tab switcher */}
-          <div className="flex gap-1 p-0.5 rounded-xl" style={{ background: 'rgba(255,255,255,0.05)' }}>
+          <div className="flex gap-1 p-0.5 rounded-xl" style={{ background: 'var(--raised)' }}>
             {['quick', 'custom'].map((t) => (
               <button
                 key={t}
                 onClick={() => setTab(t)}
                 className="flex-1 text-xs py-1.5 rounded-lg font-medium transition-all capitalize"
                 style={{
-                  background: tab === t ? 'rgba(124,58,237,0.3)' : 'transparent',
-                  color: tab === t ? '#c4b5fd' : '#71717a',
+                  background: tab === t ? '#3C4650' : 'transparent',
+                  color: tab === t ? 'var(--ink)' : '#8B949E',
                 }}
               >
                 {t === 'quick' ? 'Quick Add' : 'Custom'}
@@ -196,10 +196,10 @@ function MealSection({ slot, foods, onAdd, onRemove }) {
                   key={food.name}
                   onClick={() => handleQuickAdd(food)}
                   className="w-full flex items-center justify-between rounded-xl px-3 py-2 text-left transition-all hover:border-white/15"
-                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
+                  style={{ background: 'var(--raised)', border: '1px solid var(--raised)' }}
                 >
-                  <span className="text-sm text-zinc-200">{food.name}</span>
-                  <span className="text-xs text-zinc-500 flex-shrink-0 ml-2">
+                  <span className="text-sm text-ink">{food.name}</span>
+                  <span className="text-xs text-muted flex-shrink-0 ml-2">
                     {food.protein}g · {food.cal} kcal
                   </span>
                 </button>
@@ -248,8 +248,8 @@ function MealSection({ slot, foods, onAdd, onRemove }) {
 
 function MacroCard({ label, value, goal, unit, pct, color }) {
   const colorMap = {
-    amber: { bar: '#f59e0b', text: 'text-amber-400' },
-    orange: { bar: '#f97316', text: 'text-orange-400' },
+    amber: { bar: '#E8EBED', text: 'text-ink' },
+    orange: { bar: '#8B949E', text: 'text-ink' },
   }
   const c = colorMap[color]
   return (
@@ -257,11 +257,11 @@ function MacroCard({ label, value, goal, unit, pct, color }) {
       <div className="h-1 w-full -mx-4 -mt-4 mb-3" style={{ width: 'calc(100% + 2rem)' }}>
         <div className="h-full transition-all duration-500" style={{ width: `${pct}%`, background: c.bar }} />
       </div>
-      <div className="text-xs text-zinc-400">{label}</div>
-      <div className={`text-2xl font-bold mt-1 ${c.text}`}>
-        {value} <span className="text-sm font-normal text-zinc-400">{unit}</span>
+      <div className="text-xs text-muted">{label}</div>
+      <div className={`text-2xl font-semibold mt-1 ${c.text}`}>
+        {value} <span className="text-sm font-normal text-muted">{unit}</span>
       </div>
-      <div className="text-xs text-zinc-400 mt-1">Goal: {goal} {unit}</div>
+      <div className="text-xs text-muted mt-1">Goal: {goal} {unit}</div>
     </div>
   )
 }

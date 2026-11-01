@@ -4,8 +4,8 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 import { useStore } from '../store.jsx'
 
 const tooltipStyle = {
-  contentStyle: { background: 'rgba(10,10,18,0.95)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12, backdropFilter: 'blur(16px)' },
-  labelStyle: { color: '#a1a1aa' },
+  contentStyle: { background: '#14181D', border: '1px solid var(--rule)', borderRadius: 12 },
+  labelStyle: { color: '#8B949E' },
 }
 
 export default function BodyMetrics() {
@@ -52,19 +52,19 @@ export default function BodyMetrics() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Body Metrics</h1>
+      <h1 className="text-2xl font-semibold">Body Metrics</h1>
 
       {/* Log Form */}
       <div className="card space-y-3">
-        <h3 className="font-semibold text-sm text-white">Log Today's Measurements</h3>
+        <h3 className="font-semibold text-sm text-ink">Log Today's Measurements</h3>
         {todayMetric && (
-          <div className="text-xs text-zinc-400 rounded-xl px-3 py-2" style={{ background: 'rgba(255,255,255,0.04)' }}>
+          <div className="text-xs text-muted rounded-xl px-3 py-2" style={{ background: 'var(--raised)' }}>
             Last logged today: {todayMetric.weight && `${todayMetric.weight}kg`} {todayMetric.waist && `· ${todayMetric.waist}cm waist`}
           </div>
         )}
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-xs text-zinc-400 block mb-1">Weight (kg)</label>
+            <label className="text-xs text-muted block mb-1">Weight (kg)</label>
             <input
               type="number"
               step="0.1"
@@ -75,7 +75,7 @@ export default function BodyMetrics() {
             />
           </div>
           <div>
-            <label className="text-xs text-zinc-400 block mb-1">Waist (cm)</label>
+            <label className="text-xs text-muted block mb-1">Waist (cm)</label>
             <input
               type="number"
               step="0.5"
@@ -87,7 +87,7 @@ export default function BodyMetrics() {
           </div>
         </div>
         <div>
-          <label className="text-xs text-zinc-400 block mb-1">Notes (optional)</label>
+          <label className="text-xs text-muted block mb-1">Notes (optional)</label>
           <input
             type="text"
             placeholder="How do you feel today?"
@@ -98,11 +98,9 @@ export default function BodyMetrics() {
         </div>
         <button
           onClick={handleSave}
-          className={`w-full py-2.5 rounded-xl font-semibold transition-colors ${
-            saved ? 'bg-emerald-600 text-white' : 'btn-primary'
-          }`}
+          className="w-full btn-primary text-sm"
         >
-          {saved ? 'Saved ✓' : 'Save Measurements'}
+          {saved ? 'Saved' : 'Save measurements'}
         </button>
       </div>
 
@@ -117,14 +115,14 @@ export default function BodyMetrics() {
       {/* Weight Chart */}
       {weightData.length >= 2 && (
         <div className="card">
-          <h3 className="text-sm font-semibold mb-3 text-white">Weight Trend</h3>
+          <h3 className="text-sm font-semibold mb-3 text-ink">Weight Trend</h3>
           <ResponsiveContainer width="100%" height={160}>
             <LineChart data={weightData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-              <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#71717a' }} />
-              <YAxis tick={{ fontSize: 10, fill: '#71717a' }} domain={['auto', 'auto']} width={35} />
-              <Tooltip {...tooltipStyle} itemStyle={{ color: '#a78bfa' }} />
-              <Line type="monotone" dataKey="weight" stroke="#8b5cf6" strokeWidth={2} dot={{ fill: '#8b5cf6', r: 3 }} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--raised)" />
+              <XAxis dataKey="date" tick={{ fontSize: 12, fill: '#8B949E' }} />
+              <YAxis tick={{ fontSize: 12, fill: '#8B949E' }} domain={['auto', 'auto']} width={42} />
+              <Tooltip {...tooltipStyle} itemStyle={{ color: 'var(--ink)' }} />
+              <Line type="monotone" dataKey="weight" stroke="#E8EBED" strokeWidth={2} dot={{ fill: '#E8EBED', r: 3 }} />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -133,14 +131,14 @@ export default function BodyMetrics() {
       {/* Waist Chart */}
       {waistData.length >= 2 && (
         <div className="card">
-          <h3 className="text-sm font-semibold mb-3 text-white">Waist Trend (cm)</h3>
+          <h3 className="text-sm font-semibold mb-3 text-ink">Waist Trend (cm)</h3>
           <ResponsiveContainer width="100%" height={160}>
             <LineChart data={waistData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-              <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#71717a' }} />
-              <YAxis tick={{ fontSize: 10, fill: '#71717a' }} domain={['auto', 'auto']} width={35} />
-              <Tooltip {...tooltipStyle} itemStyle={{ color: '#10b981' }} />
-              <Line type="monotone" dataKey="waist" stroke="#10b981" strokeWidth={2} dot={{ fill: '#10b981', r: 3 }} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--raised)" />
+              <XAxis dataKey="date" tick={{ fontSize: 12, fill: '#8B949E' }} />
+              <YAxis tick={{ fontSize: 12, fill: '#8B949E' }} domain={['auto', 'auto']} width={42} />
+              <Tooltip {...tooltipStyle} itemStyle={{ color: '#8B949E' }} />
+              <Line type="monotone" dataKey="waist" stroke="#8B949E" strokeWidth={2} dot={{ fill: '#8B949E', r: 3 }} />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -149,13 +147,13 @@ export default function BodyMetrics() {
       {/* History List */}
       {bodyMetrics.length > 0 && (
         <div className="card space-y-2">
-          <h3 className="text-sm font-semibold text-white">History</h3>
+          <h3 className="text-sm font-semibold text-ink">History</h3>
           {[...bodyMetrics].reverse().slice(0, 10).map((m, i) => (
-            <div key={i} className="flex justify-between text-sm py-1.5" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-              <span className="text-zinc-400">{format(new Date(m.date + 'T00:00:00'), 'EEE, MMM d')}</span>
+            <div key={i} className="flex justify-between text-sm py-1.5" style={{ borderBottom: '1px solid var(--raised)' }}>
+              <span className="text-muted">{format(new Date(m.date + 'T00:00:00'), 'EEE, MMM d')}</span>
               <div className="text-right">
-                <span className="text-white">{m.weight && `${m.weight}kg`}</span>
-                {m.waist && <span className="text-zinc-400 ml-2">· {m.waist}cm</span>}
+                <span className="text-ink">{m.weight && `${m.weight}kg`}</span>
+                {m.waist && <span className="text-muted ml-2">· {m.waist}cm</span>}
               </div>
             </div>
           ))}
@@ -163,7 +161,7 @@ export default function BodyMetrics() {
       )}
 
       {bodyMetrics.length === 0 && (
-        <div className="text-center py-8 text-zinc-400 text-sm">
+        <div className="text-center py-8 text-muted text-sm">
           Log your first measurement to start tracking progress.
         </div>
       )}
@@ -174,11 +172,11 @@ export default function BodyMetrics() {
 function ChangeCard({ label, value, change, unit, goodDirection }) {
   const num = parseFloat(change)
   const isGood = goodDirection === 'down' ? num <= 0 : num >= 0
-  const color = num === 0 ? 'text-zinc-400' : isGood ? 'text-emerald-400' : 'text-red-400'
+  const color = num === 0 ? 'text-muted' : isGood ? 'text-signal' : 'text-warn'
   return (
     <div className="card">
-      <div className="text-xs text-zinc-400 mb-1">{label}</div>
-      <div className="text-xl font-bold text-white">{value}{unit}</div>
+      <div className="text-xs text-muted mb-1">{label}</div>
+      <div className="text-xl font-semibold text-ink">{value}{unit}</div>
       {change !== null && (
         <div className={`text-sm font-medium ${color} mt-1`}>
           {num > 0 ? '+' : ''}{change}{unit} total

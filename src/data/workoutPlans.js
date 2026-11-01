@@ -1,13 +1,16 @@
 import rawPlans from './plans.json'
 
-const COLORS = {
-  red:     { bg: 'bg-red-500/10',     border: 'border-red-500/30',     text: 'text-red-400',     badge: 'bg-red-500/20 text-red-300',     dot: 'bg-red-500'     },
-  blue:    { bg: 'bg-blue-500/10',    border: 'border-blue-500/30',    text: 'text-blue-400',    badge: 'bg-blue-500/20 text-blue-300',    dot: 'bg-blue-500'    },
-  emerald: { bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', text: 'text-emerald-400', badge: 'bg-emerald-500/20 text-emerald-300', dot: 'bg-emerald-500' },
-  amber:   { bg: 'bg-amber-500/10',   border: 'border-amber-500/30',   text: 'text-amber-400',   badge: 'bg-amber-500/20 text-amber-300',   dot: 'bg-amber-500'   },
-  violet:  { bg: 'bg-violet-500/10',  border: 'border-violet-500/30',  text: 'text-violet-400',  badge: 'bg-violet-500/20 text-violet-300',  dot: 'bg-violet-500'  },
-  orange:  { bg: 'bg-orange-500/10',  border: 'border-orange-500/30',  text: 'text-orange-400',  badge: 'bg-orange-500/20 text-orange-300',  dot: 'bg-orange-500'  },
-  zinc:    { bg: 'bg-zinc-500/10',    border: 'border-zinc-500/30',    text: 'text-zinc-400',    badge: 'bg-zinc-500/20 text-zinc-300',    dot: 'bg-zinc-500'    },
+// Workout days used to each carry their own hue, which put seven decorative
+// colours on screen and left colour meaning nothing in particular. Colour now
+// carries exactly one meaning in this interface — a target met — so the day
+// styling is monochrome. The `color` field in plans.json is kept but no longer
+// selects a hue; nothing currently reads colorClasses at all.
+const NEUTRAL = {
+  bg: 'bg-raised',
+  border: 'border-rule',
+  text: 'text-ink',
+  badge: 'bg-raised text-muted',
+  dot: 'bg-muted',
 }
 
 function expandPlan(plan) {
@@ -16,7 +19,7 @@ function expandPlan(plan) {
     days: Object.fromEntries(
       Object.entries(plan.days).map(([id, day]) => [
         id,
-        { ...day, colorClasses: COLORS[day.color] ?? COLORS.zinc },
+        { ...day, colorClasses: NEUTRAL },
       ])
     ),
   }
