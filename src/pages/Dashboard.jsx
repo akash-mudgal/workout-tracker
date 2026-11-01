@@ -8,13 +8,23 @@ import { requestNotifPermission, getNotifPermission } from '../utils/notificatio
 const WATER_GOAL = 10
 const STEPS_GOAL = 9000
 const SLEEP_GOAL = 7.5
+const NOTIF_PROMPT_DISMISSED = 'wt_notif_prompt_dismissed'
 
 export default function Dashboard() {
-  const { today, dayNumber, totalDays, todayLog, workoutHistory, updateTodayLog, toggleSupplement, activeSession, proteinGoal, userProfile, streakData, streakFreezeState, useStreakFreeze } = useStore()
+  const { today, dayNumber, totalDays, todayLog, workoutHistory, updateTodayLog, setTotalProtein, toggleSupplement, activeSession, proteinGoal, userProfile, streakData, streakFreezeState, useStreakFreeze } = useStore()
   const navigate = useNavigate()
-  const [showNotifPrompt, setShowNotifPrompt] = useState(
-    () => typeof window !== 'undefined' && 'Notification' in window && getNotifPermission() === 'default'
-  )
+  // "Later" is remembered — it used to be component state only, so the card
+  // came back every single time you navigated home.
+  const [showNotifPrompt, setShowNotifPrompt] = useState(() => {
+    if (typeof window === 'undefined' || !('Notification' in window)) return false
+    if (getNotifPermission() !== 'default') return false
+    try { return localStorage.getItem(NOTIF_PROMPT_DISMISSED) !== '1' } catch { return true }
+  })
+
+  function dismissNotifPrompt() {
+    try { localStorage.setItem(NOTIF_PROMPT_DISMISSED, '1') } catch { /* ignore */ }
+    setShowNotifPrompt(false)
+  }
   const recommended = getRecommendedWorkout(activeSession?.planId ?? 'ppl', workoutHistory)
   const todayDone = workoutHistory[today]
 
@@ -50,7 +60,7 @@ export default function Dashboard() {
             >
               Enable
             </button>
-            <button onClick={() => setShowNotifPrompt(false)} className="text-xs text-zinc-500 px-2 py-1.5">
+            <button onClick={dismissNotifPrompt} className="text-xs text-zinc-500 px-2 py-1.5">
               Later
             </button>
           </div>
@@ -164,9 +174,11 @@ export default function Dashboard() {
         <StatCard label="Water" value={todayLog.water} goal={WATER_GOAL} unit="glasses" color="cyan"
           min={0} max={15} step={1}
           onChange={(v) => updateTodayLog({ water: v })} />
+        {/* Sets the day's total protein; the store holds the difference from the
+            diary as a single "Quick add" item so meals stay the only writer. */}
         <StatCard label="Protein" value={todayLog.protein} goal={proteinGoal} unit="g" color="amber"
           min={0} max={Math.max(400, proteinGoal * 2)} step={5}
-          onChange={(v) => updateTodayLog({ protein: v })} />
+          onChange={setTotalProtein} />
         <StatCard label="Steps" value={todayLog.steps} goal={STEPS_GOAL} unit="steps" color="emerald"
           min={0} max={20000} step={500}
           onChange={(v) => updateTodayLog({ steps: v })} />

@@ -1,8 +1,6 @@
-import { useState, useEffect } from 'react'
-import { format } from 'date-fns'
+import { useState } from 'react'
 import { useStore } from '../store.jsx'
-
-const TODAY = format(new Date(), 'yyyy-MM-dd')
+import { QUICK_ADD_SLOT } from '../utils/nutritionTotals'
 
 const QUICK_FOODS = [
   { name: 'Soya Chunks (100g)', protein: 52, cal: 345 },
@@ -23,38 +21,23 @@ const MEAL_SLOTS = ['Breakfast', 'Lunch', 'Snack', 'Dinner', 'Before Bed']
 const EMPTY_MEALS = MEAL_SLOTS.reduce((acc, m) => ({ ...acc, [m]: [] }), {})
 
 export default function NutritionPage() {
-  const { todayLog, updateTodayLog, updateTodayMeals, proteinGoal, calorieGoal } = useStore()
-  const [meals, setMeals] = useState(() => {
-    try {
-      const stored = localStorage.getItem(`wt_meals_${TODAY}`)
-      return stored ? JSON.parse(stored) : EMPTY_MEALS
-    } catch { return EMPTY_MEALS }
-  })
+  const { todayLog, updateTodayMeals, todayMeals, proteinGoal, calorieGoal } = useStore()
 
-  // Sync totals to store whenever meals change
-  useEffect(() => {
-    const allFoods = Object.values(meals).flat()
-    updateTodayLog({
-      protein: Math.round(allFoods.reduce((s, f) => s + f.protein, 0)),
-      calories: Math.round(allFoods.reduce((s, f) => s + f.cal, 0)),
-    })
-  }, [meals]) // eslint-disable-line react-hooks/exhaustive-deps
+  // Meals live in the store, which derives protein/calories from them. This page
+  // used to keep its own copy and overwrite those totals on every mount, which
+  // silently clobbered the Dashboard slider and missed cross-device updates.
+  const meals = todayMeals && Object.keys(todayMeals).length > 0 ? todayMeals : EMPTY_MEALS
 
   function addFood(mealSlot, food) {
-    setMeals((prev) => {
-      const next = { ...prev, [mealSlot]: [...(prev[mealSlot] || []), food] }
-      updateTodayMeals(next)
-      return next
-    })
+    updateTodayMeals({ ...meals, [mealSlot]: [...(meals[mealSlot] || []), food] })
   }
 
   function removeFood(mealSlot, idx) {
-    setMeals((prev) => {
-      const next = { ...prev, [mealSlot]: prev[mealSlot].filter((_, i) => i !== idx) }
-      updateTodayMeals(next)
-      return next
-    })
+    updateTodayMeals({ ...meals, [mealSlot]: (meals[mealSlot] || []).filter((_, i) => i !== idx) })
   }
+
+  const quickAdded = meals[QUICK_ADD_SLOT] || []
+  const quickProtein = quickAdded.reduce((s, f) => s + (Number(f?.protein) || 0), 0)
 
   const protein = todayLog.protein
   const calories = todayLog.calories || 0
@@ -81,6 +64,24 @@ export default function NutritionPage() {
           onRemove={(idx) => removeFood(slot, idx)}
         />
       ))}
+
+      {/* Protein set straight from the Dashboard slider, surfaced here so the
+          day's total is always explainable rather than appearing out of nowhere. */}
+      {quickProtein > 0 && (
+        <div className="card flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <span className="font-semibold text-sm text-white">{QUICK_ADD_SLOT}</span>
+            <span className="text-xs text-zinc-500 ml-2">{quickProtein}g protein, set on the Dashboard</span>
+          </div>
+          <button
+            onClick={() => updateTodayMeals({ ...meals, [QUICK_ADD_SLOT]: [] })}
+            className="text-xs font-semibold px-3 py-1.5 rounded-lg flex-shrink-0"
+            style={{ background: 'rgba(255,255,255,0.06)', color: '#a1a1aa', border: '1px solid rgba(255,255,255,0.08)' }}
+          >
+            Clear
+          </button>
+        </div>
+      )}
     </div>
   )
 }

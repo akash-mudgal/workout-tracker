@@ -3,6 +3,31 @@ import { format } from 'date-fns'
 import { useStore } from '../store.jsx'
 import { getPlan, getRecommendedWorkout, getWorkoutById, getWorkoutDays } from '../data/workoutPlans'
 
+// An in-progress workout is persisted on every keystroke. Before this, sets lived
+// only in component state, so one tap on the nav bar between sets threw the whole
+// session away. The draft also means there is no need to block navigation.
+const DRAFT_KEY = 'wt_workout_draft'
+
+function readValidDraft(date, sessionId) {
+  if (!sessionId) return null
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY)
+    if (!raw) return null
+    const d = JSON.parse(raw)
+    if (d?.date !== date || d?.sessionId !== sessionId) return null
+    if (!d.sessionSets || Object.keys(d.sessionSets).length === 0) return null
+    return d
+  } catch { return null }
+}
+
+function writeDraft(draft) {
+  try { localStorage.setItem(DRAFT_KEY, JSON.stringify(draft)) } catch { /* ignore */ }
+}
+
+function clearDraft() {
+  try { localStorage.removeItem(DRAFT_KEY) } catch { /* ignore */ }
+}
+
 function NumericInput({ value, onCommit, inputMode = 'decimal', className }) {
   const [display, setDisplay] = useState(String(value ?? 0))
 
@@ -30,18 +55,27 @@ function NumericInput({ value, onCommit, inputMode = 'decimal', className }) {
 }
 
 export default function WorkoutLogger() {
-  const { today, workoutHistory, saveWorkout, activeSession } = useStore()
+  const { today, workoutHistory, saveWorkout, activeSession, activeSessionId } = useStore()
   const planId = activeSession?.planId ?? 'ppl'
   const plan = getPlan(planId)
   const todayWorkout = workoutHistory[today]
   const recommended = getRecommendedWorkout(planId, workoutHistory)
 
-  const [selectedId, setSelectedId] = useState(recommended.id)
-  const [phase, setPhase] = useState('select') // select | logging | done
-  const [sessionSets, setSessionSets] = useState({})
-  const [startTime] = useState(Date.now())
+  const [draft] = useState(() => readValidDraft(today, activeSessionId))
+
+  const [selectedId, setSelectedId] = useState(draft?.workoutId ?? recommended.id)
+  const [phase, setPhase] = useState(draft ? 'logging' : 'select') // select | logging | done
+  const [sessionSets, setSessionSets] = useState(draft?.sessionSets ?? {})
+  const [startTime, setStartTime] = useState(draft?.startTime ?? Date.now())
+  const [confirmOverwrite, setConfirmOverwrite] = useState(false)
 
   const workout = getWorkoutById(planId, selectedId)
+
+  // Keep the draft current while logging.
+  useEffect(() => {
+    if (phase !== 'logging') return
+    writeDraft({ sessionId: activeSessionId, date: today, workoutId: selectedId, startTime, sessionSets })
+  }, [phase, sessionSets, selectedId, startTime, today, activeSessionId])
 
   const initSession = useCallback(() => {
     const sets = {}
@@ -59,6 +93,9 @@ export default function WorkoutLogger() {
       }))
     })
     setSessionSets(sets)
+    // Start the clock here, not at mount, so the duration measures the workout
+    // rather than however long was spent choosing a day.
+    setStartTime(Date.now())
     setPhase('logging')
   }, [workout, selectedId, workoutHistory])
 
@@ -80,20 +117,50 @@ export default function WorkoutLogger() {
     }))
   }, [])
 
-  const finishWorkout = useCallback(() => {
+  // `mode` is 'replace' or 'merge'. A workout row is keyed by date, so a second
+  // workout on the same day used to silently destroy the first one.
+  const commitFinish = useCallback((mode) => {
     const exercises = workout.exercises.map((ex) => ({
       name: ex.name,
       sets: sessionSets[ex.name] || [],
     }))
-    saveWorkout(today, {
-      date: today,
-      workoutId: selectedId,
-      workoutName: workout.name,
-      durationMin: Math.round((Date.now() - startTime) / 60000),
-      exercises,
-    })
+    const durationMin = Math.round((Date.now() - startTime) / 60000)
+    const existing = workoutHistory[today]
+
+    const payload = mode === 'merge' && existing
+      ? {
+          date: today,
+          workoutId: selectedId,
+          workoutName: existing.workoutId === selectedId
+            ? workout.name
+            : `${existing.workoutName} + ${workout.name}`,
+          durationMin: (existing.durationMin || 0) + durationMin,
+          exercises: [...(existing.exercises || []), ...exercises],
+        }
+      : {
+          date: today,
+          workoutId: selectedId,
+          workoutName: workout.name,
+          durationMin,
+          exercises,
+        }
+
+    saveWorkout(today, payload)
+    clearDraft()
+    setConfirmOverwrite(false)
     setPhase('done')
-  }, [workout, sessionSets, selectedId, today, startTime, saveWorkout])
+  }, [workout, sessionSets, selectedId, today, startTime, saveWorkout, workoutHistory])
+
+  const handleFinish = useCallback(() => {
+    if (workoutHistory[today]) setConfirmOverwrite(true)
+    else commitFinish('replace')
+  }, [workoutHistory, today, commitFinish])
+
+  const discardDraft = useCallback(() => {
+    clearDraft()
+    setSessionSets({})
+    setPhase('select')
+  }, [])
 
   if (todayWorkout && phase !== 'logging' && phase !== 'done') {
     return <WorkoutSummary workout={todayWorkout} onRedo={() => {
@@ -108,15 +175,27 @@ export default function WorkoutLogger() {
 
   if (phase === 'logging') {
     return (
-      <LoggingView
-        workout={workout}
-        sessionSets={sessionSets}
-        workoutHistory={workoutHistory}
-        selectedId={selectedId}
-        onUpdateSet={updateSet}
-        onToggleDone={toggleSetDone}
-        onFinish={finishWorkout}
-      />
+      <>
+        <LoggingView
+          workout={workout}
+          sessionSets={sessionSets}
+          workoutHistory={workoutHistory}
+          selectedId={selectedId}
+          resumed={!!draft}
+          onUpdateSet={updateSet}
+          onToggleDone={toggleSetDone}
+          onFinish={handleFinish}
+          onDiscard={discardDraft}
+        />
+        {confirmOverwrite && (
+          <OverwriteConfirm
+            existing={workoutHistory[today]}
+            onMerge={() => commitFinish('merge')}
+            onReplace={() => commitFinish('replace')}
+            onCancel={() => setConfirmOverwrite(false)}
+          />
+        )}
+      </>
     )
   }
 
@@ -174,7 +253,7 @@ export default function WorkoutLogger() {
   )
 }
 
-function LoggingView({ workout, sessionSets, workoutHistory, selectedId, onUpdateSet, onToggleDone, onFinish }) {
+function LoggingView({ workout, sessionSets, workoutHistory, selectedId, resumed, onUpdateSet, onToggleDone, onFinish, onDiscard }) {
   const [expandedEx, setExpandedEx] = useState(workout.exercises[0]?.name)
   const totalSets = Object.values(sessionSets).flat().length
   const doneSets = Object.values(sessionSets).flat().filter((s) => s.done).length
@@ -191,6 +270,16 @@ function LoggingView({ workout, sessionSets, workoutHistory, selectedId, onUpdat
           <div className="text-lg font-bold text-white">{doneSets}/{totalSets}</div>
         </div>
       </div>
+
+      {resumed && (
+        <div className="flex items-center justify-between gap-3 rounded-xl px-3 py-2.5"
+          style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)' }}>
+          <p className="text-xs text-emerald-300">Picked up where you left off.</p>
+          <button onClick={onDiscard} className="text-xs text-zinc-400 hover:text-zinc-200 flex-shrink-0 px-2 py-1">
+            Start over
+          </button>
+        </div>
+      )}
 
       <div className="progress-bar">
         <div
@@ -294,6 +383,36 @@ function LoggingView({ workout, sessionSets, workoutHistory, selectedId, onUpdat
       <button onClick={onFinish} className="w-full btn-primary py-3 text-base">
         Finish Workout ✓
       </button>
+    </div>
+  )
+}
+
+function OverwriteConfirm({ existing, onMerge, onReplace, onCancel }) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
+      style={{ background: 'rgba(0,0,0,0.6)' }}
+      onClick={onCancel}
+    >
+      <div className="card-raised w-full max-w-sm space-y-4" onClick={(e) => e.stopPropagation()}>
+        <div>
+          <h3 className="font-bold text-base text-white">You already logged a workout today</h3>
+          <p className="text-sm text-zinc-400 mt-1">
+            {existing?.workoutName} is saved for today with {existing?.exercises?.length ?? 0} exercises.
+          </p>
+        </div>
+        <div className="space-y-2">
+          <button onClick={onMerge} className="w-full btn-primary py-2.5 text-sm">
+            Add to today's log
+          </button>
+          <button onClick={onReplace} className="w-full btn-ghost py-2.5 text-sm">
+            Replace it
+          </button>
+          <button onClick={onCancel} className="w-full text-xs text-zinc-500 py-2">
+            Keep logging
+          </button>
+        </div>
+      </div>
     </div>
   )
 }

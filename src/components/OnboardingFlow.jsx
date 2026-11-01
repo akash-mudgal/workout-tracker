@@ -50,6 +50,7 @@ export default function OnboardingFlow() {
   const [activityLevel, setActivityLevel] = useState('')
   const [firstName, setFirstName] = useState('')
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const selectedPlan = PLAN_LIST.find((p) => p.id === planId)
   const protein = calcProtein(Number(weightKg), goal)
@@ -60,9 +61,20 @@ export default function OnboardingFlow() {
     if (!name.trim() || !planId) return
     const days = Math.max(7, Math.min(365, Number(totalDays) || 90))
     setLoading(true)
+    setError('')
     try {
-      updateUserProfile({ name: firstName.trim(), weightKg: Number(weightKg) || 0, heightCm: Number(heightCm) || 0, age: Number(age) || 0, sex, activityLevel })
+      // The session is what the app needs to function, so a failed profile write
+      // shouldn't stop someone getting in. It's handled separately on purpose.
+      try {
+        await updateUserProfile({ name: firstName.trim(), weightKg: Number(weightKg) || 0, heightCm: Number(heightCm) || 0, age: Number(age) || 0, sex, activityLevel })
+      } catch (e) {
+        console.error('[kinetiq] profile save during onboarding failed:', e)
+      }
       await createSession(name.trim(), startDate, planId, days, goal)
+    } catch (e) {
+      // Previously this had no catch at all: the button just stopped spinning
+      // and the first-run failure was completely silent.
+      setError(e?.message || "Couldn't create your cycle. Check your connection and try again.")
     } finally {
       setLoading(false)
     }
@@ -357,6 +369,13 @@ export default function OnboardingFlow() {
                 </div>
               ))}
             </div>
+
+            {error && (
+              <div className="text-xs text-red-400 rounded-xl px-3 py-2.5"
+                style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }}>
+                {error}
+              </div>
+            )}
 
             <div className="flex gap-2">
               <button onClick={() => setStep(2)} className="btn-ghost px-4 py-3">← Back</button>

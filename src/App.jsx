@@ -22,7 +22,7 @@ export default function App() {
 }
 
 function AppInner() {
-  const { user, authLoading, syncing, needsOnboarding, refetchSessionData } = useStore()
+  const { user, authLoading, syncing, syncError, clearSyncError, needsOnboarding, refetchSessionData } = useStore()
   const location = useLocation()
 
   useEffect(() => {
@@ -52,6 +52,25 @@ function AppInner() {
             >
               Sign out
             </button>
+
+            {/* Writes are optimistic, so without this a failed cloud save looked
+                identical to a successful one. */}
+            {syncError && (
+              <div
+                className="sticky top-0 z-40 flex items-center justify-between gap-3 px-4 py-2.5"
+                style={{ background: 'rgba(239,68,68,0.12)', borderBottom: '1px solid rgba(239,68,68,0.25)' }}
+              >
+                <p className="text-xs text-red-300">
+                  {syncError} It's saved on this device — it will sync when you're back online.
+                </p>
+                <button
+                  onClick={clearSyncError}
+                  className="text-xs text-red-300/70 hover:text-red-200 flex-shrink-0 px-2 py-1"
+                >
+                  Dismiss
+                </button>
+              </div>
+            )}
 
             <main className="flex-1 pb-28 md:pb-10 px-4 md:px-8 pt-6">
               <div className="max-w-2xl mx-auto">

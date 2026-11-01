@@ -3,6 +3,7 @@ import { format, addDays } from 'date-fns'
 import { supabase } from './lib/supabase'
 import { getPlan } from './data/workoutPlans'
 import { computeStreak, getWeeklySummary, getStreakFreezeState, applyStreakFreeze } from './utils/streakUtils'
+import { mealTotals, withTotalProtein } from './utils/nutritionTotals'
 import { getNotifPrefs, scheduleDailyNotifications, clearScheduledNotifications, sendWeeklyDigestNotif } from './utils/notifications'
 
 const StoreContext = createContext(null)
@@ -20,10 +21,33 @@ function load(key, def) {
 }
 function save(key, value) { localStorage.setItem(key, JSON.stringify(value)) }
 
+// Meals are scoped per session so switching or resetting a cycle doesn't leak
+// yesterday's food into it. Older builds stored them unscoped, so reads fall back.
+function mealsKey(sessionId, date) { return `wt_meals_${sessionId ?? 'none'}_${date}` }
+function legacyMealsKey(date) { return `wt_meals_${date}` }
+
+function loadMeals(sessionId, date) {
+  const scoped = load(mealsKey(sessionId, date), null)
+  if (scoped) return scoped
+  return load(legacyMealsKey(date), {})
+}
+
+function clearMealsForSession(sessionId) {
+  const prefix = `wt_meals_${sessionId}_`
+  // Legacy unscoped keys look like wt_meals_2026-11-02 and belong to whatever
+  // session predated scoping, so clear those too rather than leave them to bleed.
+  const legacy = /^wt_meals_\d{4}-\d{2}-\d{2}$/
+  Object.keys(localStorage)
+    .filter((k) => k.startsWith(prefix) || legacy.test(k))
+    .forEach((k) => localStorage.removeItem(k))
+}
+
+
 export function StoreProvider({ children }) {
   const [user, setUser] = useState(null)
   const [authLoading, setAuthLoading] = useState(true)
   const [syncing, setSyncing] = useState(false)
+  const [syncError, setSyncError] = useState(null)
 
   const [sessions, setSessions] = useState(() => load('wt_sessions', []))
   const [activeSessionId, setActiveSessionId] = useState(() => load('wt_active_session_id', null))
@@ -38,15 +62,15 @@ export function StoreProvider({ children }) {
   )
 
   const today = format(new Date(), 'yyyy-MM-dd')
+  const [todayMeals, setTodayMeals] = useState(() => loadMeals(activeSessionId, format(new Date(), 'yyyy-MM-dd')))
+
   const userRef = useRef(null)
   const sessionIdRef = useRef(activeSessionId)
   const logSyncTimer = useRef(null)
-  const latestLogRef = useRef(DEFAULT_LOG)
-  const latestMealsRef = useRef(load(`wt_meals_${format(new Date(), 'yyyy-MM-dd')}`, {}))
+  const latestMealsRef = useRef(todayMeals)
 
   useEffect(() => { userRef.current = user }, [user])
   useEffect(() => { sessionIdRef.current = activeSessionId }, [activeSessionId])
-  useEffect(() => { latestLogRef.current = dailyLogs[today] || DEFAULT_LOG }, [dailyLogs, today])
 
   const activeSession = sessions.find((s) => s.id === activeSessionId) ?? sessions[0] ?? null
   const startDate = activeSession?.startDate ?? today
@@ -101,8 +125,11 @@ export function StoreProvider({ children }) {
       }, ({ new: r }) => {
         if (r.session_id !== activeSessionId) return
         if (r.meals && Object.keys(r.meals).length > 0) {
-          save(`wt_meals_${r.date}`, r.meals)
-          if (r.date === today) latestMealsRef.current = r.meals
+          save(mealsKey(activeSessionId, r.date), r.meals)
+          if (r.date === today) {
+            latestMealsRef.current = r.meals
+            setTodayMeals(r.meals)
+          }
         }
         setDailyLogs((prev) => {
           const next = { ...prev, [r.date]: {
@@ -186,8 +213,7 @@ export function StoreProvider({ children }) {
     const logs = l.data?.length
       ? Object.fromEntries(l.data.map((r) => {
           if (r.meals && Object.keys(r.meals).length > 0) {
-            save(`wt_meals_${r.date}`, r.meals)
-            if (r.date === today) latestMealsRef.current = r.meals
+            save(mealsKey(sessionId, r.date), r.meals)
           }
           return [r.date, {
             water: r.water, steps: r.steps, protein: r.protein,
@@ -195,6 +221,12 @@ export function StoreProvider({ children }) {
           }]
         }))
       : {}
+
+    // Set today's meals from the server unconditionally — including to empty.
+    // Without the empty case, switching sessions left the previous cycle's food in place.
+    const serverTodayMeals = l.data?.find((r) => r.date === today)?.meals ?? {}
+    latestMealsRef.current = serverTodayMeals
+    setTodayMeals(serverTodayMeals)
 
     const hist = w.data?.length
       ? Object.fromEntries(w.data.map((r) => [r.date, {
@@ -308,6 +340,7 @@ export function StoreProvider({ children }) {
     setDailyLogs({}); save('wt_daily_logs', {})
     setWorkoutHistory({}); save('wt_workout_history', {})
     setBodyMetrics([]); save('wt_body_metrics', [])
+    setTodayMeals({}); latestMealsRef.current = {}
     return newSession
   }, [])
 
@@ -345,10 +378,12 @@ export function StoreProvider({ children }) {
       save('wt_sessions', next); return next
     })
     // Clear data in memory if this is the active session
+    clearMealsForSession(sessionId)
     if (sessionIdRef.current === sessionId) {
       setDailyLogs({}); save('wt_daily_logs', {})
       setWorkoutHistory({}); save('wt_workout_history', {})
       setBodyMetrics([]); save('wt_body_metrics', [])
+      setTodayMeals({}); latestMealsRef.current = {}
     }
     if (userRef.current) {
       await Promise.all([
@@ -385,19 +420,18 @@ export function StoreProvider({ children }) {
         calories: log.calories, sleep: log.sleep, supplements: log.supplements,
         meals: latestMealsRef.current,
       }, { onConflict: 'user_id,session_id,date' })
-      if (error) console.error('[kinetiq] daily_log sync failed:', error.message, error)
+      if (error) {
+        console.error('[kinetiq] daily_log sync failed:', error.message, error)
+        setSyncError("Today's log didn't reach the cloud.")
+      } else {
+        setSyncError(null)
+      }
     }, 800)
   }
 
-  const updateTodayMeals = useCallback((meals) => {
-    latestMealsRef.current = meals
-    save(`wt_meals_${today}`, meals)
-    scheduledLogSync(today, latestLogRef.current)
-  }, [today])
-
   const todayLog = dailyLogs[today] || DEFAULT_LOG
 
-  const updateTodayLog = useCallback((updates) => {
+  const applyTodayLog = useCallback((updates) => {
     setDailyLogs((prev) => {
       const updated = { ...(prev[today] || DEFAULT_LOG), ...updates }
       const next = { ...prev, [today]: updated }
@@ -406,6 +440,24 @@ export function StoreProvider({ children }) {
       return next
     })
   }, [today])
+
+  // Water, steps, sleep. Protein and calories deliberately do NOT come through
+  // here — they are derived from meals so there is exactly one writer.
+  const updateTodayLog = applyTodayLog
+
+  const updateTodayMeals = useCallback((meals) => {
+    latestMealsRef.current = meals
+    setTodayMeals(meals)
+    save(mealsKey(sessionIdRef.current, today), meals)
+    applyTodayLog(mealTotals(meals))
+  }, [today, applyTodayLog])
+
+  // The Dashboard slider sets the day's TOTAL protein. Whatever exceeds what the
+  // diary already accounts for is held as a single "Quick add" item, so the diary
+  // stays the only writer and the number on screen is always explainable.
+  const setTotalProtein = useCallback((grams) => {
+    updateTodayMeals(withTotalProtein(latestMealsRef.current, grams))
+  }, [updateTodayMeals])
 
   const toggleSupplement = useCallback((key) => {
     setDailyLogs((prev) => {
@@ -429,7 +481,12 @@ export function StoreProvider({ children }) {
         workout_id: workoutData.workoutId, workout_name: workoutData.workoutName,
         duration_min: workoutData.durationMin, exercises: workoutData.exercises,
       }, { onConflict: 'user_id,session_id,date' })
-      if (error) console.error('[kinetiq] workout save failed:', error.message, error)
+      if (error) {
+        console.error('[kinetiq] workout save failed:', error.message, error)
+        setSyncError("Your workout didn't reach the cloud.")
+      } else {
+        setSyncError(null)
+      }
     }
   }, [])
 
@@ -444,7 +501,12 @@ export function StoreProvider({ children }) {
         user_id: userRef.current.id, session_id: sessionIdRef.current,
         date: metric.date, weight: metric.weight, waist: metric.waist, notes: metric.notes,
       }, { onConflict: 'user_id,session_id,date' })
-      if (error) console.error('[kinetiq] body metric save failed:', error.message, error)
+      if (error) {
+        console.error('[kinetiq] body metric save failed:', error.message, error)
+        setSyncError("Your measurements didn't reach the cloud.")
+      } else {
+        setSyncError(null)
+      }
     }
   }, [])
 
@@ -462,16 +524,36 @@ export function StoreProvider({ children }) {
         activity_level: profile.activityLevel ?? '',
         updated_at: new Date().toISOString(),
       }, { onConflict: 'user_id' })
-      if (error) console.error('[kinetiq] profile sync failed:', error.message, error)
+      if (error) {
+        console.error('[kinetiq] profile sync failed:', error.message, error)
+        setSyncError("Your profile didn't reach the cloud.")
+        // Rethrow so ProfilePage's error branch actually runs instead of
+        // showing "Saved ✓" over a write that failed.
+        throw error
+      }
+      setSyncError(null)
     }
   }, [])
+
+  // Targets follow the most recent weigh-in, falling back to the profile figure.
+  // Previously they were pinned to whatever was typed on the Profile page, so they
+  // drifted stale over a cycle while the body_metrics log knew the real number.
+  const latestLoggedWeight = useMemo(() => {
+    for (let i = bodyMetrics.length - 1; i >= 0; i--) {
+      const w = Number(bodyMetrics[i]?.weight)
+      if (w > 0) return w
+    }
+    return null
+  }, [bodyMetrics])
+
+  const effectiveWeightKg = latestLoggedWeight ?? userProfile.weightKg
 
   const proteinMultiplier =
     activeSession?.goal === 'fat_loss' ? 2.2 :
     activeSession?.goal === 'muscle_gain' ? 1.6 : 1.8
 
-  const proteinGoal = userProfile.weightKg > 0
-    ? Math.round((userProfile.weightKg * proteinMultiplier) / 10) * 10
+  const proteinGoal = effectiveWeightKg > 0
+    ? Math.round((effectiveWeightKg * proteinMultiplier) / 10) * 10
     : 130
 
   const ACTIVITY_MULTIPLIERS = {
@@ -483,7 +565,8 @@ export function StoreProvider({ children }) {
   }
 
   const calorieGoal = useMemo(() => {
-    const { weightKg, heightCm, age, sex, activityLevel } = userProfile
+    const { heightCm, age, sex, activityLevel } = userProfile
+    const weightKg = effectiveWeightKg
     const sessionGoal = activeSession?.goal ?? 'recomp'
     if (!weightKg || !heightCm || !age || !sex || !activityLevel) return 2100
     const bmr = sex === 'male'
@@ -492,7 +575,7 @@ export function StoreProvider({ children }) {
     const tdee = bmr * (ACTIVITY_MULTIPLIERS[activityLevel] ?? 1.55)
     const adjustment = sessionGoal === 'fat_loss' ? -400 : sessionGoal === 'muscle_gain' ? 300 : 0
     return Math.round((tdee + adjustment) / 50) * 50
-  }, [userProfile, activeSession?.goal])
+  }, [userProfile, effectiveWeightKg, activeSession?.goal])
 
   const totalDays = activeSession?.totalDays ?? 90
   const dayNumber = (() => {
@@ -550,12 +633,14 @@ export function StoreProvider({ children }) {
   return (
     <StoreContext.Provider value={{
       user, authLoading, syncing, needsOnboarding,
+      syncError, clearSyncError: () => setSyncError(null),
       userProfile, updateUserProfile, proteinGoal, calorieGoal,
+      effectiveWeightKg, latestLoggedWeight,
       today, startDate, dayNumber, totalDays,
       sessions, activeSession, activeSessionId,
-      todayLog, dailyLogs, workoutHistory, bodyMetrics,
+      todayLog, dailyLogs, workoutHistory, bodyMetrics, todayMeals,
       activeWorkout, setActiveWorkout,
-      updateTodayLog, updateTodayMeals, toggleSupplement, saveWorkout, addBodyMetric,
+      updateTodayLog, updateTodayMeals, setTotalProtein, toggleSupplement, saveWorkout, addBodyMetric,
       createSession, switchSession, updateSession, resetSessionProgress, deleteSession,
       streakData, streakFreezeState, useStreakFreeze,
       refetchSessionData: () => {
