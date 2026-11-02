@@ -3,7 +3,7 @@ import { useStore } from '../store.jsx'
 import { supabase } from '../lib/supabase'
 import {
   cachedPrefs, loadPrefs, savePrefs, requestNotifPermission, getNotifPermission,
-  subscribeToPush, unsubscribeFromPush, pushSupported,
+  subscribeToPush, unsubscribeFromPush, pushSupported, isDeviceSubscribed,
 } from '../utils/notifications'
 
 export default function ProfilePage() {
@@ -18,6 +18,8 @@ export default function ProfilePage() {
   const [notifPrefs, setNotifPrefs] = useState(cachedPrefs)
   const [notifPermission, setNotifPermission] = useState(() => getNotifPermission())
   const [prefsSynced, setPrefsSynced] = useState(true)
+  const [notifError, setNotifError] = useState('')
+  const [deviceSubscribed, setDeviceSubscribed] = useState(null)
   const notifSupported = pushSupported()
   const timezone = (() => {
     try { return Intl.DateTimeFormat().resolvedOptions().timeZone } catch { return 'UTC' }
@@ -32,6 +34,8 @@ export default function ProfilePage() {
       if (cancelled) return
       setNotifPrefs(prefs)
       setPrefsSynced(available)
+      const subscribed = await isDeviceSubscribed(user?.id)
+      if (!cancelled) setDeviceSubscribed(subscribed)
     })()
     return () => { cancelled = true }
   }, [user?.id])
@@ -49,15 +53,33 @@ export default function ProfilePage() {
 
   async function handleToggleNotifications() {
     const turningOn = !notifPrefs.enabled
-    if (turningOn && notifPermission !== 'granted') {
-      const result = await requestNotifPermission()
-      setNotifPermission(result)
-      if (result !== 'granted') return
+    setNotifError('')
+
+    if (turningOn) {
+      if (notifPermission !== 'granted') {
+        const result = await requestNotifPermission()
+        setNotifPermission(result)
+        if (result !== 'granted') {
+          setNotifError('Notifications need permission before reminders can be sent.')
+          return
+        }
+      }
+      // Registering the browser's push subscription is what actually makes
+      // delivery possible with the app closed. If it fails, reminders must NOT
+      // be recorded as on — that combination silently guarantees nothing ever
+      // arrives, which is exactly the bug this feature replaced.
+      const result = await subscribeToPush(user?.id)
+      if (!result.ok) {
+        setNotifError(result.reason)
+        setDeviceSubscribed(false)
+        return
+      }
+      setDeviceSubscribed(true)
+    } else {
+      await unsubscribeFromPush(user?.id)
+      setDeviceSubscribed(false)
     }
-    // Registering the browser's push subscription is what actually makes
-    // delivery possible with the app closed.
-    if (turningOn) await subscribeToPush(user?.id)
-    else await unsubscribeFromPush(user?.id)
+
     await persist({ ...notifPrefs, enabled: turningOn })
   }
 
@@ -229,6 +251,36 @@ export default function ProfilePage() {
                   label="Toggle daily reminders"
                 />
               </div>
+
+              {notifError && (
+                <p className="text-micro" style={{ color: 'var(--warn)' }}>{notifError}</p>
+              )}
+
+              {/* Whether THIS device is registered, read from the database
+                  rather than inferred from the toggle. The two can disagree,
+                  and when they do nothing is delivered. */}
+              {notifPrefs.enabled && deviceSubscribed !== null && (
+                deviceSubscribed ? (
+                  <p className="text-micro text-muted">This device is registered for reminders.</p>
+                ) : (
+                  <div className="space-y-2">
+                    <p className="text-micro" style={{ color: 'var(--warn)' }}>
+                      Reminders are on, but this device isn't registered — nothing will arrive here.
+                    </p>
+                    <button
+                      onClick={async () => {
+                        setNotifError('')
+                        const r = await subscribeToPush(user?.id)
+                        if (r.ok) setDeviceSubscribed(true)
+                        else setNotifError(r.reason)
+                      }}
+                      className="btn-ghost px-3 text-xs"
+                    >
+                      Register this device
+                    </button>
+                  </div>
+                )
+              )}
 
               {notifPrefs.enabled && (
                 <div className="space-y-4">
