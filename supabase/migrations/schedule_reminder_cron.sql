@@ -11,7 +11,12 @@
 -- Re-running this file is safe.
 
 create extension if not exists pg_cron;
-create extension if not exists pg_net;
+
+-- pg_net must be given a schema explicitly. Without the clause it registers
+-- into `public`, which the Supabase linter flags (extension_in_public), and it
+-- does not support ALTER EXTENSION ... SET SCHEMA afterwards — the only fix is
+-- to drop and recreate it. Its functions live in `net` either way.
+create extension if not exists pg_net with schema extensions;
 
 do $$
 begin
