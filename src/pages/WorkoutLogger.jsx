@@ -28,6 +28,41 @@ function clearDraft() {
   try { localStorage.removeItem(DRAFT_KEY) } catch { /* ignore */ }
 }
 
+// The exercise actually being done in a planned slot: the plan's own, or the
+// alternative swapped in for it. An alternative keeps the slot's sets, reps,
+// RPE and rest, and brings its own name and coaching tip.
+function activeExercise(ex, swaps) {
+  const altName = swaps?.[ex.name]
+  const alt = altName && ex.alternatives?.find((a) => a.name === altName)
+  return alt ? { ...ex, name: alt.name, tip: alt.tip } : ex
+}
+
+// Most recent log of an exercise by name. Prefers the same workout day, then
+// falls back to any day, so a lift that appears on several days (or was
+// swapped in last time) still pre-fills from where it was last done.
+function findLastLog(workoutHistory, name, workoutId) {
+  const sorted = Object.values(workoutHistory).sort((a, b) => b.date.localeCompare(a.date))
+  const pick = (list) => {
+    for (const w of list) {
+      const e = w.exercises?.find((x) => x.name === name)
+      if (e) return e
+    }
+    return undefined
+  }
+  return pick(sorted.filter((w) => w.workoutId === workoutId)) ?? pick(sorted)
+}
+
+function seedSets(workoutHistory, ex, workoutId) {
+  const prev = findLastLog(workoutHistory, ex.name, workoutId)
+  const defaultWeight = prev?.sets?.[0]?.weight ?? 0
+  const defaultReps = prev?.sets?.[0]?.reps ?? parseInt(ex.repRange)
+  return Array.from({ length: ex.sets }, (_, i) => ({
+    reps: prev?.sets?.[i]?.reps ?? defaultReps,
+    weight: prev?.sets?.[i]?.weight ?? defaultWeight,
+    done: false,
+  }))
+}
+
 function NumericInput({ value, onCommit, inputMode = 'decimal', className }) {
   const [display, setDisplay] = useState(String(value ?? 0))
 
@@ -66,6 +101,7 @@ export default function WorkoutLogger() {
   const [selectedId, setSelectedId] = useState(draft?.workoutId ?? recommended.id)
   const [phase, setPhase] = useState(draft ? 'logging' : 'select') // select | logging | done
   const [sessionSets, setSessionSets] = useState(draft?.sessionSets ?? {})
+  const [swaps, setSwaps] = useState(draft?.swaps ?? {})
   const [startTime, setStartTime] = useState(draft?.startTime ?? Date.now())
   const [confirmOverwrite, setConfirmOverwrite] = useState(false)
 
@@ -74,25 +110,30 @@ export default function WorkoutLogger() {
   // Keep the draft current while logging.
   useEffect(() => {
     if (phase !== 'logging') return
-    writeDraft({ sessionId: activeSessionId, date: today, workoutId: selectedId, startTime, sessionSets })
-  }, [phase, sessionSets, selectedId, startTime, today, activeSessionId])
+    writeDraft({ sessionId: activeSessionId, date: today, workoutId: selectedId, startTime, sessionSets, swaps })
+  }, [phase, sessionSets, swaps, selectedId, startTime, today, activeSessionId])
+
+  // Machine busy: replace one planned exercise with one of its alternatives.
+  // sessionSets stays keyed by the planned name (the slot); the swapped-in
+  // exercise gets fresh sets seeded from its own last log.
+  const swapExercise = useCallback((slotEx, altName) => {
+    setSwaps((prev) => {
+      const next = { ...prev }
+      if (altName) next[slotEx.name] = altName
+      else delete next[slotEx.name]
+      return next
+    })
+    const active = activeExercise(slotEx, altName ? { [slotEx.name]: altName } : {})
+    setSessionSets((prev) => ({ ...prev, [slotEx.name]: seedSets(workoutHistory, active, selectedId) }))
+  }, [workoutHistory, selectedId])
 
   const initSession = useCallback(() => {
     const sets = {}
     workout.exercises.forEach((ex) => {
-      const prevWorkouts = Object.values(workoutHistory)
-        .filter((w) => w.workoutId === selectedId)
-        .sort((a, b) => b.date.localeCompare(a.date))
-      const prev = prevWorkouts[0]?.exercises?.find((e) => e.name === ex.name)
-      const defaultWeight = prev?.sets?.[0]?.weight ?? 0
-      const defaultReps = prev?.sets?.[0]?.reps ?? parseInt(ex.repRange)
-      sets[ex.name] = Array.from({ length: ex.sets }, (_, i) => ({
-        reps: prev?.sets?.[i]?.reps ?? defaultReps,
-        weight: prev?.sets?.[i]?.weight ?? defaultWeight,
-        done: false,
-      }))
+      sets[ex.name] = seedSets(workoutHistory, ex, selectedId)
     })
     setSessionSets(sets)
+    setSwaps({})
     // Start the clock here, not at mount, so the duration measures the workout
     // rather than however long was spent choosing a day.
     setStartTime(Date.now())
@@ -120,8 +161,9 @@ export default function WorkoutLogger() {
   // `mode` is 'replace' or 'merge'. A workout row is keyed by date, so a second
   // workout on the same day used to silently destroy the first one.
   const commitFinish = useCallback((mode) => {
+    // Record what was actually done, so a swapped-in lift gets its own history.
     const exercises = workout.exercises.map((ex) => ({
-      name: ex.name,
+      name: activeExercise(ex, swaps).name,
       sets: sessionSets[ex.name] || [],
     }))
     const durationMin = Math.round((Date.now() - startTime) / 60000)
@@ -149,7 +191,7 @@ export default function WorkoutLogger() {
     clearDraft()
     setConfirmOverwrite(false)
     setPhase('done')
-  }, [workout, sessionSets, selectedId, today, startTime, saveWorkout, workoutHistory])
+  }, [workout, sessionSets, swaps, selectedId, today, startTime, saveWorkout, workoutHistory])
 
   const handleFinish = useCallback(() => {
     if (workoutHistory[today]) setConfirmOverwrite(true)
@@ -159,6 +201,7 @@ export default function WorkoutLogger() {
   const discardDraft = useCallback(() => {
     clearDraft()
     setSessionSets({})
+    setSwaps({})
     setPhase('select')
   }, [])
 
@@ -179,6 +222,8 @@ export default function WorkoutLogger() {
         <LoggingView
           workout={workout}
           sessionSets={sessionSets}
+          swaps={swaps}
+          onSwap={swapExercise}
           workoutHistory={workoutHistory}
           selectedId={selectedId}
           resumed={!!draft}
@@ -246,7 +291,7 @@ export default function WorkoutLogger() {
   )
 }
 
-function LoggingView({ workout, sessionSets, workoutHistory, selectedId, resumed, onUpdateSet, onToggleDone, onFinish, onDiscard }) {
+function LoggingView({ workout, sessionSets, swaps, onSwap, workoutHistory, selectedId, resumed, onUpdateSet, onToggleDone, onFinish, onDiscard }) {
   const [expandedEx, setExpandedEx] = useState(workout.exercises[0]?.name)
   const totalSets = Object.values(sessionSets).flat().length
   const doneSets = Object.values(sessionSets).flat().filter((s) => s.done).length
@@ -285,26 +330,28 @@ function LoggingView({ workout, sessionSets, workoutHistory, selectedId, resumed
       </div>
 
       <div className="panel rule-group">
-        {workout.exercises.map((ex) => {
-          const sets = sessionSets[ex.name] || []
-          const prevWorkouts = Object.values(workoutHistory)
-            .filter((w) => w.workoutId === selectedId)
-            .sort((a, b) => b.date.localeCompare(a.date))
-          const prev = prevWorkouts[0]?.exercises?.find((e) => e.name === ex.name)
+        {workout.exercises.map((slot) => {
+          // `slot` is the planned exercise and keys the sets; `ex` is what's
+          // actually being done, which differs when a machine was busy.
+          const ex = activeExercise(slot, swaps)
+          const swapped = ex !== slot
+          const sets = sessionSets[slot.name] || []
+          const prev = findLastLog(workoutHistory, ex.name, selectedId)
           const exDone = sets.length > 0 && sets.every((s) => s.done)
-          const isExpanded = expandedEx === ex.name
+          const isExpanded = expandedEx === slot.name
 
           return (
-            <div key={ex.name}>
+            <div key={slot.name}>
               <button
                 className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left min-h-[56px]"
-                onClick={() => setExpandedEx(isExpanded ? null : ex.name)}
+                onClick={() => setExpandedEx(isExpanded ? null : slot.name)}
                 aria-expanded={isExpanded}
               >
                 <span className="min-w-0">
                   <span className={`block text-sm ${exDone ? 'text-signal' : 'text-ink'}`}>{ex.name}</span>
                   <span className="block text-micro text-muted mt-0.5 num">
                     {ex.sets} <span className="x">×</span> {ex.repRange}, RPE {ex.rpe}
+                    {swapped && <> · instead of {slot.name}</>}
                   </span>
                 </span>
                 <span className="text-micro text-muted flex-shrink-0">
@@ -342,7 +389,7 @@ function LoggingView({ workout, sessionSets, workoutHistory, selectedId, resumed
                           <div className="col-span-4">
                             <NumericInput
                               value={set.weight}
-                              onCommit={(v) => onUpdateSet(ex.name, i, 'weight', v)}
+                              onCommit={(v) => onUpdateSet(slot.name, i, 'weight', v)}
                               inputMode="decimal"
                               className="input-field num text-center"
                             />
@@ -350,14 +397,14 @@ function LoggingView({ workout, sessionSets, workoutHistory, selectedId, resumed
                           <div className="col-span-3">
                             <NumericInput
                               value={set.reps}
-                              onCommit={(v) => onUpdateSet(ex.name, i, 'reps', v)}
+                              onCommit={(v) => onUpdateSet(slot.name, i, 'reps', v)}
                               inputMode="numeric"
                               className="input-field num text-center"
                             />
                           </div>
                           <div className="col-span-3 flex justify-center">
                             <button
-                              onClick={() => onToggleDone(ex.name, i)}
+                              onClick={() => onToggleDone(slot.name, i)}
                               aria-label={`Mark set ${i + 1} done`}
                               aria-pressed={!!set.done}
                               className="w-11 h-11 rounded-full flex items-center justify-center"
@@ -387,6 +434,28 @@ function LoggingView({ workout, sessionSets, workoutHistory, selectedId, resumed
                       </div>
                     )
                   })}
+
+                  {/* Machine busy? Swapping re-seeds this slot's sets, so it's
+                      only offered before any set of it has been ticked off. */}
+                  {slot.alternatives?.length > 0 && !sets.some((s) => s.done) && (
+                    <div className="rule-top pt-3 space-y-2">
+                      <p className="text-micro text-muted">Machine busy? Swap to</p>
+                      <div className="flex flex-wrap gap-2">
+                        {slot.alternatives
+                          .filter((a) => a.name !== ex.name)
+                          .map((a) => (
+                            <button key={a.name} onClick={() => onSwap(slot, a.name)} className="btn-ghost text-xs">
+                              {a.name}
+                            </button>
+                          ))}
+                        {swapped && (
+                          <button onClick={() => onSwap(slot, null)} className="btn-ghost text-xs">
+                            Back to {slot.name}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Coaching note sits below the inputs rather than above them,
                       so a long paragraph doesn't push the numbers off screen. */}

@@ -10,7 +10,12 @@ import { getPlan, getWorkoutDays } from '../data/workoutPlans'
 export default function Progress() {
   const { startDate, today, workoutHistory, dailyLogs, dayNumber, totalDays, activeSession } = useStore()
   const planId = activeSession?.planId ?? 'ppl'
-  const uniqueExercises = [...new Set(getWorkoutDays(planId).flatMap((w) => w.exercises.map((e) => e.name)))]
+  // Planned lifts, plus any machine-busy alternatives that have actually been logged.
+  const loggedNames = new Set(Object.values(workoutHistory).flatMap((w) => (w.exercises ?? []).map((e) => e.name)))
+  const uniqueExercises = [...new Set(getWorkoutDays(planId).flatMap((w) => w.exercises.flatMap((e) => [
+    e.name,
+    ...(e.alternatives ?? []).map((a) => a.name).filter((n) => loggedNames.has(n)),
+  ])))]
   const [selectedExercise, setSelectedExercise] = useState(uniqueExercises[0])
 
   const completedWorkouts = Object.values(workoutHistory)
@@ -26,7 +31,8 @@ export default function Progress() {
     .sort((a, b) => a.date.localeCompare(b.date))
     .map((w) => {
       const ex = w.exercises.find((e) => e.name === selectedExercise)
-      const bestSet = ex?.sets?.reduce((best, s) => (s.weight > (best?.weight ?? 0) ? s : best), null)
+      // Assisted lifts are logged as negative kg, so don't assume weight > 0.
+      const bestSet = ex?.sets?.reduce((best, s) => (best == null || s.weight > best.weight ? s : best), null)
       return {
         date: format(new Date(w.date + 'T00:00:00'), 'MMM d'),
         weight: bestSet?.weight ?? 0,
@@ -34,7 +40,7 @@ export default function Progress() {
         volume: ex?.sets?.reduce((sum, s) => sum + s.weight * s.reps, 0) ?? 0,
       }
     })
-    .filter((d) => d.weight > 0)
+    .filter((d) => d.weight !== 0)
 
   const stepsData = getLast14Days(today).map((date) => ({
     date: format(new Date(date + 'T00:00:00'), 'EEE'),

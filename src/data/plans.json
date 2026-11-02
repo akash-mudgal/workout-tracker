@@ -4,6 +4,9 @@
     "name": "Push / Pull / Legs",
     "description": "6 days/week · 2× frequency per muscle group · Best for muscle gain",
     "daysPerWeek": 6,
+    "equipment": "home",
+    "bestFor": "Training 6 days most weeks at home and wanting the most muscle growth",
+    "notIdealIf": "You often miss 2+ days a week — the cycle falls apart",
     "accentColor": "violet",
     "cycle": ["push_a", "pull_a", "legs_a", "rest", "push_b", "pull_b", "legs_b"],
     "days": {
@@ -78,6 +81,9 @@
     "name": "Upper / Lower",
     "description": "4 days/week · Good recovery · Balanced strength & size",
     "daysPerWeek": 4,
+    "equipment": "home",
+    "bestFor": "A steady 4 days a week at home with good recovery between sessions",
+    "notIdealIf": "You can only train 3 days, or want to hit each muscle more often",
     "accentColor": "blue",
     "cycle": ["upper_a", "lower_a", "rest", "upper_b", "lower_b", "rest", "rest"],
     "days": {
@@ -133,6 +139,9 @@
     "name": "Full Body 3×",
     "description": "3 days/week · Maximum frequency · Great for beginners",
     "daysPerWeek": 3,
+    "equipment": "home",
+    "bestFor": "Beginners or busy weeks — 3 home sessions still hit every muscle",
+    "notIdealIf": "You want long sessions focused on one or two muscle groups",
     "accentColor": "amber",
     "cycle": ["full_a", "rest", "full_b", "rest", "full_c", "rest", "rest"],
     "days": {
@@ -177,6 +186,9 @@
     "name": "Bro Split",
     "description": "5 days/week · One muscle group per day · High volume",
     "daysPerWeek": 5,
+    "equipment": "home",
+    "bestFor": "Enjoying high volume for one muscle group per day at home",
+    "notIdealIf": "You miss days often — each muscle is only trained once a week",
     "accentColor": "orange",
     "cycle": ["chest", "back", "shoulders", "arms", "legs", "rest", "rest"],
     "days": {
@@ -241,6 +253,9 @@
     "name": "Built With Science Home",
     "description": "4 days/week · Upper/Lower split · Mon/Tue/Thu/Fri · Science-based dumbbell program",
     "daysPerWeek": 4,
+    "equipment": "home",
+    "bestFor": "A structured, evidence-based 4-day dumbbell program on a fixed Mon/Tue/Thu/Fri week",
+    "notIdealIf": "Your training days move around from week to week",
     "accentColor": "violet",
     "cycle": ["bws_upper1", "bws_lower1", "rest", "bws_upper2", "bws_lower2", "rest", "rest"],
     "days": {
@@ -295,6 +310,9 @@
     "name": "Full-Body A/B",
     "description": "4 days/week · A/B alternation · Mon/Tue/Thu/Fri · Double progression",
     "daysPerWeek": 4,
+    "equipment": "home",
+    "bestFor": "Simple A/B alternation with double progression — easy to follow at home",
+    "notIdealIf": "You prefer shorter sessions; each workout has around 10 exercises",
     "accentColor": "orange",
     "cycle": ["ab_a", "ab_b", "rest", "ab_a", "ab_b", "rest", "rest"],
     "days": {
@@ -328,6 +346,203 @@
           { "name": "Calf Raises",             "sets": 3, "repRange": "15–25",      "rpe": 9, "restSec": 60, "tip": "Superset with Goblet Squat / RDL. Do these on a step for full range — the stretch at the bottom is the key stimulus for calf growth. Rise fully onto the ball of the foot, squeeze at the top, lower slowly (3 seconds). This finishes the lower body antagonist pair for the session." }
         ]
       },
+      "rest": { "id": "rest", "name": "Rest", "subtitle": "Active Recovery", "type": "rest", "color": "zinc", "exercises": [] }
+    }
+  },
+
+  "gym_ppl": {
+    "id": "gym_ppl",
+    "name": "Gym Push / Pull / Legs",
+    "description": "6 days/week · Machines, cables & barbells · 2× frequency per muscle group",
+    "daysPerWeek": 6,
+    "equipment": "gym",
+    "bestFor": "Lifters who can train 6 days most weeks and want the most volume",
+    "notIdealIf": "You often miss 2+ days a week — the cycle falls apart",
+    "accentColor": "violet",
+    "cycle": ["gpush_a", "gpull_a", "glegs_a", "rest", "gpush_b", "gpull_b", "glegs_b"],
+    "days": {
+      "gpush_a": {
+        "id": "gpush_a", "name": "Push A", "subtitle": "Chest Dominant", "type": "push", "color": "red",
+        "exercises": [
+          { "name": "Barbell Bench Press",              "sets": 4, "repRange": "5–8",   "rpe": 8, "restSec": 180, "tip": "Retract and depress your shoulder blades, slight arch, feet planted. Lower the bar to mid-chest with elbows around 60° from your torso, touch, and press back up toward your face slightly. Use a spotter or the safety pins when you push close to failure.", "alternatives": [{ "name": "Smith Machine Bench Press", "tip": "Same setup and bar path, minus the balance demand. Set the bench so the bar lands on mid-chest." }, { "name": "Flat DB Press", "tip": "Elbows at 45–60°, full stretch at the bottom, press up and slightly inward." }] },
+          { "name": "Incline DB Press",                 "sets": 3, "repRange": "8–12",  "rpe": 8, "restSec": 150, "tip": "Bench at 30°. Lower the dumbbells to the upper chest with elbows tucked slightly, get a deep stretch, then press up and in. Higher angles turn it into a shoulder press, so keep it low.", "alternatives": [{ "name": "Incline Smith Press", "tip": "Bench at 30° under the Smith bar, lower to the upper chest, keep the shoulder blades pinned." }, { "name": "Incline Machine Press", "tip": "Set the seat so the handles line up with your upper chest. Control the stretch and don't let the stack touch between reps." }] },
+          { "name": "Machine Shoulder Press",           "sets": 3, "repRange": "8–12",  "rpe": 8, "restSec": 120, "tip": "Seat height so the handles start at about chin level. Keep your back against the pad and press up without locking out, so the delts stay loaded. Lower under control to just below chin height.", "alternatives": [{ "name": "Seated DB Shoulder Press", "tip": "Bench upright, dumbbells at ear height, press up without leaning back." }, { "name": "Smith Machine Shoulder Press", "tip": "Seated, bar travels just in front of your face to chin height." }] },
+          { "name": "Cable Lateral Raise",              "sets": 3, "repRange": "12–15", "rpe": 9, "restSec": 75,  "tip": "Set the pulley at hand height or lower and stand side-on. Raise the handle out to shoulder height, leading with the elbow. The cable keeps tension at the bottom, where dumbbells go slack, which is why this one is worth doing.", "alternatives": [{ "name": "DB Lateral Raises", "tip": "Slight forward lean, lead with the elbow, stop at shoulder height, don't shrug." }, { "name": "Machine Lateral Raise", "tip": "Pads against the outside of your arms, raise to shoulder height, slow on the way down." }] },
+          { "name": "Cable Triceps Pushdown",           "sets": 3, "repRange": "10–15", "rpe": 9, "restSec": 75,  "tip": "Pulley high, rope or straight bar. Pin your elbows to your sides and extend fully, spreading the rope at the bottom. Only the forearms move. If your shoulders roll forward, the weight is too heavy.", "alternatives": [{ "name": "Machine Triceps Dip", "tip": "Sit tall, elbows tucked, press down to full lockout." }, { "name": "Close-Grip DB Press", "tip": "Dumbbells pressed together on a flat bench, elbows tucked to your sides." }] },
+          { "name": "Overhead Cable Triceps Extension", "sets": 2, "repRange": "10–15", "rpe": 9, "restSec": 75,  "tip": "Face away from a low or mid pulley with a rope over your head. Upper arms stay by your ears. Let the rope pull your hands deep behind your head, then extend fully. The overhead position stretches the long head, which is the biggest part of the triceps.", "alternatives": [{ "name": "Overhead DB Triceps Extension", "tip": "One dumbbell held with both hands overhead, lower deep behind your head, extend." }, { "name": "EZ-Bar Skull Crusher", "tip": "Lie flat and lower the bar toward your forehead, or just behind it. Elbows stay pointed at the ceiling." }] }
+        ]
+      },
+
+      "gpull_a": {
+        "id": "gpull_a", "name": "Pull A", "subtitle": "Back Thickness", "type": "pull", "color": "blue",
+        "exercises": [
+          { "name": "Barbell Row",      "sets": 4, "repRange": "6–10",  "rpe": 8, "restSec": 150, "tip": "Hinge to about 45°, brace your core, bar hanging at arm's length. Pull to your lower ribs, driving the elbows back, then lower under control. If your torso rises every rep, the weight is too heavy.", "alternatives": [{ "name": "Chest-Supported T-Bar Row", "tip": "Chest on the pad, pull the handles to your ribs, squeeze the shoulder blades together." }, { "name": "One-Arm DB Row", "tip": "Hand and knee on the bench, row toward the hip, full stretch at the bottom." }] },
+          { "name": "Lat Pulldown",     "sets": 3, "repRange": "8–12",  "rpe": 8, "restSec": 120, "tip": "Thighs locked under the pad, grip slightly wider than shoulders. Lean back about 15° and pull the bar to your upper chest, driving the elbows down toward your back pockets. Let the bar rise all the way so the lats get a full stretch.", "alternatives": [{ "name": "Pull-Up / Assisted Pull-Up", "tip": "Full hang to chin over bar. Log assistance as negative kg." }, { "name": "Single-Arm Cable Pulldown", "tip": "Kneel or sit, pull one handle down to the side of your chest, elbow to hip." }] },
+          { "name": "Seated Cable Row", "sets": 3, "repRange": "10–12", "rpe": 8, "restSec": 120, "tip": "Feet on the platform, knees soft, torso upright. Pull the handle to your belly button, squeeze the shoulder blades together, then reach forward and let them spread. Don't swing your torso back to move the weight.", "alternatives": [{ "name": "Machine Row", "tip": "Chest on the pad, pull the handles to your ribs, pause at the squeeze." }, { "name": "Chest-Supported T-Bar Row", "tip": "Chest on the pad, pull to the ribs." }] },
+          { "name": "Reverse Pec-Deck", "sets": 3, "repRange": "12–15", "rpe": 9, "restSec": 75,  "tip": "Face the pad, handles at shoulder height, arms nearly straight. Sweep the arms back and out until they line up with your body. Keep the traps down. These are small muscles, so go slow and controlled.", "alternatives": [{ "name": "Cable Rear Delt Fly", "tip": "Cross the cables at shoulder height and pull each arm back and out." }, { "name": "Rear Delt Fly", "tip": "Hinge forward, dumbbells under the chest, raise out to the sides." }] },
+          { "name": "EZ-Bar Curl",      "sets": 3, "repRange": "8–12",  "rpe": 9, "restSec": 90,  "tip": "Grip the angled part of the bar, elbows pinned to your sides. Curl up without rocking your torso, squeeze, and take 2–3 seconds on the way down. The angled grip is easier on the wrists than a straight bar.", "alternatives": [{ "name": "Cable Curl", "tip": "Low pulley, straight or EZ attachment, elbows pinned, constant tension." }, { "name": "Incline DB Curl", "tip": "Bench at 45–60°, arms hanging behind you, curl without moving the upper arm." }] }
+        ]
+      },
+
+      "glegs_a": {
+        "id": "glegs_a", "name": "Legs A", "subtitle": "Quad Dominant", "type": "legs", "color": "green",
+        "exercises": [
+          { "name": "Back Squat",         "sets": 4, "repRange": "5–8",   "rpe": 8, "restSec": 180, "tip": "Bar on the upper traps, feet shoulder-width, toes slightly out. Brace hard, then sit down between your heels with knees tracking over the toes, to at least parallel. Drive up through the whole foot. Always set the safety pins in the rack.", "alternatives": [{ "name": "Hack Squat", "tip": "Back flat on the pad, feet mid-platform, lower deep under control." }, { "name": "Smith Machine Squat", "tip": "Feet slightly in front of the bar, sit straight down to parallel or below." }] },
+          { "name": "Leg Press",          "sets": 3, "repRange": "10–12", "rpe": 8, "restSec": 150, "tip": "Feet shoulder-width, mid-platform. Lower until your knees are near your chest without your lower back peeling off the pad, then press without locking the knees. Load up gradually — it's easy to pile on plates you can't control.", "alternatives": [{ "name": "Hack Squat", "tip": "Back flat on the pad, lower deep, drive through the whole foot." }, { "name": "Smith Machine Squat", "tip": "Feet slightly forward, sit straight down." }] },
+          { "name": "Leg Extension",      "sets": 3, "repRange": "12–15", "rpe": 9, "restSec": 90,  "tip": "Line your knee up with the machine's pivot and set the pad just above the ankle. Extend fully and hold the squeeze for a second, then lower slowly. Grip the handles so your hips stay down.", "alternatives": [{ "name": "Heel-Elevated Goblet Squat", "tip": "Heels on a plate, upright torso, knees forward, deep squat." }, { "name": "Sissy Squat (Assisted)", "tip": "Hold a rack, rise onto your toes and lean back as the knees travel forward." }] },
+          { "name": "Seated Leg Curl",    "sets": 3, "repRange": "10–12", "rpe": 9, "restSec": 90,  "tip": "Knee lined up with the pivot, thigh pad locked down tight. Curl all the way under, squeeze, and return slowly to a full stretch. Being seated stretches the hamstrings more than the lying version, which helps growth.", "alternatives": [{ "name": "Lying Leg Curl", "tip": "Hips pressed into the pad, curl to full contraction, slow return." }, { "name": "Cable Leg Curl", "tip": "Ankle strap on a low pulley, face the stack, curl the heel to your glute." }] },
+          { "name": "Machine Calf Raise", "sets": 4, "repRange": "10–15", "rpe": 9, "restSec": 60,  "tip": "Balls of the feet on the edge, shoulders under the pads. Drop into a deep stretch and pause for a second at the bottom, then rise fully onto your toes. The pause in the stretch matters more than the load.", "alternatives": [{ "name": "Leg Press Calf Raise", "tip": "Balls of the feet at the bottom edge of the platform, press through the toes." }, { "name": "Smith Machine Calf Raise", "tip": "Stand on a plate under the bar, deep stretch, full rise." }] }
+        ]
+      },
+
+      "gpush_b": {
+        "id": "gpush_b", "name": "Push B", "subtitle": "Shoulder Dominant", "type": "push", "color": "red",
+        "exercises": [
+          { "name": "Seated DB Shoulder Press",         "sets": 4, "repRange": "6–10",  "rpe": 8, "restSec": 150, "tip": "Bench upright, or one notch back. Dumbbells start at ear height with forearms vertical. Press up and slightly in, stop short of lockout, and don't arch your lower back off the pad.", "alternatives": [{ "name": "Machine Shoulder Press", "tip": "Handles at chin level, back on the pad, press without locking out." }, { "name": "Smith Machine Shoulder Press", "tip": "Seated, bar just in front of your face, lower to chin height." }] },
+          { "name": "Incline Machine Press",            "sets": 3, "repRange": "8–12",  "rpe": 8, "restSec": 120, "tip": "Set the seat so the handles start level with your upper chest. Shoulder blades back against the pad, press without locking out, and take 2 seconds on the way back. A machine lets you push close to failure safely, so use that.", "alternatives": [{ "name": "Incline DB Press", "tip": "Bench at 30°, deep stretch at the bottom, press up and in." }, { "name": "Incline Smith Press", "tip": "Bench at 30° under the Smith bar, lower to the upper chest." }] },
+          { "name": "Pec-Deck Fly",                     "sets": 3, "repRange": "12–15", "rpe": 9, "restSec": 90,  "tip": "Seat height so the handles line up with mid-chest. Slight bend in the elbows. Let the arms open until you feel a deep chest stretch, then squeeze the handles together and hold for a second.", "alternatives": [{ "name": "Cable Fly", "tip": "Pulleys at chest height, step forward, arc the hands together with a soft elbow bend." }, { "name": "DB Fly", "tip": "Flat bench, soft elbows, lower wide to a deep stretch, then hug back up." }] },
+          { "name": "DB Lateral Raises",                "sets": 4, "repRange": "12–15", "rpe": 9, "restSec": 75,  "tip": "Slight forward lean from the hips. Lead with the elbow, raise to shoulder height, don't shrug. Pick a weight light enough that the side delt does the work, not the traps.", "alternatives": [{ "name": "Cable Lateral Raise", "tip": "Pulley low, side-on, raise to shoulder height with constant tension." }, { "name": "Machine Lateral Raise", "tip": "Pads on the outside of your arms, raise to shoulder height." }] },
+          { "name": "Assisted Dip",                     "sets": 3, "repRange": "8–12",  "rpe": 8, "restSec": 120, "tip": "Choose enough assistance to get 8–12 clean reps. Lean slightly forward, lower until your shoulders are just below your elbows, and press back up. Log the assist as a negative number (e.g. -20) and work toward 0.", "alternatives": [{ "name": "Machine Chest Press", "tip": "Handles at mid-chest, press out, full stretch on the return." }, { "name": "Diamond Push-Ups", "tip": "Hands together under the chest, elbows tucked, chest to hands." }] },
+          { "name": "Overhead Cable Triceps Extension", "sets": 3, "repRange": "10–15", "rpe": 9, "restSec": 75,  "tip": "Face away from a low or mid pulley with a rope over your head. Upper arms stay by your ears. Let the rope pull your hands deep behind your head, then extend fully. The overhead position stretches the long head, which is the biggest part of the triceps.", "alternatives": [{ "name": "Overhead DB Triceps Extension", "tip": "One dumbbell held with both hands overhead, lower deep behind your head, extend." }, { "name": "EZ-Bar Skull Crusher", "tip": "Lie flat and lower the bar toward your forehead, or just behind it. Elbows stay pointed at the ceiling." }] }
+        ]
+      },
+
+      "gpull_b": {
+        "id": "gpull_b", "name": "Pull B", "subtitle": "Width + Arms", "type": "pull", "color": "blue",
+        "exercises": [
+          { "name": "Pull-Up / Assisted Pull-Up", "sets": 4, "repRange": "6–10",  "rpe": 8, "restSec": 150, "tip": "Start from a full dead hang and pull until your chin clears the bar, chest up. On the assisted machine, log the assistance as a negative number (e.g. -25 kg) and reduce it over time. Once you can do bodyweight reps, log added weight as positive.", "alternatives": [{ "name": "Lat Pulldown", "tip": "Lean back slightly, pull to the upper chest, full stretch at the top." }, { "name": "Single-Arm Cable Pulldown", "tip": "One handle, pull elbow to hip, full stretch overhead." }] },
+          { "name": "Single-Arm Cable Pulldown",  "sets": 3, "repRange": "10–12", "rpe": 8, "restSec": 90,  "tip": "Kneel or sit under a high pulley with a single handle. Reach fully overhead, then pull the elbow down to your hip, turning the palm in. Working one arm at a time lets you get a bigger stretch and contraction than a bar does.", "alternatives": [{ "name": "Lat Pulldown", "tip": "Grip slightly wider than shoulders, pull to the upper chest." }, { "name": "Machine High Row", "tip": "Chest on the pad, pull the handles down and back, elbows to the hips." }] },
+          { "name": "Machine Row",                "sets": 3, "repRange": "8–12",  "rpe": 8, "restSec": 120, "tip": "Chest against the pad, so your lower back is out of it. Pull the handles to your ribs, hold the squeeze for a beat, then let your shoulders reach forward fully. A neutral grip hits the mid-back; elbows wide shifts it to the upper back and rear delts.", "alternatives": [{ "name": "Seated Cable Row", "tip": "Torso upright, pull to the belly button, full reach forward." }, { "name": "Chest-Supported T-Bar Row", "tip": "Chest on the pad, pull to the ribs." }] },
+          { "name": "Cable Face Pull",            "sets": 3, "repRange": "15–20", "rpe": 8, "restSec": 60,  "tip": "Rope at upper-chest to face height. Pull toward your eyes, splitting the rope and rotating the hands back so your knuckles finish beside your ears. Good for rear delts and shoulder health. Go light and controlled.", "alternatives": [{ "name": "Reverse Pec-Deck", "tip": "Arms nearly straight, sweep back to in line with the body." }, { "name": "Band Face Pull", "tip": "Band anchored at face height, pull apart toward the eyes." }] },
+          { "name": "Incline DB Curl",            "sets": 3, "repRange": "8–12",  "rpe": 9, "restSec": 90,  "tip": "Bench at 45–60°, arms hanging straight down behind you. This pre-stretches the long head of the biceps. Curl without letting the elbows drift forward, and don't rush the bottom.", "alternatives": [{ "name": "Machine Preacher Curl", "tip": "Armpits snug on the pad, curl up, lower all the way to a full stretch." }, { "name": "Cable Curl", "tip": "Low pulley, elbows pinned, slow lowering." }] },
+          { "name": "Cable Rope Hammer Curl",     "sets": 3, "repRange": "10–12", "rpe": 9, "restSec": 75,  "tip": "Low pulley with a rope, palms facing each other. Curl up keeping the thumbs on top, elbows at your sides. Works the brachialis and forearms, which add arm thickness.", "alternatives": [{ "name": "Hammer Curl", "tip": "Dumbbells with palms facing in, curl without swinging." }, { "name": "EZ-Bar Reverse Curl", "tip": "Overhand grip on the EZ bar, curl up slowly." }] }
+        ]
+      },
+
+      "glegs_b": {
+        "id": "glegs_b", "name": "Legs B + Core", "subtitle": "Posterior Chain", "type": "legs", "color": "green",
+        "exercises": [
+          { "name": "Romanian Deadlift",  "sets": 4, "repRange": "6–10",  "rpe": 8, "restSec": 180, "tip": "Barbell at the hips, soft knees. Push your hips back and slide the bar down your thighs with a flat back until you feel a strong hamstring stretch, usually mid-shin. Drive the hips forward to stand. This is a hinge, not a squat, so the knees barely move.", "alternatives": [{ "name": "DB Romanian Deadlift", "tip": "Same hinge with dumbbells, close to the legs." }, { "name": "45° Back Extension", "tip": "Hips on the pad edge, hinge down with a flat back, squeeze the glutes to come up." }] },
+          { "name": "Barbell Hip Thrust", "sets": 3, "repRange": "8–12",  "rpe": 8, "restSec": 120, "tip": "Upper back on a bench, padded bar across the hip crease, feet flat with shins vertical at the top. Drive through the heels until your hips are fully extended, chin tucked, and squeeze the glutes for a second.", "alternatives": [{ "name": "Hip Thrust Machine", "tip": "Belt across the hips, drive up to full extension, pause." }, { "name": "Smith Machine Hip Thrust", "tip": "Same setup with the Smith bar, so no balancing." }] },
+          { "name": "Lying Leg Curl",     "sets": 3, "repRange": "10–12", "rpe": 9, "restSec": 90,  "tip": "Lie face down, knees just off the end of the pad, roller above the heels. Keep your hips pressed down and curl to full contraction, then lower over 3 seconds.", "alternatives": [{ "name": "Seated Leg Curl", "tip": "Thigh pad locked tight, curl fully under, slow return." }, { "name": "Cable Leg Curl", "tip": "Ankle strap on a low pulley, curl the heel to your glute." }] },
+          { "name": "Walking Lunge",      "sets": 3, "repRange": "10–12", "rpe": 8, "restSec": 120, "tip": "Dumbbells at your sides. Take a long stride and drop the back knee toward the floor, front shin roughly vertical, then step through into the next rep. Reps are per leg. A longer stride works the glutes more; a shorter one, the quads.", "alternatives": [{ "name": "Bulgarian Split Squat", "tip": "Rear foot on a bench, drop straight down, drive through the front heel." }, { "name": "Smith Machine Reverse Lunge", "tip": "Step back under the Smith bar, drop the knee, drive up through the front foot." }] },
+          { "name": "Seated Calf Raise",  "sets": 4, "repRange": "12–15", "rpe": 9, "restSec": 60,  "tip": "Pad snug on the lower thighs, balls of the feet on the edge. Stretch deep at the bottom, rise fully, and squeeze. A bent knee shifts the work to the soleus, the lower calf muscle under the gastrocnemius.", "alternatives": [{ "name": "Leg Press Calf Raise", "tip": "Balls of the feet at the bottom edge of the platform." }, { "name": "Machine Calf Raise", "tip": "Standing, deep stretch with a pause, full rise." }] },
+          { "name": "Cable Crunch",       "sets": 3, "repRange": "12–15", "rpe": 9, "restSec": 60,  "tip": "Kneel facing a high pulley, rope beside your head. Crunch your ribs down toward your hips by rounding the spine. The hips stay still. Exhale hard at the bottom.", "alternatives": [{ "name": "Ab Crunch Machine", "tip": "Curl the chest toward the hips against the pad, slow return." }, { "name": "DB Crunch", "tip": "Lie on your back with a dumbbell on your chest, curl the ribs toward the hips." }] },
+          { "name": "Hanging Knee Raise", "sets": 3, "repRange": "10–15", "rpe": 9, "restSec": 60,  "tip": "Hang from a bar, or use the captain's chair. Curl your knees up toward your chest by tilting the pelvis up, not just lifting the legs. No swinging — lower slowly.", "alternatives": [{ "name": "Captain's Chair Knee Raise", "tip": "Back on the pad, forearms on the rests, curl the knees to the chest." }, { "name": "Reverse Crunch", "tip": "Lie on your back, curl the hips off the floor toward your chest." }] }
+        ]
+      },
+
+      "rest": { "id": "rest", "name": "Rest", "subtitle": "Active Recovery", "type": "rest", "color": "zinc", "exercises": [] }
+    }
+  },
+
+  "gym_upper_lower": {
+    "id": "gym_upper_lower",
+    "name": "Gym Upper / Lower",
+    "description": "4 days/week · Machines, cables & barbells · Good recovery",
+    "daysPerWeek": 4,
+    "equipment": "gym",
+    "bestFor": "A reliable 4 gym days a week — each muscle twice, with recovery days built in",
+    "notIdealIf": "You can only get to the gym 3 times a week",
+    "accentColor": "blue",
+    "cycle": ["gupper_a", "glower_a", "rest", "gupper_b", "glower_b", "rest", "rest"],
+    "days": {
+      "gupper_a": {
+        "id": "gupper_a", "name": "Upper A", "subtitle": "Press Focus", "type": "push", "color": "red",
+        "exercises": [
+          { "name": "Barbell Bench Press",    "sets": 4, "repRange": "5–8",   "rpe": 8, "restSec": 180, "tip": "Retract and depress your shoulder blades, slight arch, feet planted. Lower the bar to mid-chest with elbows around 60° from your torso, touch, and press back up toward your face slightly. Use a spotter or the safety pins when you push close to failure.", "alternatives": [{ "name": "Smith Machine Bench Press", "tip": "Same setup and bar path, minus the balance demand. Set the bench so the bar lands on mid-chest." }, { "name": "Flat DB Press", "tip": "Elbows at 45–60°, full stretch at the bottom, press up and slightly inward." }] },
+          { "name": "Barbell Row",            "sets": 4, "repRange": "6–10",  "rpe": 8, "restSec": 150, "tip": "Hinge to about 45°, brace your core, bar hanging at arm's length. Pull to your lower ribs, driving the elbows back, then lower under control. If your torso rises every rep, the weight is too heavy.", "alternatives": [{ "name": "Chest-Supported T-Bar Row", "tip": "Chest on the pad, pull the handles to your ribs, squeeze the shoulder blades together." }, { "name": "One-Arm DB Row", "tip": "Hand and knee on the bench, row toward the hip, full stretch at the bottom." }] },
+          { "name": "Incline DB Press",       "sets": 3, "repRange": "8–12",  "rpe": 8, "restSec": 120, "tip": "Bench at 30°. Lower the dumbbells to the upper chest with elbows tucked slightly, get a deep stretch, then press up and in. Higher angles turn it into a shoulder press, so keep it low.", "alternatives": [{ "name": "Incline Smith Press", "tip": "Bench at 30° under the Smith bar, lower to the upper chest, keep the shoulder blades pinned." }, { "name": "Incline Machine Press", "tip": "Set the seat so the handles line up with your upper chest. Control the stretch and don't let the stack touch between reps." }] },
+          { "name": "Lat Pulldown",           "sets": 3, "repRange": "8–12",  "rpe": 8, "restSec": 120, "tip": "Thighs locked under the pad, grip slightly wider than shoulders. Lean back about 15° and pull the bar to your upper chest, driving the elbows down toward your back pockets. Let the bar rise all the way so the lats get a full stretch.", "alternatives": [{ "name": "Pull-Up / Assisted Pull-Up", "tip": "Full hang to chin over bar. Log assistance as negative kg." }, { "name": "Single-Arm Cable Pulldown", "tip": "Kneel or sit, pull one handle down to the side of your chest, elbow to hip." }] },
+          { "name": "Cable Lateral Raise",    "sets": 3, "repRange": "12–15", "rpe": 9, "restSec": 75,  "tip": "Set the pulley at hand height or lower and stand side-on. Raise the handle out to shoulder height, leading with the elbow. The cable keeps tension at the bottom, where dumbbells go slack, which is why this one is worth doing.", "alternatives": [{ "name": "DB Lateral Raises", "tip": "Slight forward lean, lead with the elbow, stop at shoulder height, don't shrug." }, { "name": "Machine Lateral Raise", "tip": "Pads against the outside of your arms, raise to shoulder height, slow on the way down." }] },
+          { "name": "Cable Triceps Pushdown", "sets": 3, "repRange": "10–15", "rpe": 9, "restSec": 75,  "tip": "Pulley high, rope or straight bar. Pin your elbows to your sides and extend fully, spreading the rope at the bottom. Only the forearms move. If your shoulders roll forward, the weight is too heavy.", "alternatives": [{ "name": "Machine Triceps Dip", "tip": "Sit tall, elbows tucked, press down to full lockout." }, { "name": "Close-Grip DB Press", "tip": "Dumbbells pressed together on a flat bench, elbows tucked to your sides." }] }
+        ]
+      },
+
+      "glower_a": {
+        "id": "glower_a", "name": "Lower A", "subtitle": "Squat Focus", "type": "legs", "color": "green",
+        "exercises": [
+          { "name": "Back Squat",         "sets": 4, "repRange": "5–8",   "rpe": 8, "restSec": 180, "tip": "Bar on the upper traps, feet shoulder-width, toes slightly out. Brace hard, then sit down between your heels with knees tracking over the toes, to at least parallel. Drive up through the whole foot. Always set the safety pins in the rack.", "alternatives": [{ "name": "Hack Squat", "tip": "Back flat on the pad, feet mid-platform, lower deep under control." }, { "name": "Smith Machine Squat", "tip": "Feet slightly in front of the bar, sit straight down to parallel or below." }] },
+          { "name": "Leg Press",          "sets": 3, "repRange": "10–12", "rpe": 8, "restSec": 150, "tip": "Feet shoulder-width, mid-platform. Lower until your knees are near your chest without your lower back peeling off the pad, then press without locking the knees. Load up gradually — it's easy to pile on plates you can't control.", "alternatives": [{ "name": "Hack Squat", "tip": "Back flat on the pad, lower deep, drive through the whole foot." }, { "name": "Smith Machine Squat", "tip": "Feet slightly forward, sit straight down." }] },
+          { "name": "Seated Leg Curl",    "sets": 3, "repRange": "10–12", "rpe": 9, "restSec": 90,  "tip": "Knee lined up with the pivot, thigh pad locked down tight. Curl all the way under, squeeze, and return slowly to a full stretch. Being seated stretches the hamstrings more than the lying version, which helps growth.", "alternatives": [{ "name": "Lying Leg Curl", "tip": "Hips pressed into the pad, curl to full contraction, slow return." }, { "name": "Cable Leg Curl", "tip": "Ankle strap on a low pulley, face the stack, curl the heel to your glute." }] },
+          { "name": "Leg Extension",      "sets": 3, "repRange": "12–15", "rpe": 9, "restSec": 90,  "tip": "Line your knee up with the machine's pivot and set the pad just above the ankle. Extend fully and hold the squeeze for a second, then lower slowly. Grip the handles so your hips stay down.", "alternatives": [{ "name": "Heel-Elevated Goblet Squat", "tip": "Heels on a plate, upright torso, knees forward, deep squat." }, { "name": "Sissy Squat (Assisted)", "tip": "Hold a rack, rise onto your toes and lean back as the knees travel forward." }] },
+          { "name": "Machine Calf Raise", "sets": 4, "repRange": "10–15", "rpe": 9, "restSec": 60,  "tip": "Balls of the feet on the edge, shoulders under the pads. Drop into a deep stretch and pause for a second at the bottom, then rise fully onto your toes. The pause in the stretch matters more than the load.", "alternatives": [{ "name": "Leg Press Calf Raise", "tip": "Balls of the feet at the bottom edge of the platform, press through the toes." }, { "name": "Smith Machine Calf Raise", "tip": "Stand on a plate under the bar, deep stretch, full rise." }] }
+        ]
+      },
+
+      "gupper_b": {
+        "id": "gupper_b", "name": "Upper B", "subtitle": "Pull Focus", "type": "pull", "color": "blue",
+        "exercises": [
+          { "name": "Pull-Up / Assisted Pull-Up",       "sets": 4, "repRange": "6–10",  "rpe": 8, "restSec": 150, "tip": "Start from a full dead hang and pull until your chin clears the bar, chest up. On the assisted machine, log the assistance as a negative number (e.g. -25 kg) and reduce it over time. Once you can do bodyweight reps, log added weight as positive.", "alternatives": [{ "name": "Lat Pulldown", "tip": "Lean back slightly, pull to the upper chest, full stretch at the top." }, { "name": "Single-Arm Cable Pulldown", "tip": "One handle, pull elbow to hip, full stretch overhead." }] },
+          { "name": "Seated DB Shoulder Press",         "sets": 3, "repRange": "6–10",  "rpe": 8, "restSec": 150, "tip": "Bench upright, or one notch back. Dumbbells start at ear height with forearms vertical. Press up and slightly in, stop short of lockout, and don't arch your lower back off the pad.", "alternatives": [{ "name": "Machine Shoulder Press", "tip": "Handles at chin level, back on the pad, press without locking out." }, { "name": "Smith Machine Shoulder Press", "tip": "Seated, bar just in front of your face, lower to chin height." }] },
+          { "name": "Seated Cable Row",                 "sets": 3, "repRange": "10–12", "rpe": 8, "restSec": 120, "tip": "Feet on the platform, knees soft, torso upright. Pull the handle to your belly button, squeeze the shoulder blades together, then reach forward and let them spread. Don't swing your torso back to move the weight.", "alternatives": [{ "name": "Machine Row", "tip": "Chest on the pad, pull the handles to your ribs, pause at the squeeze." }, { "name": "Chest-Supported T-Bar Row", "tip": "Chest on the pad, pull to the ribs." }] },
+          { "name": "Incline Machine Press",            "sets": 3, "repRange": "8–12",  "rpe": 8, "restSec": 120, "tip": "Set the seat so the handles start level with your upper chest. Shoulder blades back against the pad, press without locking out, and take 2 seconds on the way back. A machine lets you push close to failure safely, so use that.", "alternatives": [{ "name": "Incline DB Press", "tip": "Bench at 30°, deep stretch at the bottom, press up and in." }, { "name": "Incline Smith Press", "tip": "Bench at 30° under the Smith bar, lower to the upper chest." }] },
+          { "name": "Reverse Pec-Deck",                 "sets": 3, "repRange": "12–15", "rpe": 9, "restSec": 75,  "tip": "Face the pad, handles at shoulder height, arms nearly straight. Sweep the arms back and out until they line up with your body. Keep the traps down. These are small muscles, so go slow and controlled.", "alternatives": [{ "name": "Cable Rear Delt Fly", "tip": "Cross the cables at shoulder height and pull each arm back and out." }, { "name": "Rear Delt Fly", "tip": "Hinge forward, dumbbells under the chest, raise out to the sides." }] },
+          { "name": "EZ-Bar Curl",                      "sets": 3, "repRange": "8–12",  "rpe": 9, "restSec": 90,  "tip": "Grip the angled part of the bar, elbows pinned to your sides. Curl up without rocking your torso, squeeze, and take 2–3 seconds on the way down. The angled grip is easier on the wrists than a straight bar.", "alternatives": [{ "name": "Cable Curl", "tip": "Low pulley, straight or EZ attachment, elbows pinned, constant tension." }, { "name": "Incline DB Curl", "tip": "Bench at 45–60°, arms hanging behind you, curl without moving the upper arm." }] },
+          { "name": "Overhead Cable Triceps Extension", "sets": 3, "repRange": "10–15", "rpe": 9, "restSec": 75,  "tip": "Face away from a low or mid pulley with a rope over your head. Upper arms stay by your ears. Let the rope pull your hands deep behind your head, then extend fully. The overhead position stretches the long head, which is the biggest part of the triceps.", "alternatives": [{ "name": "Overhead DB Triceps Extension", "tip": "One dumbbell held with both hands overhead, lower deep behind your head, extend." }, { "name": "EZ-Bar Skull Crusher", "tip": "Lie flat and lower the bar toward your forehead, or just behind it. Elbows stay pointed at the ceiling." }] }
+        ]
+      },
+
+      "glower_b": {
+        "id": "glower_b", "name": "Lower B + Core", "subtitle": "Hinge Focus", "type": "legs", "color": "green",
+        "exercises": [
+          { "name": "Romanian Deadlift",  "sets": 4, "repRange": "6–10",  "rpe": 8, "restSec": 180, "tip": "Barbell at the hips, soft knees. Push your hips back and slide the bar down your thighs with a flat back until you feel a strong hamstring stretch, usually mid-shin. Drive the hips forward to stand. This is a hinge, not a squat, so the knees barely move.", "alternatives": [{ "name": "DB Romanian Deadlift", "tip": "Same hinge with dumbbells, close to the legs." }, { "name": "45° Back Extension", "tip": "Hips on the pad edge, hinge down with a flat back, squeeze the glutes to come up." }] },
+          { "name": "Barbell Hip Thrust", "sets": 3, "repRange": "8–12",  "rpe": 8, "restSec": 120, "tip": "Upper back on a bench, padded bar across the hip crease, feet flat with shins vertical at the top. Drive through the heels until your hips are fully extended, chin tucked, and squeeze the glutes for a second.", "alternatives": [{ "name": "Hip Thrust Machine", "tip": "Belt across the hips, drive up to full extension, pause." }, { "name": "Smith Machine Hip Thrust", "tip": "Same setup with the Smith bar, so no balancing." }] },
+          { "name": "Walking Lunge",      "sets": 3, "repRange": "10–12", "rpe": 8, "restSec": 120, "tip": "Dumbbells at your sides. Take a long stride and drop the back knee toward the floor, front shin roughly vertical, then step through into the next rep. Reps are per leg. A longer stride works the glutes more; a shorter one, the quads.", "alternatives": [{ "name": "Bulgarian Split Squat", "tip": "Rear foot on a bench, drop straight down, drive through the front heel." }, { "name": "Smith Machine Reverse Lunge", "tip": "Step back under the Smith bar, drop the knee, drive up through the front foot." }] },
+          { "name": "Lying Leg Curl",     "sets": 3, "repRange": "10–12", "rpe": 9, "restSec": 90,  "tip": "Lie face down, knees just off the end of the pad, roller above the heels. Keep your hips pressed down and curl to full contraction, then lower over 3 seconds.", "alternatives": [{ "name": "Seated Leg Curl", "tip": "Thigh pad locked tight, curl fully under, slow return." }, { "name": "Cable Leg Curl", "tip": "Ankle strap on a low pulley, curl the heel to your glute." }] },
+          { "name": "Seated Calf Raise",  "sets": 4, "repRange": "12–15", "rpe": 9, "restSec": 60,  "tip": "Pad snug on the lower thighs, balls of the feet on the edge. Stretch deep at the bottom, rise fully, and squeeze. A bent knee shifts the work to the soleus, the lower calf muscle under the gastrocnemius.", "alternatives": [{ "name": "Leg Press Calf Raise", "tip": "Balls of the feet at the bottom edge of the platform." }, { "name": "Machine Calf Raise", "tip": "Standing, deep stretch with a pause, full rise." }] },
+          { "name": "Cable Crunch",       "sets": 3, "repRange": "12–15", "rpe": 9, "restSec": 60,  "tip": "Kneel facing a high pulley, rope beside your head. Crunch your ribs down toward your hips by rounding the spine. The hips stay still. Exhale hard at the bottom.", "alternatives": [{ "name": "Ab Crunch Machine", "tip": "Curl the chest toward the hips against the pad, slow return." }, { "name": "DB Crunch", "tip": "Lie on your back with a dumbbell on your chest, curl the ribs toward the hips." }] }
+        ]
+      },
+
+      "rest": { "id": "rest", "name": "Rest", "subtitle": "Active Recovery", "type": "rest", "color": "zinc", "exercises": [] }
+    }
+  },
+
+  "gym_full_body": {
+    "id": "gym_full_body",
+    "name": "Gym Full Body 3×",
+    "description": "3 days/week · Machines, cables & barbells · Great for beginners",
+    "daysPerWeek": 3,
+    "equipment": "gym",
+    "bestFor": "New to the gym, or busy weeks — 3 sessions cover every muscle",
+    "notIdealIf": "You want to train 5–6 days or specialise in one area",
+    "accentColor": "amber",
+    "cycle": ["gfull_a", "rest", "gfull_b", "rest", "gfull_c", "rest", "rest"],
+    "days": {
+      "gfull_a": {
+        "id": "gfull_a", "name": "Full Body A", "subtitle": "Squat · Bench · Row", "type": "full", "color": "violet",
+        "exercises": [
+          { "name": "Back Squat",             "sets": 3, "repRange": "5–8",   "rpe": 8, "restSec": 180, "tip": "Bar on the upper traps, feet shoulder-width, toes slightly out. Brace hard, then sit down between your heels with knees tracking over the toes, to at least parallel. Drive up through the whole foot. Always set the safety pins in the rack.", "alternatives": [{ "name": "Hack Squat", "tip": "Back flat on the pad, feet mid-platform, lower deep under control." }, { "name": "Smith Machine Squat", "tip": "Feet slightly in front of the bar, sit straight down to parallel or below." }] },
+          { "name": "Barbell Bench Press",    "sets": 3, "repRange": "6–10",  "rpe": 8, "restSec": 150, "tip": "Retract and depress your shoulder blades, slight arch, feet planted. Lower the bar to mid-chest with elbows around 60° from your torso, touch, and press back up toward your face slightly. Use a spotter or the safety pins when you push close to failure.", "alternatives": [{ "name": "Smith Machine Bench Press", "tip": "Same setup and bar path, minus the balance demand. Set the bench so the bar lands on mid-chest." }, { "name": "Flat DB Press", "tip": "Elbows at 45–60°, full stretch at the bottom, press up and slightly inward." }] },
+          { "name": "Seated Cable Row",       "sets": 3, "repRange": "8–12",  "rpe": 8, "restSec": 120, "tip": "Feet on the platform, knees soft, torso upright. Pull the handle to your belly button, squeeze the shoulder blades together, then reach forward and let them spread. Don't swing your torso back to move the weight.", "alternatives": [{ "name": "Machine Row", "tip": "Chest on the pad, pull the handles to your ribs, pause at the squeeze." }, { "name": "Chest-Supported T-Bar Row", "tip": "Chest on the pad, pull to the ribs." }] },
+          { "name": "Cable Lateral Raise",    "sets": 3, "repRange": "12–15", "rpe": 9, "restSec": 75,  "tip": "Set the pulley at hand height or lower and stand side-on. Raise the handle out to shoulder height, leading with the elbow. The cable keeps tension at the bottom, where dumbbells go slack, which is why this one is worth doing.", "alternatives": [{ "name": "DB Lateral Raises", "tip": "Slight forward lean, lead with the elbow, stop at shoulder height, don't shrug." }, { "name": "Machine Lateral Raise", "tip": "Pads against the outside of your arms, raise to shoulder height, slow on the way down." }] },
+          { "name": "Cable Triceps Pushdown", "sets": 2, "repRange": "10–15", "rpe": 9, "restSec": 75,  "tip": "Pulley high, rope or straight bar. Pin your elbows to your sides and extend fully, spreading the rope at the bottom. Only the forearms move. If your shoulders roll forward, the weight is too heavy.", "alternatives": [{ "name": "Machine Triceps Dip", "tip": "Sit tall, elbows tucked, press down to full lockout." }, { "name": "Close-Grip DB Press", "tip": "Dumbbells pressed together on a flat bench, elbows tucked to your sides." }] }
+        ]
+      },
+
+      "gfull_b": {
+        "id": "gfull_b", "name": "Full Body B", "subtitle": "Hinge · Press · Pulldown", "type": "full", "color": "violet",
+        "exercises": [
+          { "name": "Romanian Deadlift",      "sets": 3, "repRange": "6–10",  "rpe": 8, "restSec": 180, "tip": "Barbell at the hips, soft knees. Push your hips back and slide the bar down your thighs with a flat back until you feel a strong hamstring stretch, usually mid-shin. Drive the hips forward to stand. This is a hinge, not a squat, so the knees barely move.", "alternatives": [{ "name": "DB Romanian Deadlift", "tip": "Same hinge with dumbbells, close to the legs." }, { "name": "45° Back Extension", "tip": "Hips on the pad edge, hinge down with a flat back, squeeze the glutes to come up." }] },
+          { "name": "Machine Shoulder Press", "sets": 3, "repRange": "8–12",  "rpe": 8, "restSec": 120, "tip": "Seat height so the handles start at about chin level. Keep your back against the pad and press up without locking out, so the delts stay loaded. Lower under control to just below chin height.", "alternatives": [{ "name": "Seated DB Shoulder Press", "tip": "Bench upright, dumbbells at ear height, press up without leaning back." }, { "name": "Smith Machine Shoulder Press", "tip": "Seated, bar travels just in front of your face to chin height." }] },
+          { "name": "Lat Pulldown",           "sets": 3, "repRange": "8–12",  "rpe": 8, "restSec": 120, "tip": "Thighs locked under the pad, grip slightly wider than shoulders. Lean back about 15° and pull the bar to your upper chest, driving the elbows down toward your back pockets. Let the bar rise all the way so the lats get a full stretch.", "alternatives": [{ "name": "Pull-Up / Assisted Pull-Up", "tip": "Full hang to chin over bar. Log assistance as negative kg." }, { "name": "Single-Arm Cable Pulldown", "tip": "Kneel or sit, pull one handle down to the side of your chest, elbow to hip." }] },
+          { "name": "EZ-Bar Curl",            "sets": 2, "repRange": "10–12", "rpe": 9, "restSec": 75,  "tip": "Grip the angled part of the bar, elbows pinned to your sides. Curl up without rocking your torso, squeeze, and take 2–3 seconds on the way down. The angled grip is easier on the wrists than a straight bar.", "alternatives": [{ "name": "Cable Curl", "tip": "Low pulley, straight or EZ attachment, elbows pinned, constant tension." }, { "name": "Incline DB Curl", "tip": "Bench at 45–60°, arms hanging behind you, curl without moving the upper arm." }] },
+          { "name": "Machine Calf Raise",     "sets": 3, "repRange": "10–15", "rpe": 9, "restSec": 60,  "tip": "Balls of the feet on the edge, shoulders under the pads. Drop into a deep stretch and pause for a second at the bottom, then rise fully onto your toes. The pause in the stretch matters more than the load.", "alternatives": [{ "name": "Leg Press Calf Raise", "tip": "Balls of the feet at the bottom edge of the platform, press through the toes." }, { "name": "Smith Machine Calf Raise", "tip": "Stand on a plate under the bar, deep stretch, full rise." }] }
+        ]
+      },
+
+      "gfull_c": {
+        "id": "gfull_c", "name": "Full Body C", "subtitle": "Leg Press · Incline · Row", "type": "full", "color": "violet",
+        "exercises": [
+          { "name": "Leg Press",        "sets": 3, "repRange": "10–12", "rpe": 8, "restSec": 150, "tip": "Feet shoulder-width, mid-platform. Lower until your knees are near your chest without your lower back peeling off the pad, then press without locking the knees. Load up gradually — it's easy to pile on plates you can't control.", "alternatives": [{ "name": "Hack Squat", "tip": "Back flat on the pad, lower deep, drive through the whole foot." }, { "name": "Smith Machine Squat", "tip": "Feet slightly forward, sit straight down." }] },
+          { "name": "Incline DB Press", "sets": 3, "repRange": "8–12",  "rpe": 8, "restSec": 120, "tip": "Bench at 30°. Lower the dumbbells to the upper chest with elbows tucked slightly, get a deep stretch, then press up and in. Higher angles turn it into a shoulder press, so keep it low.", "alternatives": [{ "name": "Incline Smith Press", "tip": "Bench at 30° under the Smith bar, lower to the upper chest, keep the shoulder blades pinned." }, { "name": "Incline Machine Press", "tip": "Set the seat so the handles line up with your upper chest. Control the stretch and don't let the stack touch between reps." }] },
+          { "name": "Machine Row",      "sets": 3, "repRange": "8–12",  "rpe": 8, "restSec": 120, "tip": "Chest against the pad, so your lower back is out of it. Pull the handles to your ribs, hold the squeeze for a beat, then let your shoulders reach forward fully. A neutral grip hits the mid-back; elbows wide shifts it to the upper back and rear delts.", "alternatives": [{ "name": "Seated Cable Row", "tip": "Torso upright, pull to the belly button, full reach forward." }, { "name": "Chest-Supported T-Bar Row", "tip": "Chest on the pad, pull to the ribs." }] },
+          { "name": "Lying Leg Curl",   "sets": 3, "repRange": "10–12", "rpe": 9, "restSec": 90,  "tip": "Lie face down, knees just off the end of the pad, roller above the heels. Keep your hips pressed down and curl to full contraction, then lower over 3 seconds.", "alternatives": [{ "name": "Seated Leg Curl", "tip": "Thigh pad locked tight, curl fully under, slow return." }, { "name": "Cable Leg Curl", "tip": "Ankle strap on a low pulley, curl the heel to your glute." }] },
+          { "name": "Cable Crunch",     "sets": 3, "repRange": "12–15", "rpe": 9, "restSec": 60,  "tip": "Kneel facing a high pulley, rope beside your head. Crunch your ribs down toward your hips by rounding the spine. The hips stay still. Exhale hard at the bottom.", "alternatives": [{ "name": "Ab Crunch Machine", "tip": "Curl the chest toward the hips against the pad, slow return." }, { "name": "DB Crunch", "tip": "Lie on your back with a dumbbell on your chest, curl the ribs toward the hips." }] }
+        ]
+      },
+
       "rest": { "id": "rest", "name": "Rest", "subtitle": "Active Recovery", "type": "rest", "color": "zinc", "exercises": [] }
     }
   }

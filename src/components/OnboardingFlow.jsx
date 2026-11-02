@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { format } from 'date-fns'
 import { PLANS } from '../data/workoutPlans'
+import PlanPicker from './PlanPicker'
 import { useStore } from '../store.jsx'
 
 const PLAN_LIST = Object.values(PLANS)
@@ -8,7 +9,6 @@ const today = format(new Date(), 'yyyy-MM-dd')
 
 const STEPS = ['Name', 'Plan', 'Schedule', 'Stats']
 
-const glassBg = { background: 'var(--raised)', border: '1px solid var(--rule)' }
 
 function calcProtein(weightKg, goal) {
   if (!weightKg || weightKg <= 0) return null
@@ -162,28 +162,7 @@ export default function OnboardingFlow() {
                 </button>
               ))}
             </div>
-            <p className="text-xs text-muted">Pick the split that fits your schedule.</p>
-            <div className="space-y-2">
-              {PLAN_LIST.map((plan) => (
-                <button
-                  key={plan.id}
-                  onClick={() => setPlanId(plan.id)}
-                  className="w-full text-left p-4 rounded-xl transition-all"
-                  style={planId === plan.id
-                    ? { border: '1px solid #3C4650', background: 'var(--raised)' }
-                    : glassBg}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-sm text-ink">{plan.name}</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-muted rounded-full px-2 py-0.5" style={{ background: 'var(--raised)' }}>{plan.daysPerWeek}d/wk</span>
-                      {planId === plan.id && <span className="text-ink">●</span>}
-                    </div>
-                  </div>
-                  <p className="text-xs text-muted mt-1">{plan.description}</p>
-                </button>
-              ))}
-            </div>
+            <PlanPicker value={planId} onChange={setPlanId} ask />
             <div className="flex gap-2">
               <button onClick={() => setStep(0)} className="btn-ghost px-4 py-3">← Back</button>
               <button onClick={() => setStep(2)} disabled={!planId} className="flex-1 btn-primary py-3 disabled:opacity-40">

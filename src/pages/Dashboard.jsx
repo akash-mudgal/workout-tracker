@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { format } from 'date-fns'
+import { format, differenceInCalendarDays, parseISO } from 'date-fns'
 import { useStore } from '../store.jsx'
-import { getRecommendedWorkout, PHASE_INFO } from '../data/workoutPlans'
+import { getRecommendedWorkout, PHASE_INFO, PLANS } from '../data/workoutPlans'
+import { planCheckIn, CHECKIN_WINDOW_DAYS } from '../utils/planGuidance'
 import { requestNotifPermission, getNotifPermission } from '../utils/notifications'
 
 const WATER_GOAL = 10
@@ -14,8 +15,39 @@ export default function Dashboard() {
   const {
     today, dayNumber, totalDays, todayLog, workoutHistory, updateTodayLog, setTotalProtein,
     toggleSupplement, activeSession, proteinGoal, userProfile, streakData, streakFreezeState,
-    useStreakFreeze,
+    useStreakFreeze, updateSession,
   } = useStore()
+
+  // Plan check-in: if far fewer workouts are being done than the plan asks
+  // for, suggest a lighter plan. "Keep my plan" hides it for 21 days.
+  const checkInKey = activeSession ? `wt_plan_checkin_${activeSession.id}` : null
+  // Read on every render rather than once at mount: the active session can
+  // arrive after the first render, and its id is part of the key.
+  const [, setCheckInDismissedOn] = useState(null)
+  let checkInDismissedOn = null
+  try { checkInDismissedOn = checkInKey ? localStorage.getItem(checkInKey) : null } catch { /* ignore */ }
+  const [switchingPlan, setSwitchingPlan] = useState(false)
+  const checkIn = activeSession ? planCheckIn(PLANS, activeSession, workoutHistory, today) : null
+  const checkInSnoozed = checkInDismissedOn
+    && differenceInCalendarDays(parseISO(today), parseISO(checkInDismissedOn)) < CHECKIN_WINDOW_DAYS
+  const showCheckIn = !!checkIn?.suggestion && !checkInSnoozed
+
+  function keepPlan() {
+    try { localStorage.setItem(checkInKey, today) } catch { /* ignore */ }
+    setCheckInDismissedOn(today)
+  }
+
+  async function switchPlan() {
+    setSwitchingPlan(true)
+    try {
+      await updateSession(activeSession.id, { planId: checkIn.suggestion.planId })
+      keepPlan() // don't immediately second-guess the plan they just switched to
+    } catch (e) {
+      console.error('[kinetiq] plan switch failed:', e)
+    } finally {
+      setSwitchingPlan(false)
+    }
+  }
   const navigate = useNavigate()
 
   // "Later" is remembered — it used to be component state only, so the card
@@ -65,6 +97,26 @@ export default function Dashboard() {
             </button>
             <button onClick={dismissNotifPrompt} className="text-xs text-muted px-3 py-2 min-h-[44px]">
               Not now
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showCheckIn && (
+        <div className="panel px-4 py-3.5 space-y-3">
+          <div>
+            <p className="text-sm font-medium">Is your plan fitting your week?</p>
+            <p className="text-xs text-muted mt-0.5">{checkIn.suggestion.reason}</p>
+            <p className="text-xs text-muted mt-1">
+              Switching keeps this cycle and its history. Weight suggestions start fresh for any new exercises.
+            </p>
+          </div>
+          <div className="flex items-center gap-1">
+            <button onClick={switchPlan} disabled={switchingPlan} className="btn-primary px-3 text-xs">
+              {switchingPlan ? 'Switching…' : `Switch to ${PLANS[checkIn.suggestion.planId].name}`}
+            </button>
+            <button onClick={keepPlan} className="text-xs text-muted px-3 py-2 min-h-[44px]">
+              Keep my plan
             </button>
           </div>
         </div>

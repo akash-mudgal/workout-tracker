@@ -29,6 +29,16 @@ export const PLANS = Object.fromEntries(
   Object.entries(rawPlans).map(([id, plan]) => [id, expandPlan(plan)])
 )
 
+// Plan pickers list gym plans and home (dumbbell/band) plans under separate
+// headings. A plan without an `equipment` tag counts as a home plan.
+export const PLAN_GROUPS = [
+  { id: 'gym', label: 'Gym — machines, cables & barbells' },
+  { id: 'home', label: 'Home — dumbbells & bands' },
+].map((g) => ({
+  ...g,
+  plans: Object.values(PLANS).filter((p) => (p.equipment ?? 'home') === g.id),
+}))
+
 export function getPlan(planId) {
   return PLANS[planId] ?? PLANS.ppl
 }

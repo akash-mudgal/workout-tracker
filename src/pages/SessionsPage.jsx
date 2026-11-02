@@ -2,8 +2,7 @@ import { useState } from 'react'
 import { format } from 'date-fns'
 import { useStore } from '../store.jsx'
 import { PLANS } from '../data/workoutPlans'
-
-const PLAN_LIST = Object.values(PLANS)
+import PlanPicker from '../components/PlanPicker'
 
 const glassBorder = { border: '1px solid var(--rule)' }
 const glassBg = { background: 'var(--raised)', border: '1px solid var(--rule)' }
@@ -155,27 +154,7 @@ export default function SessionsPage() {
           </div>
           <div>
             <label className="text-xs text-muted block mb-2">Workout Plan</label>
-            <div className="space-y-2">
-              {PLAN_LIST.map((plan) => (
-                <button
-                  key={plan.id}
-                  onClick={() => setNewPlanId(plan.id)}
-                  className={`w-full text-left p-3 rounded-xl transition-all ${
-                    newPlanId === plan.id ? 'border-rule bg-raised' : 'hover:border-rule'
-                  }`}
-                  style={newPlanId === plan.id ? { border: '1px solid #3C4650', background: 'var(--raised)' } : glassBg}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium text-sm text-ink">{plan.name}</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-muted rounded-full px-2 py-0.5" style={{ background: 'var(--raised)' }}>{plan.daysPerWeek}d/wk</span>
-                      {newPlanId === plan.id && <span className="text-ink text-xs">●</span>}
-                    </div>
-                  </div>
-                  <p className="text-xs text-muted mt-0.5">{plan.description}</p>
-                </button>
-              ))}
-            </div>
+            <PlanPicker value={newPlanId} onChange={setNewPlanId} ask compact />
           </div>
           <div className="flex gap-2">
             <button onClick={handleCreate} disabled={loading} className="btn-primary flex-1 py-2 disabled:opacity-50">
@@ -287,27 +266,7 @@ export default function SessionsPage() {
                   </div>
                   <div>
                     <label className="text-xs text-muted block mb-2">Workout Plan</label>
-                    <div className="space-y-1.5">
-                      {PLAN_LIST.map((plan) => (
-                        <button
-                          key={plan.id}
-                          onClick={() => setEditPlanId(plan.id)}
-                          className="w-full text-left p-2.5 rounded-xl transition-all"
-                          style={editPlanId === plan.id
-                            ? { border: '1px solid #3C4650', background: 'var(--raised)' }
-                            : glassBg}
-                        >
-                          <div className="flex items-center justify-between">
-                            <span className="font-medium text-xs text-ink">{plan.name}</span>
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs text-muted">{plan.daysPerWeek}d/wk</span>
-                              {editPlanId === plan.id && <span className="text-ink text-xs">●</span>}
-                            </div>
-                          </div>
-                          <p className="text-xs text-muted mt-0.5">{plan.description}</p>
-                        </button>
-                      ))}
-                    </div>
+                    <PlanPicker value={editPlanId} onChange={setEditPlanId} compact />
                   </div>
                   <div className="flex gap-2">
                     <button onClick={() => handleSaveEdit(session.id)} className="btn-primary text-xs px-4 py-1.5">Save</button>
