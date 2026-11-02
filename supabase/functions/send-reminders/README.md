@@ -5,78 +5,88 @@ closed. Before this existed, reminders were `setTimeout` calls inside the page:
 the timers died with the tab, which meant a reminder only ever fired if the PWA
 had been left open past the trigger time.
 
-## Deploy
+## Deployed state
 
-Five steps, in order. Nothing works until all five are done.
+All of this is live on project `kilerejglanqlvyinhbv`:
 
-**1. Apply the migrations** (SQL editor, or MCP). Order matters only in that the
-cron schedule must come last.
+- Tables from `add_push_notifications.sql`, RLS verified enforced.
+- Function deployed with `verify_jwt = false` (the caller is cron, not a
+  signed-in user; the function authorises itself — see below).
+- `pg_cron` and `pg_net` installed, `pg_net` in the `extensions` schema.
+- Cron job `kinetiq-send-reminders` active on `*/15 * * * *`.
 
-```
-supabase/migrations/add_push_notifications.sql
-supabase/migrations/schedule_reminder_cron.sql   # after the function is deployed
-```
+## Authorisation
 
-**2. Generate VAPID keys** — already done once; the public half is in `.env` as
-`VITE_VAPID_PUBLIC_KEY`. To rotate, run this and update both places (every
-existing subscription is invalidated by a rotation):
+The cron presents a `CRON_SECRET`: a purpose-made random token, set as an Edge
+Function secret and stored in Vault under `cron_secret`. Both halves must match.
 
-```sh
-node scripts/generate-vapid-keys.mjs
-```
+A service role key was deliberately **not** used. The cron only needs to prove
+it may trigger reminders, whereas a service key also bypasses RLS on every
+table — so a leak would expose the database rather than a notification.
 
-**3. Set the function secrets.**
+Note that Vault is not optional. The cron runs inside Postgres and Edge
+Function secrets are not visible there; the two stores are separate, so each
+end needs its own copy of the shared token.
 
-```sh
-npx supabase secrets set VAPID_KEYS='<the JWK pair from step 2>'
-npx supabase secrets set VAPID_CONTACT='mailto:you@example.com'
-```
+The function also accepts a service key as a fallback, and uses
+`SUPABASE_SECRET_KEYS` — not the deprecated `SUPABASE_SERVICE_ROLE_KEY` — for
+its own PostgREST calls, so it keeps working when the legacy JWT is disabled.
 
-`SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are injected by the platform —
-do not set them.
+## Secrets
 
-**4. Deploy.**
+Set at **Edge Functions → Secrets**:
 
-```sh
-npx supabase functions deploy send-reminders
-```
+| Name | Value |
+|---|---|
+| `VAPID_KEYS` | JWK pair from `node scripts/generate-vapid-keys.mjs` |
+| `VAPID_CONTACT` | `mailto:…`, required by RFC 8292 |
+| `CRON_SECRET` | any random string, also stored in Vault as `cron_secret` |
 
-`verify_jwt = false` is set in `supabase/config.toml`: the caller is cron, not a
-signed-in user, and the function authorises by comparing the bearer token to
-`SUPABASE_SERVICE_ROLE_KEY` itself.
+`SUPABASE_URL`, `SUPABASE_SECRET_KEYS` and `SUPABASE_SERVICE_ROLE_KEY` are
+injected by the platform. Do not set them; names starting `SUPABASE_` are
+rejected anyway.
 
-**5. Store the service role key in Vault, then schedule the cron.**
-
-```sql
-select vault.create_secret('<service-role-key>', 'service_role_key');
-```
-
-Then run `supabase/migrations/schedule_reminder_cron.sql`.
+The matching **public** key goes in `.env` and in Vercel as
+`VITE_VAPID_PUBLIC_KEY`. It must be exposed to the browser — it is passed to
+`pushManager.subscribe()` as `applicationServerKey`. Rotating the pair
+invalidates every existing subscription, so rotate before devices subscribe,
+and redeploy the frontend before subscribing or the browser will bind to the
+old key and every push will be rejected.
 
 ## Verify
 
-The only test that counts is a notification arriving with the app fully closed
-and the phone locked. Force one immediately, bypassing the schedule:
-
-```sh
-curl -X POST 'https://<project>.supabase.co/functions/v1/send-reminders' \
-  -H 'Authorization: Bearer <service-role-key>' \
-  -H 'Content-Type: application/json' \
-  -d '{"test": true}'
-```
-
-This sends to every subscription belonging to every user with reminders
-enabled, ignoring both the schedule and the already-sent log. If nothing
-arrives, check in this order:
+Force a push immediately, without waiting for the schedule and without the
+token leaving the database:
 
 ```sql
-select * from push_subscriptions;                                   -- did the browser subscribe?
-select * from notification_prefs;                                   -- enabled, and the right timezone?
-select * from cron.job_run_details order by start_time desc limit 10; -- is cron firing?
-select * from notification_log order by sent_at desc limit 10;       -- did it think it already sent?
+select net.http_post(
+  url := 'https://kilerejglanqlvyinhbv.supabase.co/functions/v1/send-reminders',
+  headers := jsonb_build_object('Content-Type','application/json',
+    'Authorization','Bearer ' || (select decrypted_secret from vault.decrypted_secrets where name='cron_secret')),
+  body := '{"test": true}'::jsonb);
+
+select id, status_code, content from net._http_response order by id desc limit 1;
 ```
 
-Function logs are in the dashboard under Edge Functions → send-reminders.
+A `200` with `{"ok":true,...}` proves the token matches, the function is
+reachable, and `VAPID_KEYS` parses — that last one is only checked at runtime,
+after authorisation, so this call is the only way to confirm it.
+
+`"users": 0` means no one has reminders enabled yet. `"sent": {}` with users > 0
+means nothing was due.
+
+If a notification still doesn't arrive, check in this order:
+
+```sql
+select count(*) from push_subscriptions;                              -- did the browser subscribe?
+select enabled, timezone, remind_hour from notification_prefs;        -- enabled, right timezone?
+select * from cron.job_run_details order by start_time desc limit 10; -- is cron firing?
+select * from notification_log order by sent_at desc limit 10;        -- did it think it already sent?
+```
+
+Function logs are in the dashboard under Edge Functions → send-reminders. A
+boot line reports which key sources are present, by name and count only, never
+values.
 
 ## How "due" is decided
 

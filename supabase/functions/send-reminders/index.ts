@@ -6,10 +6,14 @@
 // is due happens here rather than in the schedule, because "remind me at 18:00"
 // depends on the user's timezone and on whether they already logged.
 //
-// Secrets required:
-//   VAPID_KEYS  — JWK pair from `node scripts/generate-vapid-keys.mjs`
+// Secrets to set:
+//   VAPID_KEYS    — JWK pair from `node scripts/generate-vapid-keys.mjs`
 //   VAPID_CONTACT — mailto: address, required by RFC 8292
-// SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are injected by the platform.
+//   CRON_SECRET   — optional but preferred: a purpose-made token the cron
+//                   presents, so the schedule never needs a key that bypasses
+//                   RLS on the whole database.
+// SUPABASE_URL, SUPABASE_SECRET_KEYS and the legacy SUPABASE_SERVICE_ROLE_KEY
+// are injected by the platform and must not be set by hand.
 
 import * as webpush from 'jsr:@negrel/webpush@^0.5.0'
 
@@ -17,34 +21,54 @@ const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const VAPID_KEYS = Deno.env.get('VAPID_KEYS')!
 const VAPID_CONTACT = Deno.env.get('VAPID_CONTACT') ?? 'mailto:admin@example.com'
 
-// SUPABASE_SERVICE_ROLE_KEY is the legacy injected name. This project uses the
-// newer sb_secret_… format, which arrives in SUPABASE_SECRET_KEYS, so resolve
-// from either rather than 401-ing on everything if the legacy one is absent.
-function secretKeys(): string[] {
-  const keys: string[] = []
-  const legacy = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
-  if (legacy) keys.push(legacy)
-
+// Inbound and outbound want opposite policies here.
+//
+// Outbound (this function's own PostgREST calls) must use the CURRENT key.
+// SUPABASE_SERVICE_ROLE_KEY is the legacy JWT, deprecated by Supabase and
+// disable-able from the dashboard; the moment it is turned off, a function
+// preferring it stops being able to read anything.
+//
+// Inbound (who may invoke this) should be permissive, because the caller
+// presents whatever is stored in Vault and that may be either form.
+function modernSecretKeys(): string[] {
   const raw = Deno.env.get('SUPABASE_SECRET_KEYS')
-  if (raw) {
-    try {
-      const parsed = JSON.parse(raw)
-      const list = Array.isArray(parsed) ? parsed : [parsed]
-      for (const entry of list) {
-        if (typeof entry === 'string') keys.push(entry)
-        else if (entry && typeof entry === 'object') {
-          for (const v of Object.values(entry)) if (typeof v === 'string') keys.push(v)
-        }
+  if (!raw) return []
+  try {
+    const parsed = JSON.parse(raw)
+    const list = Array.isArray(parsed) ? parsed : [parsed]
+    const out: string[] = []
+    for (const entry of list) {
+      if (typeof entry === 'string') out.push(entry)
+      else if (entry && typeof entry === 'object') {
+        for (const v of Object.values(entry)) if (typeof v === 'string') out.push(v)
       }
-    } catch {
-      keys.push(raw)
     }
+    return out.filter(Boolean)
+  } catch {
+    return [raw]
   }
-  return [...new Set(keys.filter(Boolean))]
 }
 
-const SERVICE_KEYS = secretKeys()
-const SERVICE_KEY = SERVICE_KEYS[0] ?? ''
+const MODERN_KEYS = modernSecretKeys()
+const LEGACY_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+const CRON_SECRET = Deno.env.get('CRON_SECRET') ?? ''
+
+// Prefer the current key; fall back only if the project has no new-style key.
+const SERVICE_KEY = MODERN_KEYS[0] || LEGACY_KEY
+
+// A purpose-made cron token is preferred: it can only trigger reminders,
+// whereas a service key bypasses RLS on the whole database.
+const ACCEPTED_TOKENS = [...new Set([CRON_SECRET, ...MODERN_KEYS, LEGACY_KEY].filter(Boolean))]
+
+// Presence only, never values — so a deprecated-key fallback is visible in the
+// logs instead of silently working until the legacy key is switched off.
+console.log('[send-reminders] key sources: ' + JSON.stringify({
+  modernSecretKeys: MODERN_KEYS.length,
+  legacyServiceRoleKey: Boolean(LEGACY_KEY),
+  cronSecret: Boolean(CRON_SECRET),
+  outboundUses: MODERN_KEYS.length ? 'SUPABASE_SECRET_KEYS' : (LEGACY_KEY ? 'legacy SUPABASE_SERVICE_ROLE_KEY' : 'none'),
+  acceptedTokenCount: ACCEPTED_TOKENS.length,
+}))
 
 type Prefs = {
   user_id: string
@@ -151,14 +175,16 @@ async function send(server: webpush.ApplicationServer, sub: Sub, payload: unknow
 }
 
 Deno.serve(async (req) => {
-  // Only the cron job (service role) may call this. Either key form is accepted,
-  // since the caller may present whichever one is stored in Vault.
-  if (!SERVICE_KEYS.length) {
-    console.error('[send-reminders] no service key in the environment')
+  if (!SERVICE_KEY) {
+    console.error('[send-reminders] no usable secret key in the environment')
+    return new Response('Server misconfigured', { status: 500 })
+  }
+  if (!ACCEPTED_TOKENS.length) {
+    console.error('[send-reminders] nothing is accepted as a caller token')
     return new Response('Server misconfigured', { status: 500 })
   }
   const auth = req.headers.get('Authorization') ?? ''
-  if (!SERVICE_KEYS.some((k) => auth === `Bearer ${k}`)) {
+  if (!ACCEPTED_TOKENS.some((t) => auth === `Bearer ${t}`)) {
     return new Response('Unauthorized', { status: 401 })
   }
 

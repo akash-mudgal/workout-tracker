@@ -1,12 +1,19 @@
 -- Schedules the `send-reminders` Edge Function. Run this AFTER deploying the
 -- function and setting its secrets, otherwise every tick will 404.
 --
--- Prerequisite, run once by hand with the real key:
---   select vault.create_secret('<service-role-key>', 'service_role_key');
+-- Prerequisites, done once by hand:
+--   1. Set CRON_SECRET as an Edge Function secret (any random string).
+--   2. Store the SAME value in Vault:
+--        select vault.create_secret('<the value>', 'cron_secret', 'kinetiq reminder cron');
 --
--- The key goes in Vault rather than inline in the job body, because cron.job is
--- readable by anyone who can read the database and the job body would otherwise
--- contain a credential in plain text.
+-- A purpose-made token is used rather than the service role key. The cron only
+-- needs to prove it may trigger reminders; a service key additionally bypasses
+-- RLS on every table, so if the job definition ever leaked the blast radius
+-- would be the whole database instead of a notification.
+--
+-- The token lives in Vault rather than inline, because cron.job is readable by
+-- anyone with database access and the job body would otherwise hold a
+-- credential in plain text.
 --
 -- Re-running this file is safe.
 
@@ -37,7 +44,7 @@ select cron.schedule(
     headers := jsonb_build_object(
       'Content-Type', 'application/json',
       'Authorization', 'Bearer ' || (
-        select decrypted_secret from vault.decrypted_secrets where name = 'service_role_key'
+        select decrypted_secret from vault.decrypted_secrets where name = 'cron_secret'
       )
     ),
     body := '{}'::jsonb,
@@ -49,3 +56,13 @@ select cron.schedule(
 -- Useful afterwards:
 --   select jobid, jobname, schedule, active from cron.job;
 --   select * from cron.job_run_details order by start_time desc limit 20;
+--
+-- Force a test push immediately, without waiting for the schedule and without
+-- the token ever leaving the database:
+--   select net.http_post(
+--     url := 'https://kilerejglanqlvyinhbv.supabase.co/functions/v1/send-reminders',
+--     headers := jsonb_build_object('Content-Type','application/json',
+--       'Authorization','Bearer ' || (select decrypted_secret from vault.decrypted_secrets where name='cron_secret')),
+--     body := '{"test": true}'::jsonb);
+--   -- then read the reply:
+--   select id, status_code, content from net._http_response order by id desc limit 1;
