@@ -71,6 +71,14 @@
     line-height: 1;
   }
 
+  /* Archivo's multiplication sign is malformed on the widened width axis — it
+     renders as a spurred star rather than a clean ×. Set-list notation
+     ("60kg × 8") is worth keeping, so the sign alone drops back to normal width. */
+  .num .x,
+  .num-lg .x {
+    font-stretch: normal;
+  }
+
   /* ── Surfaces ──────────────────────────────────────────────────
      Three levels, no more. Hairline rules group things; only the
      thing being actively edited is lifted off the ground. */

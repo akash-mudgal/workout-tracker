@@ -270,7 +270,7 @@ function LoggingView({ workout, sessionSets, workoutHistory, selectedId, resumed
       {resumed && (
         <div className="panel flex items-center justify-between gap-3 px-3 py-2.5">
           <p className="text-xs text-muted">Picked up where you left off.</p>
-          <button onClick={onDiscard} className="text-xs text-muted hover:text-ink flex-shrink-0 px-2 py-1">
+          <button onClick={onDiscard} className="text-xs text-muted hover:text-ink flex-shrink-0 px-3 min-h-[44px]">
             Start over
           </button>
         </div>
@@ -304,7 +304,7 @@ function LoggingView({ workout, sessionSets, workoutHistory, selectedId, resumed
                 <span className="min-w-0">
                   <span className={`block text-sm ${exDone ? 'text-signal' : 'text-ink'}`}>{ex.name}</span>
                   <span className="block text-micro text-muted mt-0.5 num">
-                    {ex.sets} × {ex.repRange}, RPE {ex.rpe}
+                    {ex.sets} <span className="x">×</span> {ex.repRange}, RPE {ex.rpe}
                   </span>
                 </span>
                 <span className="text-micro text-muted flex-shrink-0">
@@ -317,7 +317,11 @@ function LoggingView({ workout, sessionSets, workoutHistory, selectedId, resumed
                 <div className="px-3 pb-4 pt-1 space-y-3" style={{ background: 'var(--raised)' }}>
                   {prev && (
                     <p className="text-micro text-muted num">
-                      Last time: {prev.sets.map((s) => `${s.weight}kg × ${s.reps}`).join(', ')}
+                      Last time: {prev.sets.map((s, i) => (
+                        <span key={i}>
+                          {i > 0 && ', '}{s.weight}kg <span className="x">×</span> {s.reps}
+                        </span>
+                      ))}
                     </p>
                   )}
 
@@ -480,7 +484,7 @@ function WorkoutSummary({ workout, onRedo }) {
             <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1.5">
               {ex.sets.map((s, i) => (
                 <span key={i} className={`text-micro num ${s.done ? 'text-ink' : 'text-muted'}`}>
-                  {s.weight}kg × {s.reps}
+                  {s.weight}kg <span className="x">×</span> {s.reps}
                 </span>
               ))}
             </div>

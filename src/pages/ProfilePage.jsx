@@ -95,7 +95,7 @@ export default function ProfilePage() {
 
       {/* Account */}
       <div className="card space-y-4">
-        <h2 className="text-xs font-semibold text-muted uppercase tracking-widest">Account</h2>
+        <h2 className="text-xs font-medium text-muted">Account</h2>
         <div>
           <label className="text-xs text-muted block mb-1">Email</label>
           <div className="input-field text-muted cursor-default select-all">{user?.email}</div>
@@ -113,7 +113,7 @@ export default function ProfilePage() {
 
       {/* Body stats */}
       <div className="card space-y-4">
-        <h2 className="text-xs font-semibold text-muted uppercase tracking-widest">Body Stats</h2>
+        <h2 className="text-xs font-medium text-muted">Body stats</h2>
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="text-xs text-muted block mb-1">Weight (kg)</label>
@@ -172,7 +172,7 @@ export default function ProfilePage() {
                 key={opt.value}
                 type="button"
                 onClick={() => setActivityLevel(opt.value)}
-                className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl border text-left transition-colors"
+                className="w-full flex items-center justify-between px-3 min-h-[48px] rounded-xl border text-left transition-colors"
                 style={activityLevel === opt.value
                   ? { background: 'var(--raised)', border: '1px solid #3C4650' }
                   : { background: 'var(--raised)', border: '1px solid var(--rule)' }}
@@ -210,7 +210,7 @@ export default function ProfilePage() {
       {/* Notifications */}
       {notifSupported && (
         <div className="card space-y-4">
-          <h2 className="text-xs font-semibold text-muted uppercase tracking-widest">Notifications</h2>
+          <h2 className="text-xs font-medium text-muted">Notifications</h2>
 
           {notifPermission === 'denied' ? (
             <p className="text-xs text-muted">Notifications are blocked. Enable them in your browser settings to use workout reminders.</p>

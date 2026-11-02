@@ -123,7 +123,7 @@ export default function NutritionPage() {
               value={date}
               max={today}
               onChange={(e) => e.target.value && setDate(e.target.value)}
-              className="text-micro text-muted bg-transparent mt-0.5"
+              className="text-micro text-muted bg-transparent min-h-[44px] -ml-0.5"
               aria-label="Pick a date"
             />
           </div>
@@ -168,8 +168,8 @@ export default function NutritionPage() {
       {(meals[QUICK_ADD_SLOT] || []).length > 0 && (
         <div className="panel px-4 py-3 flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <span className="text-sm">{QUICK_ADD_SLOT}</span>
-            <span className="text-micro text-muted ml-2 num">
+            <span className="text-sm block">{QUICK_ADD_SLOT}</span>
+            <span className="text-micro text-muted num block mt-0.5">
               {mealTotals({ q: meals[QUICK_ADD_SLOT] }).protein}g protein, set on the Dashboard
             </span>
           </div>
@@ -286,7 +286,7 @@ function MealSection({
         {/* One-tap paths before the full picker, because they cover most days. */}
         {!adding && (
           <div className="px-3 py-2.5 flex flex-wrap gap-2">
-            <button onClick={() => setAdding(true)} className="btn-primary px-3 text-xs">Add food</button>
+            <button onClick={() => setAdding(true)} className="btn-ghost px-3 text-xs">Add food</button>
 
             {/* A saved meal needs a reachable delete, not a hidden long-press. */}
             {templates.map((tpl) => (
@@ -387,7 +387,7 @@ function MealSection({
                         color: portion === p ? 'var(--ink)' : 'var(--muted)',
                       }}
                     >
-                      ×{p}
+                      <span className="x">×</span>{p}
                     </button>
                   ))}
                 </div>

@@ -34,6 +34,7 @@ export default function Dashboard() {
   const recommended = getRecommendedWorkout(activeSession?.planId ?? 'ppl', workoutHistory)
   const todayDone = workoutHistory[today]
   const isRestDay = recommended?.type === 'rest'
+  const hasHistory = Object.keys(workoutHistory).length > 0
 
   const phaseIdx = dayNumber <= Math.round(totalDays / 3) ? 0 : dayNumber <= Math.round(totalDays * 2 / 3) ? 1 : 2
   const phase = PHASE_INFO[phaseIdx]
@@ -82,7 +83,10 @@ export default function Dashboard() {
 
         <div className="flex items-center gap-3 mt-2 flex-wrap">
           {activeSession && (
-            <Link to="/sessions" className="text-xs text-muted hover:text-ink transition-colors">
+            <Link
+              to="/sessions"
+              className="inline-flex items-center min-h-[44px] text-xs text-muted hover:text-ink transition-colors"
+            >
               {activeSession.name}
             </Link>
           )}
@@ -97,10 +101,12 @@ export default function Dashboard() {
               {streakData.longestStreak > streakData.currentStreak && (
                 <span className="text-micro text-muted num">best {streakData.longestStreak}</span>
               )}
-              {streakData.streakBroken && streakFreezeState && streakFreezeState.freezesUsed < 1 && (
+              {/* Only worth offering when there's actually a streak to rescue —
+                  it was showing on a brand new cycle with nothing logged. */}
+              {hasHistory && streakData.streakBroken && streakFreezeState && streakFreezeState.freezesUsed < 1 && (
                 <button
                   onClick={useStreakFreeze}
-                  className="text-micro font-medium px-2.5 py-1.5 rounded-lg transition-colors"
+                  className="text-micro font-medium px-3 min-h-[44px] rounded-lg transition-colors"
                   style={{ border: '1px solid var(--rule)', color: 'var(--muted)' }}
                 >
                   Use a freeze
