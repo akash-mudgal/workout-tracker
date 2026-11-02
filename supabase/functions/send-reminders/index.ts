@@ -14,9 +14,37 @@
 import * as webpush from 'jsr:@negrel/webpush@^0.5.0'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
-const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 const VAPID_KEYS = Deno.env.get('VAPID_KEYS')!
 const VAPID_CONTACT = Deno.env.get('VAPID_CONTACT') ?? 'mailto:admin@example.com'
+
+// SUPABASE_SERVICE_ROLE_KEY is the legacy injected name. This project uses the
+// newer sb_secret_… format, which arrives in SUPABASE_SECRET_KEYS, so resolve
+// from either rather than 401-ing on everything if the legacy one is absent.
+function secretKeys(): string[] {
+  const keys: string[] = []
+  const legacy = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+  if (legacy) keys.push(legacy)
+
+  const raw = Deno.env.get('SUPABASE_SECRET_KEYS')
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw)
+      const list = Array.isArray(parsed) ? parsed : [parsed]
+      for (const entry of list) {
+        if (typeof entry === 'string') keys.push(entry)
+        else if (entry && typeof entry === 'object') {
+          for (const v of Object.values(entry)) if (typeof v === 'string') keys.push(v)
+        }
+      }
+    } catch {
+      keys.push(raw)
+    }
+  }
+  return [...new Set(keys.filter(Boolean))]
+}
+
+const SERVICE_KEYS = secretKeys()
+const SERVICE_KEY = SERVICE_KEYS[0] ?? ''
 
 type Prefs = {
   user_id: string
@@ -123,9 +151,14 @@ async function send(server: webpush.ApplicationServer, sub: Sub, payload: unknow
 }
 
 Deno.serve(async (req) => {
-  // Only the cron job (service role) may call this.
-  const auth = req.headers.get('Authorization')
-  if (auth !== `Bearer ${SERVICE_KEY}`) {
+  // Only the cron job (service role) may call this. Either key form is accepted,
+  // since the caller may present whichever one is stored in Vault.
+  if (!SERVICE_KEYS.length) {
+    console.error('[send-reminders] no service key in the environment')
+    return new Response('Server misconfigured', { status: 500 })
+  }
+  const auth = req.headers.get('Authorization') ?? ''
+  if (!SERVICE_KEYS.some((k) => auth === `Bearer ${k}`)) {
     return new Response('Unauthorized', { status: 401 })
   }
 
