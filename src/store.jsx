@@ -1,10 +1,10 @@
 import { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from 'react'
-import { format, addDays } from 'date-fns'
+import { format } from 'date-fns'
 import { supabase } from './lib/supabase'
 import { getPlan } from './data/workoutPlans'
-import { computeStreak, getWeeklySummary, getStreakFreezeState, applyStreakFreeze } from './utils/streakUtils'
+import { computeStreak, getStreakFreezeState, applyStreakFreeze } from './utils/streakUtils'
 import { mealTotals, withTotalProtein } from './utils/nutritionTotals'
-import { getNotifPrefs, scheduleDailyNotifications, clearScheduledNotifications, sendWeeklyDigestNotif } from './utils/notifications'
+import { listenForResubscribe } from './utils/notifications'
 
 const StoreContext = createContext(null)
 
@@ -625,26 +625,15 @@ export function StoreProvider({ children }) {
     if (updated) setStreakFreezeState(updated)
   }, [streakData.missedDate, today, planCycle, activeSession])
 
-  // Schedule daily reminder notifications whenever streak or workout status changes
+  // Reminders and the weekly digest are sent by the `send-reminders` Edge
+  // Function, not from here. The in-page setTimeout scheduler that used to live
+  // at this spot could only fire while the tab was open, which is precisely
+  // when a reminder is useless. All that's left on the client is keeping the
+  // push subscription alive when the push service rotates its endpoint.
   useEffect(() => {
-    const prefs = getNotifPrefs()
-    const todayDone = !!workoutHistory[today]
-    scheduleDailyNotifications(streakData.currentStreak, todayDone, prefs)
-    return () => clearScheduledNotifications()
-  }, [streakData.currentStreak, workoutHistory, today])
-
-  // Send weekly digest notification once per week on Monday
-  useEffect(() => {
-    const isMonday = new Date(today + 'T00:00:00').getDay() === 1
-    const lastShown = localStorage.getItem('wt_last_weekly_notif')
-    if (!isMonday || lastShown === today || !activeSession) return
-    const lastMondayDate = format(addDays(new Date(today + 'T00:00:00'), -7), 'yyyy-MM-dd')
-    const summary = getWeeklySummary(workoutHistory, dailyLogs, lastMondayDate, activeSession, planCycle, proteinGoal)
-    if (summary && summary.workoutsDone > 0) {
-      sendWeeklyDigestNotif(summary)
-      localStorage.setItem('wt_last_weekly_notif', today)
-    }
-  }, [today]) // intentionally only runs when today changes
+    if (!user?.id) return
+    return listenForResubscribe(user.id)
+  }, [user?.id])
 
   return (
     <StoreContext.Provider value={{

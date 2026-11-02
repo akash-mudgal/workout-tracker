@@ -1,0 +1,12 @@
+project_id = "kilerejglanqlvyinhbv"
+
+# NOTE: the files in supabase/migrations/ are hand-written and are NOT named
+# with CLI timestamps, so they are applied by hand (SQL editor or MCP), not with
+# `supabase db push`. Running db push against them will misorder or reject them.
+
+[functions.send-reminders]
+# The caller is Supabase Cron, not a signed-in user. The function authorises by
+# comparing the bearer token to SUPABASE_SERVICE_ROLE_KEY itself, so the
+# gateway's JWT check is both redundant and wrong here — the project uses the
+# newer non-JWT secret key format, which that check would reject.
+verify_jwt = false

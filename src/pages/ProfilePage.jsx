@@ -1,7 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useStore } from '../store.jsx'
 import { supabase } from '../lib/supabase'
-import { getNotifPrefs, saveNotifPrefs, requestNotifPermission, getNotifPermission } from '../utils/notifications'
+import {
+  cachedPrefs, loadPrefs, savePrefs, requestNotifPermission, getNotifPermission,
+  subscribeToPush, unsubscribeFromPush, pushSupported,
+} from '../utils/notifications'
 
 export default function ProfilePage() {
   const { user, userProfile, updateUserProfile, calorieGoal, activeSession } = useStore()
@@ -12,9 +15,32 @@ export default function ProfilePage() {
   const [sex, setSex] = useState(userProfile.sex || '')
   const [activityLevel, setActivityLevel] = useState(userProfile.activityLevel || '')
   const [status, setStatus] = useState(null) // 'saving' | 'saved' | 'error'
-  const [notifPrefs, setNotifPrefs] = useState(() => getNotifPrefs())
+  const [notifPrefs, setNotifPrefs] = useState(cachedPrefs)
   const [notifPermission, setNotifPermission] = useState(() => getNotifPermission())
-  const notifSupported = typeof window !== 'undefined' && 'Notification' in window
+  const [prefsSynced, setPrefsSynced] = useState(true)
+  const notifSupported = pushSupported()
+  const timezone = (() => {
+    try { return Intl.DateTimeFormat().resolvedOptions().timeZone } catch { return 'UTC' }
+  })()
+
+  // Preferences live in the database now, because the server that sends the
+  // reminders has to be able to read them. localStorage was invisible to it.
+  useEffect(() => {
+    let cancelled = false
+    ;(async () => {
+      const { prefs, available } = await loadPrefs(user?.id)
+      if (cancelled) return
+      setNotifPrefs(prefs)
+      setPrefsSynced(available)
+    })()
+    return () => { cancelled = true }
+  }, [user?.id])
+
+  async function persist(updated) {
+    setNotifPrefs(updated)
+    const ok = await savePrefs(user?.id, updated)
+    setPrefsSynced(ok)
+  }
 
   const w = Number(weightKg)
   const h = Number(heightCm)
@@ -22,21 +48,27 @@ export default function ProfilePage() {
   const bmi = w > 0 && h > 0 ? (w / Math.pow(h / 100, 2)).toFixed(1) : null
 
   async function handleToggleNotifications() {
-    if (!notifPrefs.enabled && notifPermission !== 'granted') {
+    const turningOn = !notifPrefs.enabled
+    if (turningOn && notifPermission !== 'granted') {
       const result = await requestNotifPermission()
       setNotifPermission(result)
       if (result !== 'granted') return
     }
-    const updated = { ...notifPrefs, enabled: !notifPrefs.enabled }
-    setNotifPrefs(updated)
-    saveNotifPrefs(updated)
+    // Registering the browser's push subscription is what actually makes
+    // delivery possible with the app closed.
+    if (turningOn) await subscribeToPush(user?.id)
+    else await unsubscribeFromPush(user?.id)
+    await persist({ ...notifPrefs, enabled: turningOn })
   }
 
   function handleTimeChange(e) {
-    const [hour, minute] = e.target.value.split(':').map(Number)
-    const updated = { ...notifPrefs, hour, minute }
-    setNotifPrefs(updated)
-    saveNotifPrefs(updated)
+    const [h, m] = e.target.value.split(':').map(Number)
+    persist({ ...notifPrefs, remindHour: h, remindMinute: m })
+  }
+
+  function handleLastCallChange(e) {
+    const [h] = e.target.value.split(':').map(Number)
+    persist({ ...notifPrefs, lastCallHour: h })
   }
 
   async function handleSave() {
@@ -184,30 +216,75 @@ export default function ProfilePage() {
             <p className="text-xs text-muted">Notifications are blocked. Enable them in your browser settings to use workout reminders.</p>
           ) : (
             <>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-ink">Workout reminders</p>
-                  <p className="text-xs text-muted mt-0.5">Daily nudge to log your workout</p>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-sm">Daily reminders</p>
+                  <p className="text-micro text-muted mt-0.5">
+                    Sent from the server, so they arrive with the app closed
+                  </p>
                 </div>
-                <button
+                <Toggle
+                  on={notifPrefs.enabled}
                   onClick={handleToggleNotifications}
-                  className={`relative w-10 h-6 rounded-full transition-colors flex-shrink-0 ${notifPrefs.enabled ? 'bg-ink' : 'bg-rule'}`}
-                  aria-label="Toggle notifications"
-                >
-                  <div className={`absolute top-1 w-4 h-4 rounded-full transition-transform ${notifPrefs.enabled ? 'translate-x-5 bg-ground' : 'translate-x-1 bg-muted'}`} />
-                </button>
+                  label="Toggle daily reminders"
+                />
               </div>
 
               {notifPrefs.enabled && (
-                <div>
-                  <label className="text-xs text-muted block mb-1">Reminder time</label>
-                  <input
-                    type="time"
-                    value={`${String(notifPrefs.hour).padStart(2, '0')}:${String(notifPrefs.minute).padStart(2, '0')}`}
-                    onChange={handleTimeChange}
-                    className="input-field"
-                  />
-                  <p className="text-xs text-muted mt-1.5">You'll get a streak-at-risk alert at 9 PM if you haven't logged a workout.</p>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-xs text-muted block mb-1">Remind me at</label>
+                    <input
+                      type="time"
+                      value={`${String(notifPrefs.remindHour).padStart(2, '0')}:${String(notifPrefs.remindMinute).padStart(2, '0')}`}
+                      onChange={handleTimeChange}
+                      className="input-field"
+                    />
+                    <p className="text-micro text-muted mt-1.5">
+                      Only if the day isn't logged yet. Times are in {timezone}.
+                    </p>
+                  </div>
+
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-sm">Last call</p>
+                      <p className="text-micro text-muted mt-0.5">A final nudge later in the evening</p>
+                    </div>
+                    <Toggle
+                      on={notifPrefs.lastCallEnabled}
+                      onClick={() => persist({ ...notifPrefs, lastCallEnabled: !notifPrefs.lastCallEnabled })}
+                      label="Toggle last call"
+                    />
+                  </div>
+
+                  {notifPrefs.lastCallEnabled && (
+                    <input
+                      type="time"
+                      value={`${String(notifPrefs.lastCallHour).padStart(2, '0')}:00`}
+                      onChange={handleLastCallChange}
+                      className="input-field"
+                      aria-label="Last call time"
+                    />
+                  )}
+
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-sm">Weekly recap</p>
+                      <p className="text-micro text-muted mt-0.5">Monday morning summary of last week</p>
+                    </div>
+                    <Toggle
+                      on={notifPrefs.weeklyDigest}
+                      onClick={() => persist({ ...notifPrefs, weeklyDigest: !notifPrefs.weeklyDigest })}
+                      label="Toggle weekly recap"
+                    />
+                  </div>
+
+                  {!prefsSynced && (
+                    <p className="text-micro" style={{ color: 'var(--warn)' }}>
+                      These settings aren't saved to the server yet, so reminders
+                      won't send. Run the push notifications migration.
+                    </p>
+                  )}
                 </div>
               )}
             </>
@@ -241,5 +318,29 @@ export default function ProfilePage() {
         </button>
       </div>
     </div>
+  )
+}
+
+function Toggle({ on, onClick, label }) {
+  return (
+    <button
+      onClick={onClick}
+      role="switch"
+      aria-checked={!!on}
+      aria-label={label}
+      className="relative w-11 h-11 flex items-center justify-center flex-shrink-0"
+    >
+      <span
+        className="block w-10 h-6 rounded-full transition-colors"
+        style={{ background: on ? 'var(--ink)' : 'var(--rule)' }}
+      />
+      <span
+        className="absolute w-4 h-4 rounded-full transition-transform"
+        style={{
+          background: on ? 'var(--ground)' : 'var(--muted)',
+          transform: on ? 'translateX(8px)' : 'translateX(-8px)',
+        }}
+      />
+    </button>
   )
 }
