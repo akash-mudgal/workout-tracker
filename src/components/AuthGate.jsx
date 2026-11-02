@@ -1,13 +1,61 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { LogoMark } from './Logo'
+
+const RESEND_COOLDOWN_SEC = 60
+
+// The confirmation link brings people back to wherever they signed up from,
+// so local dev and production each land on themselves. Both origins must be
+// in Supabase → Authentication → URL Configuration → Redirect URLs.
+const redirectTo = () => window.location.origin
+
+// When a confirmation link is expired or already used, Supabase redirects back
+// with the reason in the URL hash instead of a session.
+function readLinkError() {
+  if (typeof window === 'undefined' || !window.location.hash.includes('error')) return ''
+  const params = new URLSearchParams(window.location.hash.slice(1))
+  const desc = params.get('error_description')
+  if (!desc) return ''
+  return `${desc.replace(/\+/g, ' ')}. Sign in and we'll offer to send a fresh link.`
+}
 
 export default function AuthGate({ children, user, loading }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [mode, setMode] = useState('login')
-  const [error, setError] = useState('')
+  const [mode, setMode] = useState('login') // login | signup | check-email
+  const [error, setError] = useState(readLinkError)
   const [submitting, setSubmitting] = useState(false)
+  // Set when sign-in is refused because the email isn't confirmed yet.
+  const [needsConfirm, setNeedsConfirm] = useState(false)
+  const [resendState, setResendState] = useState({ sending: false, message: '', cooldown: 0 })
+
+  // Don't leave the error in the address bar: a reload would show it again.
+  useEffect(() => {
+    if (window.location.hash.includes('error')) {
+      window.history.replaceState(null, '', window.location.pathname + window.location.search)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (resendState.cooldown <= 0) return
+    const t = setTimeout(() => setResendState((s) => ({ ...s, cooldown: s.cooldown - 1 })), 1000)
+    return () => clearTimeout(t)
+  }, [resendState.cooldown])
+
+  async function resendConfirmation() {
+    setResendState({ sending: true, message: '', cooldown: 0 })
+    const { error } = await supabase.auth.resend({ type: 'signup', email, options: { emailRedirectTo: redirectTo() } })
+    setResendState(error
+      ? { sending: false, message: error.message, cooldown: 0 }
+      : { sending: false, message: `Sent another link to ${email}.`, cooldown: RESEND_COOLDOWN_SEC })
+  }
+
+  function switchMode(next) {
+    setMode(next)
+    setError('')
+    setNeedsConfirm(false)
+    setResendState({ sending: false, message: '', cooldown: 0 })
+  }
 
   if (loading) {
     return (
@@ -25,14 +73,32 @@ export default function AuthGate({ children, user, loading }) {
   async function handleSubmit(e) {
     e.preventDefault()
     setError('')
+    setNeedsConfirm(false)
     setSubmitting(true)
     try {
       if (mode === 'login') {
         const { error } = await supabase.auth.signInWithPassword({ email, password })
+        if (error?.code === 'email_not_confirmed') {
+          setNeedsConfirm(true)
+          return
+        }
         if (error) throw error
       } else {
-        const { error } = await supabase.auth.signUp({ email, password })
+        const { data, error } = await supabase.auth.signUp({
+          email, password, options: { emailRedirectTo: redirectTo() },
+        })
         if (error) throw error
+        // A session means verification is off: the auth listener signs them in.
+        if (data.session) return
+        // Supabase answers an already-registered email with a user that has no
+        // identities (rather than an error, so emails can't be probed).
+        if (data.user?.identities?.length === 0) {
+          setMode('login')
+          setError('An account with this email already exists. Sign in instead.')
+          return
+        }
+        // Before this, signup just stopped spinning and showed nothing.
+        setMode('check-email')
       }
     } catch (err) {
       setError(err.message)
@@ -54,7 +120,20 @@ export default function AuthGate({ children, user, loading }) {
           <p className="text-muted text-sm">Track every rep, step and meal.</p>
         </div>
 
-        {/* Form card */}
+        {mode === 'check-email' ? (
+          <div className="card-raised space-y-4">
+            <h2 className="font-semibold text-base text-ink">Check your inbox</h2>
+            <p className="text-sm text-muted">
+              We sent a confirmation link to <span className="text-ink font-medium break-all">{email}</span>.
+              Open it on this device to finish — it signs you straight in.
+            </p>
+            <p className="text-xs text-muted">Not there after a minute? Check spam or promotions.</p>
+            <ResendButton state={resendState} onResend={resendConfirmation} />
+            <button type="button" onClick={() => switchMode('signup')} className="w-full btn-ghost text-xs">
+              Use a different email
+            </button>
+          </div>
+        ) : (
         <div className="card-raised space-y-5">
           <h2 className="font-semibold text-base text-ink">
             {mode === 'login' ? 'Welcome back' : 'Create account'}
@@ -91,6 +170,14 @@ export default function AuthGate({ children, user, loading }) {
               </div>
             )}
 
+            {needsConfirm && (
+              <div className="space-y-2 rounded-xl px-3 py-2.5" style={{ border: '1px solid var(--rule)' }}>
+                <p className="text-xs text-ink">Confirm your email first — we sent a link when you signed up.</p>
+                <p className="text-xs text-muted">Can't find it? Check spam, or send a new one.</p>
+                <ResendButton state={resendState} onResend={resendConfirmation} />
+              </div>
+            )}
+
             <button type="submit" disabled={submitting} className="w-full btn-primary py-3 mt-1 disabled:opacity-50">
               {submitting ? 'Please wait…' : mode === 'login' ? 'Sign in' : 'Create account'}
             </button>
@@ -104,13 +191,31 @@ export default function AuthGate({ children, user, loading }) {
 
           <button
             type="button"
-            onClick={() => { setMode(mode === 'login' ? 'signup' : 'login'); setError('') }}
+            onClick={() => switchMode(mode === 'login' ? 'signup' : 'login')}
             className="w-full text-xs text-muted hover:text-ink transition-colors py-1"
           >
             {mode === 'login' ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
           </button>
         </div>
+        )}
       </div>
+    </div>
+  )
+}
+
+function ResendButton({ state, onResend }) {
+  const { sending, message, cooldown } = state
+  return (
+    <div className="space-y-1.5">
+      <button
+        type="button"
+        onClick={onResend}
+        disabled={sending || cooldown > 0}
+        className="w-full btn-ghost text-xs disabled:opacity-50"
+      >
+        {sending ? 'Sending…' : cooldown > 0 ? `Resend email (${cooldown}s)` : 'Resend email'}
+      </button>
+      {message && <p className="text-xs text-muted" role="status">{message}</p>}
     </div>
   )
 }
