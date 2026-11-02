@@ -184,12 +184,13 @@ export async function subscribeToPush(userId) {
     return { ok: false, reason: 'The browser returned a subscription with no keys.' }
   }
 
+  const userAgent = navigator.userAgent.slice(0, 300)
   const { error } = await supabase.from('push_subscriptions').upsert({
     user_id: userId,
     endpoint: sub.endpoint,
     p256dh,
     auth,
-    user_agent: navigator.userAgent.slice(0, 300),
+    user_agent: userAgent,
   }, { onConflict: 'endpoint' })
 
   if (error) {
@@ -201,6 +202,21 @@ export async function subscribeToPush(userId) {
         : `Couldn't save the subscription: ${error.message}`,
     }
   }
+
+  // A device has exactly one live endpoint at a time, but the push service
+  // issues a fresh one on every re-subscribe. Toggling reminders off and on a
+  // few times therefore leaves stale rows behind, and every reminder then fans
+  // out to all of them until they each 404. Collapse this device's older rows.
+  const { error: pruneError } = await supabase
+    .from('push_subscriptions')
+    .delete()
+    .eq('user_id', userId)
+    .eq('user_agent', userAgent)
+    .neq('endpoint', sub.endpoint)
+  if (pruneError) {
+    console.error('[kinetiq] pruning old subscriptions failed:', pruneError.message)
+  }
+
   return { ok: true }
 }
 
