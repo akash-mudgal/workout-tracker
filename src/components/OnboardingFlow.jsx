@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { format } from 'date-fns'
 import { PLANS } from '../data/workoutPlans'
 import PlanPicker from './PlanPicker'
+import ChoiceTick from './ChoiceTick'
 import { useStore } from '../store.jsx'
 
 const PLAN_LIST = Object.values(PLANS)
@@ -152,12 +153,11 @@ export default function OnboardingFlow() {
                 <button
                   key={g.value}
                   onClick={() => setGoal(g.value)}
-                  className="flex flex-col items-center py-3 px-2 rounded-xl transition-all"
-                  style={goal === g.value
-                    ? { border: '1px solid #3C4650', background: 'var(--raised)' }
-                    : { border: '1px solid var(--rule)', background: 'var(--raised)' }}
+                  type="button"
+                  aria-pressed={goal === g.value}
+                  className="choice flex flex-col items-center py-3 px-2 rounded-xl"
                 >
-                  <span className={`text-xs font-semibold ${goal === g.value ? 'text-ink' : 'text-ink'}`}>{g.label}</span>
+                  <span className="text-xs font-semibold text-ink">{g.label}</span>
                   <span className="text-micro text-muted mt-0.5">{g.desc}</span>
                 </button>
               ))}
@@ -298,16 +298,14 @@ export default function OnboardingFlow() {
                       key={opt.value}
                       type="button"
                       onClick={() => setActivityLevel(opt.value)}
-                      className="w-full flex items-center justify-between px-3 py-2 rounded-xl border text-left transition-colors"
-                      style={activityLevel === opt.value
-                        ? { background: 'var(--raised)', border: '1px solid #3C4650' }
-                        : { background: 'var(--raised)', border: '1px solid var(--rule)' }}
+                      aria-pressed={activityLevel === opt.value}
+                      className="choice w-full flex items-center justify-between gap-3 px-3 py-2 rounded-xl text-left"
                     >
                       <div>
-                        <span className={`text-xs font-semibold ${activityLevel === opt.value ? 'text-ink' : 'text-ink'}`}>{opt.label}</span>
+                        <span className="text-xs font-semibold text-ink">{opt.label}</span>
                         <span className="text-xs text-muted ml-1.5">{opt.desc}</span>
                       </div>
-                      {activityLevel === opt.value && <span className="text-ink text-xs">●</span>}
+                      <ChoiceTick />
                     </button>
                   ))}
                 </div>

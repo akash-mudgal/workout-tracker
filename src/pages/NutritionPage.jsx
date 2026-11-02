@@ -352,11 +352,10 @@ function MealSection({
                 <button
                   key={id}
                   onClick={() => setTab(id)}
-                  className="flex-1 text-xs py-2 rounded-md font-medium transition-colors"
-                  style={{
-                    background: tab === id ? '#3C4650' : 'transparent',
-                    color: tab === id ? 'var(--ink)' : 'var(--muted)',
-                  }}
+                  aria-pressed={tab === id}
+                  className={`flex-1 text-xs py-2 rounded-md font-medium transition-colors ${
+                    tab === id ? 'bg-ink text-ground' : 'text-muted hover:text-ink'
+                  }`}
                 >
                   {label}
                 </button>
@@ -380,12 +379,8 @@ function MealSection({
                     <button
                       key={p}
                       onClick={() => setPortion(p)}
-                      className="text-micro num px-2.5 py-2 rounded-md min-h-[36px]"
-                      style={{
-                        border: `1px solid ${portion === p ? '#3C4650' : 'var(--rule)'}`,
-                        background: portion === p ? 'var(--raised)' : 'transparent',
-                        color: portion === p ? 'var(--ink)' : 'var(--muted)',
-                      }}
+                      aria-pressed={portion === p}
+                      className={`choice text-micro num px-2.5 py-2 rounded-md min-h-[36px] ${portion === p ? 'text-ink' : 'text-muted'}`}
                     >
                       <span className="x">×</span>{p}
                     </button>

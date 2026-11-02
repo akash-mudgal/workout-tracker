@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import { format } from 'date-fns'
 import { useStore } from '../store.jsx'
+import ChoiceTick from '../components/ChoiceTick'
 import { getPlan, getRecommendedWorkout, getWorkoutById, getWorkoutDays } from '../data/workoutPlans'
 
 // An in-progress workout is persisted on every keystroke. Before this, sets lived
@@ -264,16 +265,21 @@ export default function WorkoutLogger() {
                 key={`${w.id}-${i}`}
                 onClick={() => setSelectedId(w.id)}
                 className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left min-h-[56px] transition-colors"
-                style={isSelected ? { background: 'var(--raised)' } : undefined}
+                // A row in a ruled list, not a card: selection is an ink bar on
+                // the left edge plus the tick, rather than a full ring.
+                style={isSelected ? { background: '#1D232A', boxShadow: 'inset 3px 0 0 var(--ink)' } : undefined}
                 aria-pressed={isSelected}
               >
                 <span className="min-w-0">
                   <span className={`block text-sm ${isSelected ? 'text-ink font-medium' : 'text-muted'}`}>{w.name}</span>
                   <span className="block text-micro text-muted mt-0.5 truncate">{w.subtitle}</span>
                 </span>
-                {w.id === recommended.id && (
-                  <span className="text-micro text-muted flex-shrink-0">up next</span>
-                )}
+                <span className="flex items-center gap-3 flex-shrink-0">
+                  {w.id === recommended.id && (
+                    <span className="text-micro text-muted">up next</span>
+                  )}
+                  <ChoiceTick />
+                </span>
               </button>
             )
           })}

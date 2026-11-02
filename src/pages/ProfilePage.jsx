@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useStore } from '../store.jsx'
 import { supabase } from '../lib/supabase'
+import ChoiceTick from '../components/ChoiceTick'
 import {
   cachedPrefs, loadPrefs, savePrefs, requestNotifPermission, getNotifPermission,
   subscribeToPush, unsubscribeFromPush, pushSupported, isDeviceSubscribed,
@@ -120,7 +121,11 @@ export default function ProfilePage() {
         <h2 className="text-xs font-medium text-muted">Account</h2>
         <div>
           <label className="text-xs text-muted block mb-1">Email</label>
-          <div className="input-field text-muted cursor-default select-all">{user?.email}</div>
+          {/* A div, not an input (the email can't be edited here), so it needs
+              its own vertical centring — inputs centre their text natively.
+              Same ink colour as every other field; it used to be muted, which
+              read as an inconsistency rather than as "read-only". */}
+          <div className="input-field flex items-center cursor-default select-all break-all">{user?.email}</div>
         </div>
         <div>
           <label className="text-xs text-muted block mb-1">First Name</label>
@@ -194,16 +199,14 @@ export default function ProfilePage() {
                 key={opt.value}
                 type="button"
                 onClick={() => setActivityLevel(opt.value)}
-                className="w-full flex items-center justify-between px-3 min-h-[48px] rounded-xl border text-left transition-colors"
-                style={activityLevel === opt.value
-                  ? { background: 'var(--raised)', border: '1px solid #3C4650' }
-                  : { background: 'var(--raised)', border: '1px solid var(--rule)' }}
+                aria-pressed={activityLevel === opt.value}
+                className="choice w-full flex items-center justify-between gap-3 px-3 min-h-[48px] rounded-xl text-left"
               >
                 <div>
-                  <span className={`text-sm font-medium ${activityLevel === opt.value ? 'text-ink' : 'text-ink'}`}>{opt.label}</span>
+                  <span className="text-sm font-medium text-ink">{opt.label}</span>
                   <span className="text-xs text-muted ml-2">{opt.desc}</span>
                 </div>
-                {activityLevel === opt.value && <span className="text-ink text-xs">●</span>}
+                <ChoiceTick />
               </button>
             ))}
           </div>

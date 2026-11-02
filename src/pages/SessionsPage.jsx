@@ -5,7 +5,6 @@ import { PLANS } from '../data/workoutPlans'
 import PlanPicker from '../components/PlanPicker'
 
 const glassBorder = { border: '1px solid var(--rule)' }
-const glassBg = { background: 'var(--raised)', border: '1px solid var(--rule)' }
 const divider = { borderTop: '1px solid var(--rule)' }
 
 export default function SessionsPage() {
@@ -17,7 +16,9 @@ export default function SessionsPage() {
   const [creating, setCreating] = useState(false)
   const [newName, setNewName] = useState('90-Day Cycle')
   const [newStart, setNewStart] = useState(today)
-  const [newPlanId, setNewPlanId] = useState('ppl')
+  // No default: the picker lists plans only after Gym/Home is chosen, so a
+  // preselected plan would be invisible.
+  const [newPlanId, setNewPlanId] = useState(null)
   const [newTotalDays, setNewTotalDays] = useState(90)
   const [newGoal, setNewGoal] = useState('recomp')
 
@@ -43,7 +44,7 @@ export default function SessionsPage() {
   }
 
   async function handleCreate() {
-    if (!newName.trim()) return
+    if (!newName.trim() || !newPlanId) return
     const days = Math.max(7, Math.min(365, Number(newTotalDays) || 90))
     setLoading(true)
     try {
@@ -51,7 +52,7 @@ export default function SessionsPage() {
       setCreating(false)
       setNewName('90-Day Cycle')
       setNewStart(today)
-      setNewPlanId('ppl')
+      setNewPlanId(null)
       setNewTotalDays(90)
       setNewGoal('recomp')
     } finally {
@@ -142,10 +143,9 @@ export default function SessionsPage() {
                 <button
                   key={g.value}
                   onClick={() => setNewGoal(g.value)}
-                  className="py-2 rounded-xl text-xs font-semibold border transition-colors"
-                  style={newGoal === g.value
-                    ? { background: 'var(--raised)', border: '1px solid #3C4650', color: 'var(--ink)' }
-                    : glassBg}
+                  type="button"
+                  aria-pressed={newGoal === g.value}
+                  className="choice py-2 rounded-xl text-xs font-semibold text-ink"
                 >
                   {g.label}
                 </button>
@@ -157,7 +157,7 @@ export default function SessionsPage() {
             <PlanPicker value={newPlanId} onChange={setNewPlanId} ask compact />
           </div>
           <div className="flex gap-2">
-            <button onClick={handleCreate} disabled={loading} className="btn-primary flex-1 py-2 disabled:opacity-50">
+            <button onClick={handleCreate} disabled={loading || !newPlanId} className="btn-primary flex-1 py-2 disabled:opacity-50">
               {loading ? 'Creating…' : 'Create & Switch'}
             </button>
             <button onClick={() => setCreating(false)} className="btn-ghost px-4 py-2">Cancel</button>
@@ -179,10 +179,7 @@ export default function SessionsPage() {
           return (
             <div
               key={session.id}
-              className="card transition-all"
-              style={isActive
-                ? { borderColor: '#3C4650', background: 'var(--raised)' }
-                : {}}
+              className={`card transition-all ${isActive ? 'choice-current' : ''}`}
             >
               {/* Header row */}
               <div className="flex items-start justify-between gap-2">
@@ -254,10 +251,9 @@ export default function SessionsPage() {
                         <button
                           key={g.value}
                           onClick={() => setEditGoal(g.value)}
-                          className="py-1.5 rounded-xl text-xs font-semibold border transition-colors"
-                          style={editGoal === g.value
-                            ? { background: 'var(--raised)', border: '1px solid #3C4650', color: 'var(--ink)' }
-                            : glassBg}
+                          type="button"
+                          aria-pressed={editGoal === g.value}
+                          className="choice py-1.5 rounded-xl text-xs font-semibold text-ink"
                         >
                           {g.label}
                         </button>
